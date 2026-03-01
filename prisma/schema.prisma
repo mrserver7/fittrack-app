@@ -1,0 +1,362 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Trainer {
+  id           String    @id @default(cuid())
+  email        String    @unique
+  name         String
+  passwordHash String
+  businessName String?
+  photoUrl     String?
+  timezone     String    @default("UTC")
+  isAdmin      Boolean   @default(false)
+  totpEnabled  Boolean   @default(false)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  deletedAt    DateTime?
+
+  clients      Client[]
+  programs     Program[]
+  exercises    Exercise[]
+  checkInForms CheckInForm[]
+  messages     Message[]
+  auditEvents  AuditEvent[]
+}
+
+model Client {
+  id                       String    @id @default(cuid())
+  trainerId                String
+  email                    String    @unique
+  name                     String
+  passwordHash             String?
+  phone                    String?
+  dateOfBirth              String?
+  photoUrl                 String?
+  goalsText                String?
+  injuriesText             String?
+  trainingSchedule         String?
+  startDate                String?
+  status                   String    @default("invited")
+  tags                     String?
+  trainerNotes             String?
+  healthDisclaimerAccepted Boolean   @default(false)
+  invitationToken          String?   @unique
+  invitationExpiresAt      DateTime?
+  weightUnit               String    @default("kg")
+  createdAt                DateTime  @default(now())
+  updatedAt                DateTime  @updatedAt
+  deletedAt                DateTime?
+
+  trainer         Trainer         @relation(fields: [trainerId], references: [id])
+  clientPrograms  ClientProgram[]
+  sessionLogs     SessionLog[]
+  measurements    Measurement[]
+  personalRecords PersonalRecord[]
+  checkIns        CheckIn[]
+  messages        Message[]
+  goalMilestones  GoalMilestone[]
+  painFlags       PainFlag[]
+}
+
+model Program {
+  id            String    @id @default(cuid())
+  trainerId     String
+  name          String
+  description   String?
+  durationWeeks Int       @default(4)
+  goalTag       String?
+  isTemplate    Boolean   @default(false)
+  clonedFromId  String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  deletedAt     DateTime?
+
+  trainer        Trainer         @relation(fields: [trainerId], references: [id])
+  weeks          ProgramWeek[]
+  clientPrograms ClientProgram[]
+}
+
+model ProgramWeek {
+  id              String   @id @default(cuid())
+  programId       String
+  weekNumber      Int
+  isDeload        Boolean  @default(false)
+  deloadVolumePct Int      @default(70)
+  notes           String?
+
+  program Program      @relation(fields: [programId], references: [id], onDelete: Cascade)
+  days    WorkoutDay[]
+}
+
+model WorkoutDay {
+  id            String @id @default(cuid())
+  programWeekId String
+  dayLabel      String
+  dayOrder      Int
+  description   String?
+
+  programWeek ProgramWeek       @relation(fields: [programWeekId], references: [id], onDelete: Cascade)
+  exercises   WorkoutExercise[]
+  sessionLogs SessionLog[]
+}
+
+model WorkoutExercise {
+  id                     String  @id @default(cuid())
+  workoutDayId           String
+  exerciseId             String
+  sortOrder              Int     @default(0)
+  sets                   Int     @default(3)
+  repsMin                Int?
+  repsMax                Int?
+  durationSeconds        Int?
+  tempo                  String?
+  restSeconds            Int     @default(60)
+  rpeMin                 Float?
+  rpeMax                 Float?
+  coachingNote           String?
+  substitutionExerciseId String?
+  substitutionCondition  String?
+  attachmentUrl          String?
+  attachmentType         String?
+
+  workoutDay           WorkoutDay @relation(fields: [workoutDayId], references: [id], onDelete: Cascade)
+  exercise             Exercise   @relation("PrimaryExercise", fields: [exerciseId], references: [id])
+  substitutionExercise Exercise?  @relation("SubstitutionExercise", fields: [substitutionExerciseId], references: [id])
+  setLogs              SetLog[]
+}
+
+model Exercise {
+  id             String    @id @default(cuid())
+  trainerId      String?
+  name           String
+  category       String    @default("other")
+  primaryMuscles String?
+  equipment      String?
+  defaultSets    Int?
+  defaultReps    Int?
+  coachingNotes  String?
+  videoUrl       String?
+  isGlobal       Boolean   @default(false)
+  bodyRegions    String?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  deletedAt      DateTime?
+
+  trainer          Trainer?          @relation(fields: [trainerId], references: [id])
+  workoutExercises WorkoutExercise[] @relation("PrimaryExercise")
+  substitutions    WorkoutExercise[] @relation("SubstitutionExercise")
+  setLogs          SetLog[]
+  personalRecords  PersonalRecord[]
+}
+
+model ClientProgram {
+  id         String   @id @default(cuid())
+  clientId   String
+  programId  String
+  startDate  String
+  endDate    String?
+  status     String   @default("active")
+  notes      String?
+  assignedAt DateTime @default(now())
+  assignedBy String
+
+  client  Client  @relation(fields: [clientId], references: [id])
+  program Program @relation(fields: [programId], references: [id])
+}
+
+model SessionLog {
+  id                   String    @id @default(cuid())
+  clientId             String
+  clientProgramId      String?
+  workoutDayId         String?
+  scheduledDate        String
+  startedAt            DateTime?
+  completedAt          DateTime?
+  status               String    @default("pending")
+  skipReason           String?
+  notes                String?
+  readinessSleep       Int?
+  readinessSoreness    Int?
+  readinessMotivation  Int?
+  readinessScore       Float?
+  overallFeedbackEmoji String?
+  overallFeedbackText  String?
+  trainerComment       String?
+  durationMinutes      Int?
+  totalVolumeKg        Float?
+  avgRpe               Float?
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
+
+  client     Client      @relation(fields: [clientId], references: [id])
+  workoutDay WorkoutDay? @relation(fields: [workoutDayId], references: [id])
+  sets       SetLog[]
+  painFlags  PainFlag[]
+}
+
+model SetLog {
+  id                     String   @id @default(cuid())
+  sessionLogId           String
+  workoutExerciseId      String?
+  exerciseId             String
+  setNumber              Int
+  weightKg               Float?
+  repsActual             Int?
+  durationSeconds        Int?
+  rpeActual              Float?
+  notes                  String?
+  isSubstituted          Boolean  @default(false)
+  substitutionExerciseId String?
+  loggedAt               DateTime @default(now())
+
+  sessionLog      SessionLog      @relation(fields: [sessionLogId], references: [id], onDelete: Cascade)
+  workoutExercise WorkoutExercise? @relation(fields: [workoutExerciseId], references: [id])
+  exercise        Exercise        @relation(fields: [exerciseId], references: [id])
+}
+
+model PainFlag {
+  id           String   @id @default(cuid())
+  sessionLogId String
+  clientId     String
+  bodyRegion   String
+  severity     Int
+  notes        String?
+  flaggedAt    DateTime @default(now())
+
+  sessionLog SessionLog @relation(fields: [sessionLogId], references: [id], onDelete: Cascade)
+  client     Client     @relation(fields: [clientId], references: [id])
+}
+
+model PersonalRecord {
+  id           String   @id @default(cuid())
+  clientId     String
+  exerciseId   String
+  valueKg      Float
+  repsAtPr     Int?
+  setLogId     String?
+  recordedAt   String
+  previousPrKg Float?
+  isNotified   Boolean  @default(false)
+  createdAt    DateTime @default(now())
+
+  client   Client   @relation(fields: [clientId], references: [id])
+  exercise Exercise @relation(fields: [exerciseId], references: [id])
+}
+
+model Measurement {
+  id           String   @id @default(cuid())
+  clientId     String
+  recordedDate String
+  weightKg     Float?
+  bodyFatPct   Float?
+  chestCm      Float?
+  waistCm      Float?
+  hipCm        Float?
+  armCm        Float?
+  thighCm      Float?
+  notes        String?
+  createdAt    DateTime @default(now())
+
+  client Client @relation(fields: [clientId], references: [id])
+}
+
+model CheckInForm {
+  id            String   @id @default(cuid())
+  trainerId     String
+  name          String
+  questions     String
+  recurrence    String   @default("weekly")
+  recurrenceDay String?
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  trainer  Trainer   @relation(fields: [trainerId], references: [id])
+  checkIns CheckIn[]
+}
+
+model CheckIn {
+  id                 String    @id @default(cuid())
+  clientId           String
+  checkInFormId      String
+  periodStart        String
+  periodEnd          String
+  status             String    @default("pending")
+  responses          String?
+  autoSummary        String?
+  trainerComment     String?
+  submittedAt        DateTime?
+  trainerRespondedAt DateTime?
+  createdAt          DateTime  @default(now())
+
+  client      Client      @relation(fields: [clientId], references: [id])
+  checkInForm CheckInForm @relation(fields: [checkInFormId], references: [id])
+}
+
+model GoalMilestone {
+  id            String    @id @default(cuid())
+  clientId      String
+  trainerId     String
+  title         String
+  description   String?
+  targetValue   Float?
+  targetUnit    String?
+  progressValue Float?
+  achievedAt    String?
+  sortOrder     Int       @default(0)
+  createdAt     DateTime  @default(now())
+
+  client Client @relation(fields: [clientId], references: [id])
+}
+
+model Message {
+  id             String    @id @default(cuid())
+  trainerId      String
+  clientId       String
+  senderRole     String
+  senderId       String
+  body           String
+  attachmentUrl  String?
+  attachmentType String?
+  isRead         Boolean   @default(false)
+  readAt         DateTime?
+  createdAt      DateTime  @default(now())
+
+  trainer Trainer @relation(fields: [trainerId], references: [id])
+  client  Client  @relation(fields: [clientId], references: [id])
+}
+
+model Notification {
+  id            String    @id @default(cuid())
+  recipientId   String
+  recipientRole String
+  type          String
+  referenceId   String?
+  referenceType String?
+  title         String
+  body          String?
+  isRead        Boolean   @default(false)
+  readAt        DateTime?
+  emailSent     Boolean   @default(false)
+  createdAt     DateTime  @default(now())
+}
+
+model AuditEvent {
+  id           String   @id @default(cuid())
+  actorId      String
+  actorRole    String
+  action       String
+  resourceType String?
+  resourceId   String?
+  meta         String?
+  ipAddress    String?
+  createdAt    DateTime @default(now())
+
+  trainer Trainer? @relation(fields: [actorId], references: [id])
+}
