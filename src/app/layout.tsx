@@ -12,6 +12,10 @@ const inter = Inter({ subsets: ["latin"] });
 export const metadata: Metadata = {
   title: "FitTrack — Smart Gym Management",
   description: "Manage clients, assign workouts, track progress — all in one platform.",
+  icons: {
+    icon: "/logo.png",
+    apple: "/logo.png",
+  },
 };
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
