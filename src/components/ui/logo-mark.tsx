@@ -1,20 +1,12 @@
+// eslint-disable-next-line @next/next/no-img-element
 export default function LogoMark({ size = 32 }: { size?: number }) {
   return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      viewBox="0 0 32 32"
+    <img
+      src="/logo.png"
+      alt="FitTrack"
       width={size}
       height={size}
-      style={{ flexShrink: 0, borderRadius: 8 }}
-    >
-      <rect width="32" height="32" rx="8" fill="#10b981" />
-      {/* F */}
-      <rect x="6" y="8" width="9" height="2.5" fill="white" />
-      <rect x="6" y="8" width="2.5" height="16" fill="white" />
-      <rect x="6" y="15" width="7" height="2.5" fill="white" />
-      {/* T */}
-      <rect x="17" y="8" width="10" height="2.5" fill="white" />
-      <rect x="20.5" y="10.5" width="3" height="13.5" fill="white" />
-    </svg>
+      style={{ width: size, height: size, objectFit: "contain", flexShrink: 0 }}
+    />
   );
 }
