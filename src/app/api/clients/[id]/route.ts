@@ -40,6 +40,32 @@ export async function GET(req: NextRequest, { params }: Params) {
   return NextResponse.json({ client });
 }
 
+export async function DELETE(req: NextRequest, { params }: Params) {
+  const session = await auth();
+  if (!session || (session.user! as Record<string, unknown>).role !== "trainer")
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  const { id } = await params;
+  const trainerId = session.user!.id!;
+
+  const client = await prisma.client.findUnique({ where: { id } });
+  if (!client) return NextResponse.json({ error: "Not found" }, { status: 404 });
+
+  const isAdmin = (session.user! as Record<string, unknown>).isAdmin as boolean;
+  if (!isAdmin && client.trainerId !== trainerId)
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+
+  await prisma.client.update({
+    where: { id },
+    data: { deletedAt: new Date(), status: "archived" },
+  });
+
+  await prisma.auditEvent.create({
+    data: { actorId: trainerId, actorRole: "trainer", action: "client.deleted", resourceType: "Client", resourceId: id },
+  });
+
+  return NextResponse.json({ success: true });
+}
+
 export async function PATCH(req: NextRequest, { params }: Params) {
   const session = await auth();
   if (!session || (session.user! as Record<string, unknown>).role !== "trainer")

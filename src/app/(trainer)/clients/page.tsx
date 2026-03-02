@@ -26,6 +26,12 @@ export default async function ClientsPage({
 
   const whereBase = isAdmin ? {} : { trainerId };
 
+  // Check if trainer has permission to approve clients
+  const trainerRecord = !isAdmin
+    ? await prisma.trainer.findUnique({ where: { id: trainerId }, select: { canApproveClients: true } })
+    : null;
+  const canApprove = isAdmin || (trainerRecord?.canApproveClients ?? false);
+
   const [activeClients, pendingClients] = await Promise.all([
     prisma.client.findMany({
       where: {
@@ -125,7 +131,7 @@ export default async function ClientsPage({
                   )}
                   <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">{t.clients.requested}: {formatDate(client.createdAt)}</p>
                 </div>
-                <ApproveRejectButtons clientId={client.id} />
+                {canApprove && <ApproveRejectButtons clientId={client.id} />}
               </div>
             ))
           )}

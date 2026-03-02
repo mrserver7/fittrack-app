@@ -26,6 +26,7 @@ export default function Sidebar({ role, isAdmin }: { role: "trainer" | "client";
   const trainerNav = [
     { href: "/dashboard", label: t.nav.dashboard, icon: LayoutDashboard },
     { href: "/clients", label: t.nav.clients, icon: Users },
+    { href: "/messages", label: t.nav.messages, icon: MessageSquare },
     { href: "/programs", label: t.nav.programs, icon: ClipboardList },
     { href: "/exercises", label: t.nav.exercises, icon: Dumbbell },
     { href: "/analytics", label: t.nav.analytics, icon: BarChart3 },
@@ -35,7 +36,7 @@ export default function Sidebar({ role, isAdmin }: { role: "trainer" | "client";
 
   const clientNav = [
     { href: "/home", label: t.nav.dashboard, icon: LayoutDashboard },
-    { href: "/workout/today", label: t.nav.todaysWorkout, icon: Dumbbell },
+    { href: "/workouts", label: t.nav.workouts, icon: Dumbbell },
     { href: "/progress", label: t.nav.progress, icon: BarChart3 },
     { href: "/messages", label: t.nav.messages, icon: MessageSquare },
     { href: "/checkins", label: t.nav.checkins, icon: CheckSquare },
@@ -46,6 +47,7 @@ export default function Sidebar({ role, isAdmin }: { role: "trainer" | "client";
     { href: "/admin", label: t.nav.adminOverview, icon: Shield },
     { href: "/admin/trainers", label: t.nav.trainers, icon: Users },
     { href: "/admin/subscribers", label: t.nav.allSubscribers, icon: Users },
+    { href: "/admin/messages", label: t.nav.messages, icon: MessageSquare },
   ];
 
   const nav = role === "trainer" ? trainerNav : clientNav;
@@ -136,11 +138,17 @@ export default function Sidebar({ role, isAdmin }: { role: "trainer" | "client";
 
   return (
     <>
-      {/* Mobile toggle button */}
-      <button onClick={() => setOpen(!open)}
-        className="md:hidden fixed top-4 left-4 rtl:left-auto rtl:right-4 z-50 p-2 bg-white dark:bg-gray-900 rounded-xl shadow-md border border-gray-200 dark:border-gray-700">
-        {open ? <X className="w-5 h-5 text-gray-700 dark:text-gray-300" /> : <Menu className="w-5 h-5 text-gray-700 dark:text-gray-300" />}
-      </button>
+      {/* Mobile top bar */}
+      <div className="md:hidden fixed top-0 left-0 right-0 z-50 h-14 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 flex items-center px-4 gap-3">
+        <button onClick={() => setOpen(!open)}
+          className="p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+          {open ? <X className="w-5 h-5 text-gray-700 dark:text-gray-300" /> : <Menu className="w-5 h-5 text-gray-700 dark:text-gray-300" />}
+        </button>
+        <div className="flex items-center gap-2 flex-1">
+          <LogoMark size={24} />
+          <span className="font-bold text-gray-900 dark:text-gray-50 text-sm">FitTrack</span>
+        </div>
+      </div>
 
       {/* Mobile overlay */}
       {open && (

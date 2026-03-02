@@ -4,7 +4,7 @@ import { toast } from "sonner";
 import { useLanguage } from "@/contexts/language-context";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { Camera } from "lucide-react";
+import { Camera, X } from "lucide-react";
 
 interface ProfileFormProps {
   currentName: string;
@@ -19,6 +19,7 @@ export default function ProfileForm({ currentName, currentPhotoUrl }: ProfileFor
   const [photoUrl, setPhotoUrl] = useState(currentPhotoUrl || "");
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [removingPhoto, setRemovingPhoto] = useState(false);
 
   async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -47,6 +48,27 @@ export default function ProfileForm({ currentName, currentPhotoUrl }: ProfileFor
       toast.success("Photo updated!");
     } finally {
       setUploading(false);
+    }
+  }
+
+  async function handleRemovePhoto() {
+    setRemovingPhoto(true);
+    try {
+      const res = await fetch("/api/settings/profile", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ photoUrl: null }),
+      });
+      if (res.ok) {
+        setPhotoUrl("");
+        await update({ photoUrl: null });
+        router.refresh();
+        toast.success("Photo removed.");
+      } else {
+        toast.error("Failed to remove photo.");
+      }
+    } finally {
+      setRemovingPhoto(false);
     }
   }
 
@@ -98,6 +120,13 @@ export default function ProfileForm({ currentName, currentPhotoUrl }: ProfileFor
         <div>
           <p className="text-sm font-medium text-gray-900 dark:text-gray-50">{t.settings.uploadPhoto}</p>
           <p className="text-xs text-gray-400 dark:text-gray-500">{uploading ? "Uploading..." : "JPG, PNG, WebP"}</p>
+          {photoUrl && (
+            <button type="button" onClick={handleRemovePhoto} disabled={removingPhoto}
+              className="mt-1.5 flex items-center gap-1 text-xs text-red-500 hover:text-red-600 disabled:opacity-50 transition-colors">
+              <X className="w-3 h-3" />
+              {removingPhoto ? "Removing..." : "Remove photo"}
+            </button>
+          )}
         </div>
       </div>
 

@@ -1,0 +1,26 @@
+import { NextRequest, NextResponse } from "next/server";
+import { auth } from "@/lib/auth";
+import { prisma } from "@/lib/prisma";
+
+type Params = { params: Promise<{ id: string }> };
+
+export async function PATCH(req: NextRequest, { params }: Params) {
+  const session = await auth();
+  if (!session || !(session.user as Record<string, unknown>).isAdmin)
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+
+  const { id } = await params;
+  const body = await req.json();
+  const { canApproveClients } = body;
+
+  if (typeof canApproveClients !== "boolean")
+    return NextResponse.json({ error: "canApproveClients must be a boolean" }, { status: 400 });
+
+  const trainer = await prisma.trainer.update({
+    where: { id },
+    data: { canApproveClients },
+    select: { id: true, name: true, canApproveClients: true },
+  });
+
+  return NextResponse.json({ trainer });
+}

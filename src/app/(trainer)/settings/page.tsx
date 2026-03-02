@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { getT } from "@/lib/i18n/server";
 import ProfileForm from "@/components/settings/profile-form";
 import AccountForm from "@/components/settings/account-form";
+import DeleteAccountButton from "@/components/settings/delete-account-button";
 
 export default async function TrainerSettingsPage() {
   const [session, t] = await Promise.all([auth(), getT()]);
@@ -31,6 +32,15 @@ export default async function TrainerSettingsPage() {
           <h2 className="text-base font-semibold text-gray-900 dark:text-gray-50 mb-5">{t.settings.account}</h2>
           <AccountForm currentEmail={trainer.email} />
         </div>
+
+        {/* Danger zone */}
+        {!trainer.isAdmin && (
+          <div className="bg-white dark:bg-gray-900 rounded-2xl border border-red-200 dark:border-red-800 p-6">
+            <h2 className="text-base font-semibold text-red-700 dark:text-red-400 mb-2">Danger Zone</h2>
+            <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">Permanently delete your account and all associated data.</p>
+            <DeleteAccountButton />
+          </div>
+        )}
       </div>
     </div>
   );

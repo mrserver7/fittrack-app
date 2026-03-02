@@ -273,19 +273,19 @@ export default function WorkoutLogger({
                     <label className="block text-xs text-gray-400 mb-1">Weight (kg)</label>
                     <input type="number" step="0.5" value={set.weightKg}
                       onChange={(e) => setSets((prev) => ({ ...prev, [currentEx.id]: prev[currentEx.id].map((s, i) => i === setIdx ? { ...s, weightKg: e.target.value } : s) }))}
-                      placeholder="kg" className="w-full px-2.5 py-2 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+                      placeholder="kg" className="w-full px-2.5 py-2 rounded-lg border border-gray-200 text-sm text-gray-900 dark:text-gray-50 bg-white dark:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-emerald-500" />
                   </div>
                   <div>
                     <label className="block text-xs text-gray-400 mb-1">Reps</label>
                     <input type="number" min={0} max={100} value={set.repsActual}
                       onChange={(e) => setSets((prev) => ({ ...prev, [currentEx.id]: prev[currentEx.id].map((s, i) => i === setIdx ? { ...s, repsActual: e.target.value } : s) }))}
-                      className="w-full px-2.5 py-2 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+                      className="w-full px-2.5 py-2 rounded-lg border border-gray-200 text-sm text-gray-900 dark:text-gray-50 bg-white dark:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-emerald-500" />
                   </div>
                   <div>
                     <label className="block text-xs text-gray-400 mb-1">RPE</label>
                     <input type="number" min={1} max={10} step={0.5} value={set.rpeActual}
                       onChange={(e) => setSets((prev) => ({ ...prev, [currentEx.id]: prev[currentEx.id].map((s, i) => i === setIdx ? { ...s, rpeActual: e.target.value } : s) }))}
-                      placeholder="1–10" className="w-full px-2.5 py-2 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+                      placeholder="1–10" className="w-full px-2.5 py-2 rounded-lg border border-gray-200 text-sm text-gray-900 dark:text-gray-50 bg-white dark:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-emerald-500" />
                   </div>
                 </div>
                 {!set.saved && (

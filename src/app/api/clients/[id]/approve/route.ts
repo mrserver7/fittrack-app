@@ -22,9 +22,12 @@ export async function POST(req: NextRequest, { params }: Params) {
   const client = await prisma.client.findUnique({ where: { id } });
   if (!client) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
-  // Trainer can only approve their own clients; admin can approve any
-  if (!isAdmin && client.trainerId !== trainerId)
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  // Admin can approve any; trainer with canApproveClients can approve their own clients only
+  if (!isAdmin) {
+    const trainerRecord = await prisma.trainer.findUnique({ where: { id: trainerId }, select: { canApproveClients: true } });
+    if (!trainerRecord?.canApproveClients || client.trainerId !== trainerId)
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
 
   const updated = await prisma.client.update({
     where: { id },

@@ -3,9 +3,10 @@ import { prisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { formatDate, formatDateTime, getStatusColor } from "@/lib/utils";
-import { ArrowLeft, Target, AlertTriangle, Calendar, MessageSquare, ClipboardList } from "lucide-react";
+import { ArrowLeft, Target, AlertTriangle, Calendar, MessageSquare, ClipboardList, ChevronRight } from "lucide-react";
 import AssignProgramButton from "@/components/clients/assign-program-button";
 import SendCheckinButton from "@/components/clients/send-checkin-button";
+import DeleteClientButton from "@/components/clients/delete-client-button";
 
 type Params = { params: Promise<{ id: string }> };
 
@@ -98,6 +99,7 @@ export default async function ClientProfilePage({ params }: Params) {
           </Link>
           <SendCheckinButton clientId={id} />
           <AssignProgramButton clientId={id} programs={programs} />
+          <DeleteClientButton clientId={id} clientName={client.name} />
         </div>
       </div>
 
@@ -223,7 +225,8 @@ export default async function ClientProfilePage({ params }: Params) {
             ) : (
               <div className="space-y-2">
                 {client.sessionLogs.slice(0, 10).map((s) => (
-                  <div key={s.id} className="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-50">
+                  <Link key={s.id} href={`/clients/${id}/sessions/${s.id}`}
+                    className="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-50 transition-colors group">
                     <div className={`w-2.5 h-2.5 rounded-full flex-shrink-0 ${sessionStatusColors[s.status]}`} />
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
@@ -238,13 +241,12 @@ export default async function ClientProfilePage({ params }: Params) {
                         )}
                       </div>
                       <p className="text-xs text-gray-400">
-                        {s.status} {s.totalVolumeKg ? `· ${s.totalVolumeKg}kg total volume` : ""} {s.avgRpe ? `· RPE ${s.avgRpe}` : ""}
+                        {s.status} {s.totalVolumeKg ? `· ${s.totalVolumeKg}kg vol` : ""} {s.avgRpe ? `· RPE ${s.avgRpe}` : ""}
+                        {s.notes ? ` · "${s.notes.slice(0, 40)}${s.notes.length > 40 ? "…" : ""}"` : ""}
                       </p>
                     </div>
-                    {s.trainerComment && (
-                      <div className="w-1.5 h-1.5 bg-blue-400 rounded-full" title="Trainer commented" />
-                    )}
-                  </div>
+                    <ChevronRight className="w-3.5 h-3.5 text-gray-300 group-hover:text-gray-500 transition-colors flex-shrink-0" />
+                  </Link>
                 ))}
               </div>
             )}

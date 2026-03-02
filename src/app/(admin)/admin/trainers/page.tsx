@@ -5,6 +5,7 @@ import { Shield, Users, Activity, ArrowLeft, Clock } from "lucide-react";
 import { formatDate } from "@/lib/utils";
 import { getT } from "@/lib/i18n/server";
 import ApproveTrainerButton from "@/components/admin/approve-trainer-button";
+import CanApproveToggle from "@/components/admin/can-approve-toggle";
 
 export default async function AdminTrainersPage() {
   const [, t] = await Promise.all([auth(), getT()]);
@@ -130,7 +131,10 @@ export default async function AdminTrainersPage() {
                           <span>{sessions} {t.admin.sessions}</span>
                         </div>
                       </div>
-                      <p className="text-xs text-gray-400 dark:text-gray-500 mt-3">{t.admin.joined} {formatDate(trainer.createdAt)}</p>
+                      <div className="mt-3 flex items-center justify-between">
+                        <p className="text-xs text-gray-400 dark:text-gray-500">{t.admin.joined} {formatDate(trainer.createdAt)}</p>
+                        <CanApproveToggle trainerId={trainer.id} initialValue={trainer.canApproveClients} />
+                      </div>
                     </div>
                   );
                 })}
