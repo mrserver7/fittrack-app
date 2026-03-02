@@ -44,7 +44,7 @@ export default function LoginPage() {
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">{t.auth.email}</label>
               <input
                 type="email" value={email} onChange={(e) => setEmail(e.target.value)} required
-                placeholder="you@example.com" autoComplete="email"
+                placeholder={t.auth.emailPlaceholder} autoComplete="email"
                 className="w-full px-3.5 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-50 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
               />
             </div>

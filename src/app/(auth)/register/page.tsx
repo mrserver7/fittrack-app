@@ -1,11 +1,9 @@
 "use client";
-import { useState, useEffect, Suspense } from "react";
+import { useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { toast } from "sonner";
 import { useLanguage } from "@/contexts/language-context";
-
-type Trainer = { id: string; name: string; businessName: string | null };
 
 function RegisterForm() {
   const { t } = useLanguage();
@@ -13,26 +11,23 @@ function RegisterForm() {
   const initialTab = searchParams.get("tab") === "subscriber" ? "subscriber" : "trainer";
   const [tab, setTab] = useState<"trainer" | "subscriber">(initialTab);
   const [loading, setLoading] = useState(false);
-  const [trainers, setTrainers] = useState<Trainer[]>([]);
   const router = useRouter();
 
-  const [trainerForm, setTrainerForm] = useState({ name: "", email: "", password: "", businessName: "" });
-  const [subForm, setSubForm] = useState({ name: "", email: "", password: "", trainerId: "", phone: "", goalsText: "" });
-
-  useEffect(() => {
-    if (tab === "subscriber") {
-      fetch("/api/trainers/public").then(r => r.json()).then(d => setTrainers(d.trainers || []));
-    }
-  }, [tab]);
+  const [trainerForm, setTrainerForm] = useState({ name: "", email: "", password: "", confirmPassword: "", businessName: "" });
+  const [subForm, setSubForm] = useState({ name: "", email: "", password: "", confirmPassword: "", phone: "", goalsText: "" });
 
   const submitTrainer = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (trainerForm.password !== trainerForm.confirmPassword) {
+      toast.error(t.auth.passwordsDoNotMatch);
+      return;
+    }
     if (trainerForm.password.length < 8) { toast.error("Password must be at least 8 characters."); return; }
     setLoading(true);
     const res = await fetch("/api/auth/register", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(trainerForm),
+      body: JSON.stringify({ name: trainerForm.name, email: trainerForm.email, password: trainerForm.password, businessName: trainerForm.businessName }),
     });
     const data = await res.json();
     setLoading(false);
@@ -46,20 +41,23 @@ function RegisterForm() {
 
   const submitSubscriber = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!subForm.trainerId) { toast.error("Please select a trainer."); return; }
+    if (subForm.password !== subForm.confirmPassword) {
+      toast.error(t.auth.passwordsDoNotMatch);
+      return;
+    }
     if (subForm.password.length < 8) { toast.error("Password must be at least 8 characters."); return; }
     setLoading(true);
     const res = await fetch("/api/auth/register-subscriber", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(subForm),
+      body: JSON.stringify({ name: subForm.name, email: subForm.email, password: subForm.password, phone: subForm.phone, goalsText: subForm.goalsText }),
     });
     const data = await res.json();
     setLoading(false);
     if (!res.ok) {
       toast.error(data.error || "Sign up failed.");
     } else {
-      toast.success("Request sent! Your trainer will approve your account shortly.");
+      toast.success("Request sent! An admin will review and assign your trainer.");
       router.push("/login");
     }
   };
@@ -71,7 +69,7 @@ function RegisterForm() {
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <Link href="/" className="inline-flex items-center gap-2">
-            <img src="/logo.png" alt="FitTrack" className="w-9 h-9 rounded-xl object-contain" />
+            <img src="/logo.svg" alt="FitTrack" className="w-9 h-9 rounded-xl object-contain" />
             <span className="font-bold text-xl text-gray-900 dark:text-gray-50">FitTrack</span>
           </Link>
         </div>
@@ -92,7 +90,7 @@ function RegisterForm() {
               <form onSubmit={submitTrainer} className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">{t.auth.fullName} *</label>
-                  <input value={trainerForm.name} onChange={(e) => setTrainerForm({ ...trainerForm, name: e.target.value })} required placeholder="Alex Johnson" className={inputClass} />
+                  <input value={trainerForm.name} onChange={(e) => setTrainerForm({ ...trainerForm, name: e.target.value })} required placeholder={t.auth.trainerNamePlaceholder} className={inputClass} />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">{t.auth.businessName}</label>
@@ -100,11 +98,15 @@ function RegisterForm() {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">{t.auth.email} *</label>
-                  <input type="email" value={trainerForm.email} onChange={(e) => setTrainerForm({ ...trainerForm, email: e.target.value })} required placeholder="trainer@example.com" className={inputClass} />
+                  <input type="email" value={trainerForm.email} onChange={(e) => setTrainerForm({ ...trainerForm, email: e.target.value })} required placeholder={t.auth.trainerEmailPlaceholder} className={inputClass} />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">{t.auth.password} *</label>
                   <input type="password" value={trainerForm.password} onChange={(e) => setTrainerForm({ ...trainerForm, password: e.target.value })} required placeholder={t.auth.minPassword} minLength={8} className={inputClass} />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">{t.auth.confirmPassword} *</label>
+                  <input type="password" value={trainerForm.confirmPassword} onChange={(e) => setTrainerForm({ ...trainerForm, confirmPassword: e.target.value })} required placeholder={t.auth.minPassword} minLength={8} className={inputClass} />
                 </div>
                 <button type="submit" disabled={loading} className="w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-lg text-sm transition-colors disabled:opacity-60">
                   {loading ? t.auth.creatingAccount : t.auth.createTrainerBtn}
@@ -114,35 +116,27 @@ function RegisterForm() {
           ) : (
             <>
               <h1 className="text-xl font-bold text-gray-900 dark:text-gray-50 mb-1">{t.auth.joinAsSubscriber}</h1>
-              <p className="text-gray-500 dark:text-gray-400 text-sm mb-5">{t.auth.trainerApproves}</p>
+              <p className="text-gray-500 dark:text-gray-400 text-sm mb-5">{t.auth.adminAssignsTrainer}</p>
               <form onSubmit={submitSubscriber} className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">{t.auth.selectTrainer} *</label>
-                  <select value={subForm.trainerId} onChange={(e) => setSubForm({ ...subForm, trainerId: e.target.value })} required className={inputClass}>
-                    <option value="">{t.auth.chooseTrainer}</option>
-                    {trainers.map((tr) => (
-                      <option key={tr.id} value={tr.id}>{tr.name}{tr.businessName ? ` — ${tr.businessName}` : ""}</option>
-                    ))}
-                  </select>
-                  {trainers.length === 0 && (
-                    <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">{t.auth.loadingTrainers}</p>
-                  )}
-                </div>
-                <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">{t.auth.fullName} *</label>
-                  <input value={subForm.name} onChange={(e) => setSubForm({ ...subForm, name: e.target.value })} required placeholder="Your full name" className={inputClass} />
+                  <input value={subForm.name} onChange={(e) => setSubForm({ ...subForm, name: e.target.value })} required placeholder={t.auth.namePlaceholder} className={inputClass} />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">{t.auth.email} *</label>
-                  <input type="email" value={subForm.email} onChange={(e) => setSubForm({ ...subForm, email: e.target.value })} required placeholder="you@example.com" className={inputClass} />
+                  <input type="email" value={subForm.email} onChange={(e) => setSubForm({ ...subForm, email: e.target.value })} required placeholder={t.auth.emailPlaceholder} className={inputClass} />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">{t.auth.password} *</label>
                   <input type="password" value={subForm.password} onChange={(e) => setSubForm({ ...subForm, password: e.target.value })} required placeholder={t.auth.minPassword} minLength={8} className={inputClass} />
                 </div>
                 <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">{t.auth.confirmPassword} *</label>
+                  <input type="password" value={subForm.confirmPassword} onChange={(e) => setSubForm({ ...subForm, confirmPassword: e.target.value })} required placeholder={t.auth.minPassword} minLength={8} className={inputClass} />
+                </div>
+                <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">{t.auth.phone}</label>
-                  <input value={subForm.phone} onChange={(e) => setSubForm({ ...subForm, phone: e.target.value })} placeholder="+1 555 000 0000" className={inputClass} />
+                  <input value={subForm.phone} onChange={(e) => setSubForm({ ...subForm, phone: e.target.value })} placeholder={t.auth.phonePlaceholder} className={inputClass} />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">{t.auth.goals}</label>

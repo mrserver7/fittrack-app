@@ -13,6 +13,12 @@ export async function POST(req: NextRequest, { params }: Params) {
   const trainerId = session.user!.id!;
   const isAdmin = (session.user as Record<string, unknown>).isAdmin as boolean;
 
+  // Parse optional trainerId from body
+  let body: { trainerId?: string } = {};
+  try {
+    body = await req.json();
+  } catch { /* no body */ }
+
   const client = await prisma.client.findUnique({ where: { id } });
   if (!client) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
@@ -22,7 +28,10 @@ export async function POST(req: NextRequest, { params }: Params) {
 
   const updated = await prisma.client.update({
     where: { id },
-    data: { status: "active" },
+    data: {
+      status: "active",
+      ...(body.trainerId ? { trainerId: body.trainerId } : {}),
+    },
   });
 
   // Notify the subscriber

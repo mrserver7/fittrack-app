@@ -22,7 +22,7 @@ export default async function AdminSubscribersPage({
   const [, t] = await Promise.all([auth(), getT()]);
   const { status = "" } = await searchParams;
 
-  const [allSubscribers, pendingCount] = await Promise.all([
+  const [allSubscribers, pendingCount, trainers] = await Promise.all([
     prisma.client.findMany({
       where: { deletedAt: null, ...(status ? { status } : {}) },
       include: {
@@ -32,6 +32,11 @@ export default async function AdminSubscribersPage({
       orderBy: { createdAt: "desc" },
     }),
     prisma.client.count({ where: { deletedAt: null, status: "pending" } }),
+    prisma.trainer.findMany({
+      where: { isAdmin: false, deletedAt: null },
+      select: { id: true, name: true, businessName: true },
+      orderBy: { name: "asc" },
+    }),
   ]);
 
   const allStatuses = ["", "active", "pending", "paused", "invited", "archived"];
@@ -102,8 +107,8 @@ export default async function AdminSubscribersPage({
                 </div>
                 <p className="text-sm text-gray-400 dark:text-gray-500">{client.email}</p>
                 <p className="text-xs text-purple-600 dark:text-purple-400 mt-0.5">
-                  {t.admin.trainer}: {client.trainer.name}
-                  {client.trainer.businessName ? ` · ${client.trainer.businessName}` : ""}
+                  {t.admin.trainer}: {client.trainer?.name ?? t.admin.noTrainerAssigned}
+                  {client.trainer?.businessName ? ` · ${client.trainer.businessName}` : ""}
                 </p>
                 <div className="flex items-center gap-3 mt-1 text-xs text-gray-400 dark:text-gray-500">
                   <span>{client._count.sessionLogs} {t.admin.sessions}</span>
@@ -121,10 +126,14 @@ export default async function AdminSubscribersPage({
 
               <div className="flex items-center gap-2 flex-shrink-0">
                 {client.status === "pending" && (
-                  <ApproveRejectButtons clientId={client.id} />
+                  <ApproveRejectButtons
+                    clientId={client.id}
+                    clientTrainerId={client.trainerId}
+                    trainers={trainers}
+                  />
                 )}
                 <Link href={`/admin/subscribers/${client.id}`}
-                  className="px-3 py-1.5 text-xs font-medium border border-gray-200 dark:border-gray-700 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors whitespace-nowrap">
+                  className="px-3 py-1.5 text-xs font-medium border border-gray-200 dark:border-gray-700 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors whitespace-nowrap self-start">
                   View →
                 </Link>
               </div>
