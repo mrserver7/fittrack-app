@@ -30,7 +30,7 @@ export default function TrainerMessagesHub({
   const activeClient = clients.find((c) => c.id === activeClientId);
 
   const selectClient = (clientId: string) => {
-    router.push(`/messages?client=${clientId}`);
+    router.push(`/clients/messages?client=${clientId}`);
     setMobileView("thread");
   };
 

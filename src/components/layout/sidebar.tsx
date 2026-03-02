@@ -26,7 +26,7 @@ export default function Sidebar({ role, isAdmin }: { role: "trainer" | "client";
   const trainerNav = [
     { href: "/dashboard", label: t.nav.dashboard, icon: LayoutDashboard },
     { href: "/clients", label: t.nav.clients, icon: Users },
-    { href: "/messages", label: t.nav.messages, icon: MessageSquare },
+    { href: "/clients/messages", label: t.nav.messages, icon: MessageSquare },
     { href: "/programs", label: t.nav.programs, icon: ClipboardList },
     { href: "/exercises", label: t.nav.exercises, icon: Dumbbell },
     { href: "/analytics", label: t.nav.analytics, icon: BarChart3 },
