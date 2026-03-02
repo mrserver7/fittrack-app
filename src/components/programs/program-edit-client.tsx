@@ -3,7 +3,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { toast } from "sonner";
-import { ArrowLeft, Plus, Trash2, Save } from "lucide-react";
+import { ArrowLeft, Plus, Trash2, Save, X } from "lucide-react";
 import ExerciseSelect from "@/components/programs/exercise-select";
 
 type ExerciseOption = { id: string; name: string };
@@ -23,7 +23,8 @@ type ExerciseState = {
 };
 
 type DayState = {
-  id: string;
+  id: string;       // "" for newly added days (not yet in DB)
+  weekId: string;   // parent week ID — needed when creating new days
   dayLabel: string;
   exercises: ExerciseState[];
 };
@@ -63,6 +64,8 @@ type ProgramData = {
   }>;
 };
 
+const DAY_LABELS = ["Day A", "Day B", "Day C", "Day D", "Day E", "Day F", "Day G"];
+
 const exerciseFields: { label: string; field: keyof ExerciseState; min: number; max: number }[] = [
   { label: "Sets", field: "sets", min: 1, max: 20 },
   { label: "Reps Min", field: "repsMin", min: 1, max: 100 },
@@ -91,6 +94,7 @@ export default function ProgramEditClient({
       isDeload: w.isDeload,
       days: w.days.map((d) => ({
         id: d.id,
+        weekId: w.id,
         dayLabel: d.dayLabel,
         exercises: d.exercises.map((ex) => ({
           id: ex.id,
@@ -111,9 +115,33 @@ export default function ProgramEditClient({
 
   const currentDay = weeks[activeWeek]?.days[activeDay];
 
+  const addDay = () => {
+    setWeeks((prev) =>
+      prev.map((w, wi) => {
+        if (wi !== activeWeek || w.days.length >= 7) return w;
+        const nextLabel = DAY_LABELS[w.days.length] ?? `Day ${w.days.length + 1}`;
+        return {
+          ...w,
+          days: [...w.days, { id: "", weekId: w.id, dayLabel: nextLabel, exercises: [] }],
+        };
+      })
+    );
+    setActiveDay(weeks[activeWeek].days.length); // switch to the new day
+  };
+
+  const removeDay = (di: number) => {
+    setWeeks((prev) =>
+      prev.map((w, wi) => {
+        if (wi !== activeWeek || w.days.length <= 1) return w;
+        return { ...w, days: w.days.filter((_, i) => i !== di) };
+      })
+    );
+    setActiveDay((prev) => Math.min(prev, weeks[activeWeek].days.length - 2));
+  };
+
   const updateExercise = (exIdx: number, field: keyof ExerciseState, value: string | number) => {
-    setWeeks((prev) => {
-      const updated = prev.map((w, wi) =>
+    setWeeks((prev) =>
+      prev.map((w, wi) =>
         wi !== activeWeek ? w : {
           ...w,
           days: w.days.map((d, di) =>
@@ -125,9 +153,8 @@ export default function ProgramEditClient({
             }
           ),
         }
-      );
-      return updated;
-    });
+      )
+    );
   };
 
   const addExercise = () => {
@@ -178,9 +205,13 @@ export default function ProgramEditClient({
     }
 
     setSaving(true);
+
+    // Build the days payload — new days have id: ""
     const days = weeks.flatMap((w) =>
       w.days.map((d) => ({
-        dayId: d.id,
+        dayId: d.id || undefined,        // undefined = new day
+        weekId: d.weekId,               // needed for new days
+        dayLabel: d.dayLabel,           // needed for new days
         exercises: d.exercises.map((ex) => ({
           id: ex.id,
           exerciseId: ex.exerciseId,
@@ -196,10 +227,13 @@ export default function ProgramEditClient({
       }))
     );
 
+    // Also send which existing day IDs to keep (so the API can delete removed ones)
+    const keptDayIds = weeks.flatMap((w) => w.days.filter((d) => d.id).map((d) => d.id));
+
     const res = await fetch(`/api/programs/${program.id}/exercises`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ days }),
+      body: JSON.stringify({ days, keptDayIds }),
     });
 
     setSaving(false);
@@ -207,7 +241,8 @@ export default function ProgramEditClient({
       toast.success("Program saved!");
       router.push(`/programs/${program.id}`);
     } else {
-      toast.error("Failed to save changes.");
+      const data = await res.json().catch(() => ({}));
+      toast.error(data.error || "Failed to save changes.");
     }
   };
 
@@ -254,22 +289,43 @@ export default function ProgramEditClient({
           ))}
         </div>
 
-        {/* Day tabs */}
-        <div className="flex border-b border-gray-100 dark:border-gray-800 overflow-x-auto">
+        {/* Day tabs + add day button */}
+        <div className="flex items-stretch border-b border-gray-100 dark:border-gray-800 overflow-x-auto">
           {weeks[activeWeek]?.days.map((d, di) => (
-            <button
-              key={di}
-              type="button"
-              onClick={() => setActiveDay(di)}
-              className={`px-4 py-2.5 text-sm font-medium whitespace-nowrap flex-shrink-0 transition-colors ${
-                activeDay === di
-                  ? "text-emerald-700 dark:text-emerald-400 border-b-2 border-emerald-500"
-                  : "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
-              }`}
-            >
-              {d.dayLabel}
-            </button>
+            <div key={di} className="flex items-stretch flex-shrink-0">
+              <button
+                type="button"
+                onClick={() => setActiveDay(di)}
+                className={`px-4 py-2.5 text-sm font-medium whitespace-nowrap transition-colors ${
+                  activeDay === di
+                    ? "text-emerald-700 dark:text-emerald-400 border-b-2 border-emerald-500"
+                    : "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
+                }`}
+              >
+                {d.dayLabel}
+                {!d.id && <span className="ml-1 text-xs text-emerald-500">•</span>}
+              </button>
+              {weeks[activeWeek].days.length > 1 && (
+                <button
+                  type="button"
+                  onClick={() => removeDay(di)}
+                  className="pr-1 text-gray-300 dark:text-gray-600 hover:text-red-500 dark:hover:text-red-400 transition-colors"
+                  title="Remove day"
+                >
+                  <X className="w-3 h-3" />
+                </button>
+              )}
+            </div>
           ))}
+          {(weeks[activeWeek]?.days.length ?? 0) < 7 && (
+            <button
+              type="button"
+              onClick={addDay}
+              className="px-3 py-2.5 text-xs text-gray-400 dark:text-gray-500 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors whitespace-nowrap flex items-center gap-1 border-l border-gray-100 dark:border-gray-800 flex-shrink-0"
+            >
+              <Plus className="w-3 h-3" /> Day
+            </button>
+          )}
         </div>
 
         {/* Exercises */}
