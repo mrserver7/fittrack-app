@@ -2,7 +2,7 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { formatDateTime, getGreeting } from "@/lib/utils";
 import Link from "next/link";
-import { Users, Activity, CheckSquare, UserPlus } from "lucide-react";
+import { Users, Activity, CheckSquare, UserPlus, AlertTriangle } from "lucide-react";
 import { getT } from "@/lib/i18n/server";
 import DashboardAlerts from "@/components/dashboard/dashboard-alerts";
 
