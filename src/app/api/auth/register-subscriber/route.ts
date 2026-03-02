@@ -18,7 +18,8 @@ export async function POST(req: NextRequest) {
     const parsed = schema.safeParse(body);
     if (!parsed.success) return NextResponse.json({ error: "Invalid data" }, { status: 422 });
 
-    const { name, email, password, trainerId, phone, goalsText } = parsed.data;
+    const { name, email: rawEmail, password, trainerId, phone, goalsText } = parsed.data;
+    const email = rawEmail.toLowerCase();
 
     // Check if email already used in either table
     const existingClient = await prisma.client.findUnique({ where: { email } });

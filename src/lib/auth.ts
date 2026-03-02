@@ -21,7 +21,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       async authorize(credentials) {
         const parsed = loginSchema.safeParse(credentials);
         if (!parsed.success) return null;
-        const { email, password } = parsed.data;
+        const { email: rawEmail, password } = parsed.data;
+        const email = rawEmail.toLowerCase();
 
         // Check trainer table first (includes admin)
         const trainer = await prisma.trainer.findFirst({

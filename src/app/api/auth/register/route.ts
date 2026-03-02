@@ -16,7 +16,8 @@ export async function POST(req: NextRequest) {
     const parsed = schema.safeParse(body);
     if (!parsed.success) return NextResponse.json({ error: "Invalid data" }, { status: 422 });
 
-    const { name, email, password, businessName } = parsed.data;
+    const { name, email: rawEmail, password, businessName } = parsed.data;
+    const email = rawEmail.toLowerCase();
     const existing = await prisma.trainer.findUnique({ where: { email } });
     if (existing) return NextResponse.json({ error: "Email already registered" }, { status: 409 });
 
