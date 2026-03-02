@@ -2,6 +2,8 @@
 import { useState } from "react";
 import { toast } from "sonner";
 import { useLanguage } from "@/contexts/language-context";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
 import { Camera } from "lucide-react";
 
 interface ProfileFormProps {
@@ -11,6 +13,8 @@ interface ProfileFormProps {
 
 export default function ProfileForm({ currentName, currentPhotoUrl }: ProfileFormProps) {
   const { t } = useLanguage();
+  const { update } = useSession();
+  const router = useRouter();
   const [name, setName] = useState(currentName);
   const [photoUrl, setPhotoUrl] = useState(currentPhotoUrl || "");
   const [uploading, setUploading] = useState(false);
@@ -21,16 +25,26 @@ export default function ProfileForm({ currentName, currentPhotoUrl }: ProfileFor
     if (!file) return;
     setUploading(true);
     try {
+      // 1. Upload file to Supabase Storage
       const formData = new FormData();
       formData.append("file", file);
-      const res = await fetch("/api/settings/upload-avatar", { method: "POST", body: formData });
-      if (res.ok) {
-        const data = await res.json();
-        setPhotoUrl(data.url);
-        toast.success("Photo uploaded!");
-      } else {
-        toast.error("Upload failed.");
-      }
+      const uploadRes = await fetch("/api/settings/upload-avatar", { method: "POST", body: formData });
+      if (!uploadRes.ok) { toast.error("Upload failed."); return; }
+      const { url: newUrl } = await uploadRes.json();
+
+      // 2. Immediately persist the new URL to DB
+      const saveRes = await fetch("/api/settings/profile", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ photoUrl: newUrl }),
+      });
+      if (!saveRes.ok) { toast.error("Failed to save photo."); return; }
+
+      // 3. Update local state + session token so sidebar reflects change instantly
+      setPhotoUrl(newUrl);
+      await update({ photoUrl: newUrl });
+      router.refresh();
+      toast.success("Photo updated!");
     } finally {
       setUploading(false);
     }
@@ -46,6 +60,9 @@ export default function ProfileForm({ currentName, currentPhotoUrl }: ProfileFor
         body: JSON.stringify({ name, photoUrl }),
       });
       if (res.ok) {
+        // Refresh session so sidebar name updates immediately
+        await update({ name, photoUrl });
+        router.refresh();
         toast.success(t.settings.profileUpdated);
       } else {
         const data = await res.json();

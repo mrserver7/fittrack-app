@@ -20,6 +20,7 @@ export default function Sidebar({ role, isAdmin }: { role: "trainer" | "client";
   const [logoError, setLogoError] = useState(false);
   const name = session?.user?.name ?? "";
   const email = session?.user?.email ?? "";
+  const photoUrl = (session?.user as Record<string, unknown>)?.photoUrl as string | null | undefined;
   const initials = name.split(" ").map((n: string) => n[0]).slice(0, 2).join("").toUpperCase();
 
   const trainerNav = [
@@ -56,7 +57,7 @@ export default function Sidebar({ role, isAdmin }: { role: "trainer" | "client";
         {logoError ? (
           <div className="w-8 h-8 bg-emerald-600 rounded-lg flex items-center justify-center text-white font-bold text-xs flex-shrink-0">FT</div>
         ) : (
-          <img src="/logo.png" alt="FitTrack" className="w-8 h-8 rounded-lg flex-shrink-0 object-contain" onError={() => setLogoError(true)} />
+          <img src="/logo.svg" alt="FitTrack" className="w-8 h-8 rounded-lg flex-shrink-0 object-contain" onError={() => setLogoError(true)} />
         )}
         <span className="font-bold text-gray-900 dark:text-gray-50">FitTrack</span>
       </div>
@@ -120,8 +121,13 @@ export default function Sidebar({ role, isAdmin }: { role: "trainer" | "client";
           {t.nav.signOut}
         </button>
         <div className="flex items-center gap-3 px-3 py-2">
-          <div className="w-8 h-8 bg-emerald-100 dark:bg-emerald-900 rounded-full flex items-center justify-center text-emerald-700 dark:text-emerald-300 font-bold text-xs flex-shrink-0">
-            {initials}
+          <div className="w-8 h-8 rounded-full overflow-hidden flex-shrink-0 bg-emerald-100 dark:bg-emerald-900 flex items-center justify-center">
+            {photoUrl ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={photoUrl} alt={name} className="w-full h-full object-cover" />
+            ) : (
+              <span className="text-emerald-700 dark:text-emerald-300 font-bold text-xs">{initials}</span>
+            )}
           </div>
           <div className="min-w-0">
             <p className="text-sm font-medium text-gray-900 dark:text-gray-50 truncate">{name}</p>

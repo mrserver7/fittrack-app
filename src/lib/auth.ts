@@ -36,6 +36,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             name: trainer.name,
             role: "trainer",
             isAdmin: trainer.isAdmin,
+            photoUrl: trainer.photoUrl ?? null,
           } as Record<string, unknown>;
         }
 
@@ -52,6 +53,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           name: client.name,
           role: "client",
           trainerId: client.trainerId,
+          photoUrl: client.photoUrl ?? null,
         } as Record<string, unknown>;
       },
     }),
