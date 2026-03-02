@@ -45,11 +45,34 @@ export default function NewProgramPage() {
   const [activeDay, setActiveDay] = useState(0);
   const router = useRouter();
 
-  // Map stored day labels to translated display labels
+  const DAY_LABELS = ["Day A", "Day B", "Day C", "Day D", "Day E", "Day F", "Day G"];
   const dayDisplayLabels: Record<string, string> = {
     "Day A": t.programs.dayA,
     "Day B": t.programs.dayB,
     "Day C": t.programs.dayC,
+    "Day D": t.programs.dayD ?? "Day D",
+    "Day E": t.programs.dayE ?? "Day E",
+    "Day F": t.programs.dayF ?? "Day F",
+    "Day G": t.programs.dayG ?? "Day G",
+  };
+
+  const addDay = () => {
+    const updated = [...weeks];
+    const currentDays = updated[activeWeek].days;
+    if (currentDays.length >= 7) return;
+    const nextLabel = DAY_LABELS[currentDays.length];
+    updated[activeWeek].days.push({ dayLabel: nextLabel, dayOrder: currentDays.length, exercises: [] });
+    setWeeks(updated);
+    setActiveDay(updated[activeWeek].days.length - 1);
+  };
+
+  const removeDay = (di: number) => {
+    const updated = [...weeks];
+    if (updated[activeWeek].days.length <= 1) return;
+    updated[activeWeek].days.splice(di, 1);
+    updated[activeWeek].days.forEach((d, i) => { d.dayOrder = i; });
+    setWeeks([...updated]);
+    setActiveDay(Math.min(activeDay, updated[activeWeek].days.length - 1));
   };
 
   const loadExercises = async () => {
@@ -216,13 +239,27 @@ export default function NewProgramPage() {
           </div>
 
           {/* Day tabs */}
-          <div className="flex border-b border-gray-100 dark:border-gray-800">
+          <div className="flex items-stretch border-b border-gray-100 dark:border-gray-800 overflow-x-auto">
             {weeks[activeWeek]?.days.map((d, di) => (
-              <button key={di} type="button" onClick={() => setActiveDay(di)}
-                className={`flex-1 py-2.5 text-sm font-medium transition-colors ${activeDay === di ? "text-emerald-700 dark:text-emerald-400 border-b-2 border-emerald-500" : "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"}`}>
-                {dayDisplayLabels[d.dayLabel] || d.dayLabel}
-              </button>
+              <div key={di} className="flex items-stretch flex-shrink-0">
+                <button type="button" onClick={() => setActiveDay(di)}
+                  className={`px-4 py-2.5 text-sm font-medium transition-colors whitespace-nowrap ${activeDay === di ? "text-emerald-700 dark:text-emerald-400 border-b-2 border-emerald-500" : "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"}`}>
+                  {dayDisplayLabels[d.dayLabel] || d.dayLabel}
+                </button>
+                {weeks[activeWeek].days.length > 1 && (
+                  <button type="button" onClick={() => removeDay(di)}
+                    className="px-1 text-gray-300 dark:text-gray-600 hover:text-red-500 dark:hover:text-red-400 transition-colors text-xs pb-0.5">
+                    ✕
+                  </button>
+                )}
+              </div>
             ))}
+            {weeks[activeWeek]?.days.length < 7 && (
+              <button type="button" onClick={addDay}
+                className="px-3 py-2.5 text-xs text-gray-400 dark:text-gray-500 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors whitespace-nowrap flex items-center gap-1 border-l border-gray-100 dark:border-gray-800">
+                <Plus className="w-3 h-3" /> Day
+              </button>
+            )}
           </div>
 
           {/* Exercises */}

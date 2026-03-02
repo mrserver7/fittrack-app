@@ -35,7 +35,7 @@ function RegisterForm() {
     if (!res.ok) {
       toast.error(data.error || "Registration failed.");
     } else {
-      toast.success("Trainer account created! Please sign in.");
+      toast.success("Account created! Please wait for admin approval before signing in.");
       router.push("/login");
     }
   };

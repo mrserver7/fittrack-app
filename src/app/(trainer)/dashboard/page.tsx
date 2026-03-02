@@ -28,6 +28,7 @@ export default async function DashboardPage() {
       prisma.client.findMany({
         where: {
           trainerId, status: "active", deletedAt: null,
+          createdAt: { lt: sevenDaysAgo },
           sessionLogs: { none: { status: "completed", completedAt: { gte: sevenDaysAgo } } },
         },
         take: 5,

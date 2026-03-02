@@ -2,9 +2,10 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 import WorkoutLogger from "@/components/workout/workout-logger";
-import { Dumbbell } from "lucide-react";
+import { Dumbbell, CheckCircle } from "lucide-react";
 
-export default async function TodayWorkoutPage() {
+export default async function TodayWorkoutPage({ searchParams }: { searchParams: Promise<{ redo?: string }> }) {
+  const { redo } = await searchParams;
   const session = await auth();
   const clientId = session!.user!.id!;
 
@@ -83,6 +84,39 @@ export default async function TodayWorkoutPage() {
   })).map((s) => s.workoutDayId).filter(Boolean);
 
   const nextDay = allDays.find((d) => !loggedDayIds.includes(d.id)) || allDays[0];
+
+  // Check if today's workout was already completed today (and user didn't choose to redo)
+  const todayStr = new Date().toISOString().split("T")[0];
+  const todayCompletedSession = !redo && await prisma.sessionLog.findFirst({
+    where: { clientId, workoutDayId: nextDay.id, status: "completed", scheduledDate: todayStr },
+  });
+
+  if (todayCompletedSession) {
+    return (
+      <div className="p-6 md:p-8 max-w-2xl mx-auto">
+        <div className="text-center py-16 bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-700">
+          <div className="w-16 h-16 bg-emerald-100 dark:bg-emerald-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
+            <CheckCircle className="w-8 h-8 text-emerald-600 dark:text-emerald-400" />
+          </div>
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-50 mb-2">Workout Complete! 🎉</h2>
+          <p className="text-gray-500 dark:text-gray-400 text-sm mb-2">
+            You already completed <strong>{nextDay.dayLabel}</strong> today.
+          </p>
+          <p className="text-gray-400 dark:text-gray-500 text-xs mb-8">Great work! Come back tomorrow for your next session.</p>
+          <div className="flex flex-col sm:flex-row gap-3 justify-center px-8">
+            <Link href="/home"
+              className="px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-xl text-sm transition-colors">
+              ← Back to Home
+            </Link>
+            <Link href="/workout/today?redo=1"
+              className="px-6 py-2.5 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 font-medium rounded-xl text-sm transition-colors">
+              Do it again
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   const existingSession = await prisma.sessionLog.findFirst({
     where: { clientId, workoutDayId: nextDay?.id, status: "in_progress" },

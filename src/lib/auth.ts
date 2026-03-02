@@ -30,6 +30,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         if (trainer) {
           const valid = await verifyPassword(password, trainer.passwordHash);
           if (!valid) return null;
+          // Block pending trainers (unless admin)
+          if (!trainer.isAdmin && trainer.status === "pending") return null;
           return {
             id: trainer.id,
             email: trainer.email,

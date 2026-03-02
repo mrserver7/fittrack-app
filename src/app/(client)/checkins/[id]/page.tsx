@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { useLanguage } from "@/contexts/language-context";
 
-type Question = { id: string; type: string; label: string; required: boolean };
+type Question = { id: string; type: string; label?: string; text?: string; required?: boolean };
 
 export default function CheckInPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
@@ -63,7 +63,7 @@ export default function CheckInPage({ params }: { params: Promise<{ id: string }
         {questions.map((q) => (
           <div key={q.id} className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-700 p-5">
             <label className="block font-medium text-gray-900 dark:text-gray-50 mb-3">
-              {q.label}
+              {q.label || q.text || ""}
               {q.required && <span className="text-red-500 ml-1">*</span>}
             </label>
             {(q.type === "scale_1_5" || q.type === "scale_1_10") && (
@@ -80,7 +80,7 @@ export default function CheckInPage({ params }: { params: Promise<{ id: string }
               <input type="number" value={responses[q.id] || ""} onChange={(e) => setResponses((r) => ({ ...r, [q.id]: e.target.value }))}
                 required={q.required} className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-50 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500" />
             )}
-            {(q.type === "short_text" || q.type === "long_text") && (
+            {(q.type === "short_text" || q.type === "long_text" || q.type === "text") && (
               <textarea rows={q.type === "long_text" ? 4 : 2} value={responses[q.id] || ""}
                 onChange={(e) => setResponses((r) => ({ ...r, [q.id]: e.target.value }))}
                 required={q.required} className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-50 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 resize-none" />

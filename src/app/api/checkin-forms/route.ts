@@ -16,12 +16,12 @@ export async function GET(req: NextRequest) {
   // If no forms exist, auto-create a default one for this trainer
   if (forms.length === 0) {
     const defaultQuestions = JSON.stringify([
-      { id: "q1", text: "How would you rate your overall energy this week? (1–10)", type: "scale_1_10" },
-      { id: "q2", text: "How was your sleep quality? (1–5)", type: "scale_1_5" },
-      { id: "q3", text: "Did you follow your nutrition plan?", type: "text" },
-      { id: "q4", text: "Any pain or discomfort to report?", type: "text" },
-      { id: "q5", text: "Current bodyweight (kg)", type: "number" },
-      { id: "q6", text: "Any notes or wins to share with your trainer?", type: "text" },
+      { id: "q1", label: "How would you rate your overall energy this week? (1–10)", type: "scale_1_10", required: true },
+      { id: "q2", label: "How was your sleep quality? (1–5)", type: "scale_1_5", required: true },
+      { id: "q3", label: "Did you follow your nutrition plan?", type: "long_text", required: false },
+      { id: "q4", label: "Any pain or discomfort to report?", type: "long_text", required: false },
+      { id: "q5", label: "Current bodyweight (kg)", type: "number", required: false },
+      { id: "q6", label: "Any notes or wins to share with your trainer?", type: "long_text", required: false },
     ]);
 
     const created = await prisma.checkInForm.create({

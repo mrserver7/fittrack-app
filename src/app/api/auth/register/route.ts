@@ -21,7 +21,7 @@ export async function POST(req: NextRequest) {
     if (existing) return NextResponse.json({ error: "Email already registered" }, { status: 409 });
 
     const passwordHash = await hashPassword(password);
-    await prisma.trainer.create({ data: { name, email, passwordHash, businessName } });
+    await prisma.trainer.create({ data: { name, email, passwordHash, businessName, status: "pending" } });
     return NextResponse.json({ success: true }, { status: 201 });
   } catch (e) {
     console.error(e);

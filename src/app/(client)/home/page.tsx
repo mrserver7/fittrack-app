@@ -2,14 +2,16 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 import { formatDate } from "@/lib/utils";
-import { Dumbbell, TrendingUp, MessageSquare, CheckSquare, Award, Flame } from "lucide-react";
+import { Dumbbell, TrendingUp, CheckSquare, Award, Flame, CheckCircle } from "lucide-react";
 import { getT } from "@/lib/i18n/server";
+import ClientNotifications from "@/components/client/client-notifications";
 
 export default async function ClientHomePage() {
   const [session, t] = await Promise.all([auth(), getT()]);
   const clientId = session!.user!.id!;
 
-  const [client, recentSessions, upcomingCheckins, recentPRs, notifications] = await Promise.all([
+  const todayStr = new Date().toISOString().split("T")[0];
+  const [client, recentSessions, upcomingCheckins, recentPRs, notifications, todayDone] = await Promise.all([
     prisma.client.findUnique({
       where: { id: clientId },
       include: {
@@ -45,6 +47,7 @@ export default async function ClientHomePage() {
       take: 4,
     }),
     prisma.notification.findMany({ where: { recipientId: clientId, recipientRole: "client", isRead: false }, orderBy: { createdAt: "desc" }, take: 5 }),
+    prisma.sessionLog.findFirst({ where: { clientId, status: "completed", scheduledDate: todayStr } }),
   ]);
 
   let streak = 0;
@@ -71,19 +74,7 @@ export default async function ClientHomePage() {
         </p>
       </div>
 
-      {notifications.length > 0 && (
-        <div className="mb-6 space-y-2">
-          {notifications.map((n) => (
-            <div key={n.id} className="flex items-start gap-3 p-4 bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800 rounded-xl">
-              <div className="w-2 h-2 bg-blue-500 rounded-full mt-1.5 flex-shrink-0" />
-              <div>
-                <p className="text-sm font-semibold text-blue-900 dark:text-blue-300">{n.title}</p>
-                {n.body && <p className="text-xs text-blue-700 dark:text-blue-400 mt-0.5">{n.body}</p>}
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
+      <ClientNotifications initialNotifications={notifications} />
 
       <div className="grid grid-cols-3 gap-4 mb-8">
         <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-700 p-4 text-center">
@@ -104,23 +95,26 @@ export default async function ClientHomePage() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
         <Link href="/workout/today"
-          className="bg-gradient-to-br from-emerald-500 to-emerald-700 rounded-2xl p-6 text-white hover:shadow-lg transition-shadow group">
+          className={`rounded-2xl p-6 text-white hover:shadow-lg transition-shadow group ${todayDone ? "bg-gradient-to-br from-gray-600 to-gray-800" : "bg-gradient-to-br from-emerald-500 to-emerald-700"}`}>
           <div className="flex items-center gap-3 mb-3">
             <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center">
-              <Dumbbell className="w-5 h-5" />
+              {todayDone ? <CheckCircle className="w-5 h-5" /> : <Dumbbell className="w-5 h-5" />}
             </div>
             <div>
-              <p className="text-xs text-emerald-100">{t.workout.today}</p>
-              <p className="font-bold text-lg leading-tight">{t.workout.startWorkout}</p>
+              <p className="text-xs text-white/70">{t.workout.today}</p>
+              <p className="font-bold text-lg leading-tight">
+                {todayDone ? "Workout Done Today! 🎉" : t.workout.startWorkout}
+              </p>
             </div>
           </div>
           {hasActiveProgram ? (
-            <p className="text-emerald-100 text-sm">{activeProgram.program.name}</p>
+            <p className="text-white/70 text-sm">{activeProgram.program.name}</p>
           ) : (
-            <p className="text-emerald-200 text-sm">{t.workout.noProgram}</p>
+            <p className="text-white/50 text-sm">{t.workout.noProgram}</p>
           )}
           <div className="mt-4 flex items-center gap-1 text-sm font-medium">
-            {t.workout.openWorkout} <span className="group-hover:translate-x-1 transition-transform">→</span>
+            {todayDone ? "Do it again? →" : t.workout.openWorkout + " "}
+            <span className="group-hover:translate-x-1 transition-transform">→</span>
           </div>
         </Link>
 

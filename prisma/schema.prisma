@@ -15,6 +15,7 @@ model Trainer {
   businessName String?
   photoUrl     String?
   timezone     String    @default("UTC")
+  status       String    @default("active")
   isAdmin      Boolean   @default(false)
   totpEnabled  Boolean   @default(false)
   createdAt    DateTime  @default(now())
