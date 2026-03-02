@@ -2,9 +2,10 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { formatDateTime, getGreeting } from "@/lib/utils";
 import Link from "next/link";
-import { Users, Activity, CheckSquare, UserPlus, AlertTriangle } from "lucide-react";
+import { Users, Activity, CheckSquare, UserPlus } from "lucide-react";
 import { getT } from "@/lib/i18n/server";
 import DashboardAlerts from "@/components/dashboard/dashboard-alerts";
+import MarkAllReadButton from "@/components/dashboard/mark-all-read-button";
 
 export default async function DashboardPage() {
   const [session, t] = await Promise.all([auth(), getT()]);
@@ -46,13 +47,10 @@ export default async function DashboardPage() {
     ]);
 
   const activeClients = clients.filter((c) => c.status === "active");
-  const totalAlerts = staleClients.length + recentPainFlags.length;
 
   const stats = [
     { label: t.dashboard.activeClients, value: activeClients.length, icon: Users, color: "text-emerald-600", bg: "bg-emerald-50 dark:bg-emerald-900/30", border: "border-emerald-100 dark:border-emerald-800" },
     { label: t.dashboard.sessionsThisWeek, value: completedThisWeek, icon: Activity, color: "text-blue-600", bg: "bg-blue-50 dark:bg-blue-900/30", border: "border-blue-100 dark:border-blue-800" },
-    { label: t.dashboard.unreadAlerts, value: notifications.length, icon: CheckSquare, color: "text-orange-600", bg: "bg-orange-50 dark:bg-orange-900/30", border: "border-orange-100 dark:border-orange-800" },
-    { label: t.dashboard.needAttention, value: totalAlerts, icon: AlertTriangle, color: "text-red-600", bg: "bg-red-50 dark:bg-red-900/30", border: "border-red-100 dark:border-red-800" },
   ];
 
   const statusStyles: Record<string, string> = {
@@ -74,7 +72,7 @@ export default async function DashboardPage() {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+      <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
         {stats.map((s) => {
           const Icon = s.icon;
           return (
@@ -91,6 +89,19 @@ export default async function DashboardPage() {
             </div>
           );
         })}
+        {/* Unread Alerts — separate so we can add mark-all button */}
+        <div className="bg-white dark:bg-gray-900 rounded-2xl border border-orange-100 dark:border-orange-800 p-5 shadow-sm">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">{t.dashboard.unreadAlerts}</p>
+              <p className="text-3xl font-bold text-gray-900 dark:text-gray-50 mt-1">{notifications.length}</p>
+              {notifications.length > 0 && <MarkAllReadButton />}
+            </div>
+            <div className="p-3 rounded-xl bg-orange-50 dark:bg-orange-900/30">
+              <CheckSquare className="w-5 h-5 text-orange-600" />
+            </div>
+          </div>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
