@@ -1,12 +1,14 @@
-// eslint-disable-next-line @next/next/no-img-element
+import Image from "next/image";
+
 export default function LogoMark({ size = 32 }: { size?: number }) {
   return (
-    <img
+    <Image
       src="/logo.png"
       alt="FitTrack"
       width={size}
       height={size}
-      style={{ width: size, height: size, objectFit: "contain", flexShrink: 0 }}
+      style={{ objectFit: "contain" }}
+      priority
     />
   );
 }
