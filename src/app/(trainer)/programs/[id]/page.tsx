@@ -2,7 +2,7 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, Users, ClipboardList } from "lucide-react";
+import { ArrowLeft, Users, ClipboardList, Pencil } from "lucide-react";
 
 type Params = { params: Promise<{ id: string }> };
 
@@ -54,6 +54,10 @@ export default async function ProgramDetailPage({ params }: Params) {
           </div>
           {program.description && <p className="text-gray-400 text-sm mt-1">{program.description}</p>}
         </div>
+        <Link href={`/programs/${program.id}/edit`}
+          className="flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium rounded-xl transition-colors flex-shrink-0">
+          <Pencil className="w-3.5 h-3.5" /> Edit Program
+        </Link>
       </div>
 
       {/* Assigned clients */}

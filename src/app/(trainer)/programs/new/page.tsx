@@ -1,10 +1,11 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { toast } from "sonner";
 import { ArrowLeft, Plus, Trash2 } from "lucide-react";
 import { useLanguage } from "@/contexts/language-context";
+import ExerciseSelect from "@/components/programs/exercise-select";
 
 type Exercise = {
   exerciseId: string;
@@ -83,6 +84,8 @@ export default function NewProgramPage() {
     setExercises(data.exercises || []);
     setLoadingExercises(false);
   };
+
+  useEffect(() => { loadExercises(); }, []);
 
   const addExercise = () => {
     const updated = [...weeks];
@@ -273,12 +276,15 @@ export default function NewProgramPage() {
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
                     <div className="sm:col-span-2">
                       <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">{t.programs.exerciseLabel}</label>
-                      <select value={ex.exerciseId} onFocus={loadExercises}
-                        onChange={(e) => updateExercise(exIdx, "exerciseId", e.target.value)}
-                        className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-50 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
-                        <option value="">— {loadingExercises ? t.programs.loadingExercises : t.programs.selectExercise} —</option>
-                        {exercises.map((e) => <option key={e.id} value={e.id}>{e.name}</option>)}
-                      </select>
+                      <ExerciseSelect
+                        value={ex.exerciseId}
+                        exercises={exercises}
+                        loading={loadingExercises}
+                        onChange={(id, name) => {
+                          updateExercise(exIdx, "exerciseId", id);
+                          updateExercise(exIdx, "exerciseName", name);
+                        }}
+                      />
                     </div>
                     {exerciseFields.map((f) => (
                       <div key={f.field}>

@@ -151,7 +151,13 @@ export default async function ClientProfilePage({ params }: Params) {
               <div className="space-y-2">
                 {client.clientPrograms.map((cp) => (
                   <div key={cp.id} className="p-3 bg-blue-50 rounded-xl">
-                    <p className="text-sm font-semibold text-blue-900">{cp.program.name}</p>
+                    <div className="flex items-center justify-between gap-2">
+                      <p className="text-sm font-semibold text-blue-900 truncate">{cp.program.name}</p>
+                      <Link href={`/programs/${cp.program.id}/edit`}
+                        className="text-xs text-blue-600 hover:text-blue-800 font-medium whitespace-nowrap flex-shrink-0 underline">
+                        Edit Plan
+                      </Link>
+                    </div>
                     <p className="text-xs text-blue-600 mt-0.5">
                       Started: {formatDate(cp.startDate)} · {cp.program.durationWeeks} weeks
                     </p>
