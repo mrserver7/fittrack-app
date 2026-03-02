@@ -11,13 +11,13 @@ import { useState } from "react";
 import { useLanguage } from "@/contexts/language-context";
 import ThemeToggle from "@/components/ui/theme-toggle";
 import LanguageToggle from "@/components/ui/language-toggle";
+import LogoMark from "@/components/ui/logo-mark";
 
 export default function Sidebar({ role, isAdmin }: { role: "trainer" | "client"; isAdmin?: boolean }) {
   const pathname = usePathname();
   const { data: session } = useSession();
   const { t } = useLanguage();
   const [open, setOpen] = useState(false);
-  const [logoError, setLogoError] = useState(false);
   const name = session?.user?.name ?? "";
   const email = session?.user?.email ?? "";
   const photoUrl = (session?.user as Record<string, unknown>)?.photoUrl as string | null | undefined;
@@ -54,11 +54,7 @@ export default function Sidebar({ role, isAdmin }: { role: "trainer" | "client";
     <div className="flex flex-col h-full bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-700">
       {/* Logo */}
       <div className="flex items-center gap-2.5 px-5 py-5 border-b border-gray-100 dark:border-gray-800">
-        {logoError ? (
-          <div className="w-8 h-8 bg-emerald-600 rounded-lg flex items-center justify-center text-white font-bold text-xs flex-shrink-0">FT</div>
-        ) : (
-          <img src="/logo.svg" alt="FitTrack" className="w-8 h-8 rounded-lg flex-shrink-0 object-contain" onError={() => setLogoError(true)} />
-        )}
+        <LogoMark size={32} />
         <span className="font-bold text-gray-900 dark:text-gray-50">FitTrack</span>
       </div>
 

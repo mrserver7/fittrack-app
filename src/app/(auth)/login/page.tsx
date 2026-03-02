@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { toast } from "sonner";
 import { useLanguage } from "@/contexts/language-context";
+import LogoMark from "@/components/ui/logo-mark";
 
 export default function LoginPage() {
   const { t } = useLanguage();
@@ -31,7 +32,7 @@ export default function LoginPage() {
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <Link href="/" className="inline-flex items-center gap-2">
-            <img src="/logo.png" alt="FitTrack" className="w-9 h-9 rounded-xl object-contain" />
+            <LogoMark size={36} />
             <span className="font-bold text-xl text-gray-900 dark:text-gray-50">FitTrack</span>
           </Link>
         </div>

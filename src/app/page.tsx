@@ -4,6 +4,7 @@ import Link from "next/link";
 import { getT } from "@/lib/i18n/server";
 import ThemeToggle from "@/components/ui/theme-toggle";
 import LanguageToggle from "@/components/ui/language-toggle";
+import LogoMark from "@/components/ui/logo-mark";
 
 export default async function HomePage() {
   const session = await auth();
@@ -29,7 +30,7 @@ export default async function HomePage() {
     <div className="min-h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-emerald-950 text-white">
       <nav className="flex items-center justify-between px-6 md:px-10 py-5 border-b border-white/10">
         <div className="flex items-center gap-2">
-          <img src="/logo.svg" alt="FitTrack" className="w-8 h-8 rounded-lg object-contain" />
+          <LogoMark size={32} />
           <span className="font-semibold text-lg">FitTrack</span>
         </div>
         <div className="flex items-center gap-2">
