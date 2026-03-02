@@ -53,7 +53,8 @@ export default async function ClientsPage({
       orderBy: { createdAt: "desc" },
     }),
     prisma.client.findMany({
-      where: { ...whereBase, status: "pending", deletedAt: null },
+      // Admin sees all pending; trainer with canApproveClients sees all pending; regular trainer sees only their own
+      where: canApprove && !isAdmin ? { status: "pending", deletedAt: null } : { ...whereBase, status: "pending", deletedAt: null },
       include: { trainer: { select: { name: true, businessName: true } } },
       orderBy: { createdAt: "desc" },
     }),
