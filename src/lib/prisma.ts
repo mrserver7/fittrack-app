@@ -7,7 +7,8 @@ const globalForPrisma = globalThis as unknown as {
 
 function createPrisma() {
   const url = process.env.DATABASE_URL!;
-  const adapter = new PrismaPg({ connectionString: url });
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const adapter = new PrismaPg({ connectionString: url, ssl: { rejectUnauthorized: false } } as any);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return new PrismaClient({ adapter } as any);
 }
