@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { Trash2 } from "lucide-react";
 
-export default function DeleteClientButton({ clientId, clientName }: { clientId: string; clientName: string }) {
+export default function DeleteClientButton({ clientId, clientName, redirectTo = "/clients" }: { clientId: string; clientName: string; redirectTo?: string }) {
   const router = useRouter();
   const [showConfirm, setShowConfirm] = useState(false);
   const [deleting, setDeleting] = useState(false);
@@ -15,7 +15,7 @@ export default function DeleteClientButton({ clientId, clientName }: { clientId:
       const res = await fetch(`/api/clients/${clientId}`, { method: "DELETE" });
       if (res.ok) {
         toast.success("Client deleted.");
-        router.push("/clients");
+        router.push(redirectTo);
       } else {
         const data = await res.json();
         toast.error(data.error || "Failed to delete client.");

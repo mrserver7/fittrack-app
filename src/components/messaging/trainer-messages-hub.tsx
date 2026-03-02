@@ -114,6 +114,7 @@ export default function TrainerMessagesHub({
               </div>
             </div>
             <MessageThread
+              key={activeClientId}
               initialMessages={initialMessages}
               clientId={activeClientId!}
               senderRole="trainer"

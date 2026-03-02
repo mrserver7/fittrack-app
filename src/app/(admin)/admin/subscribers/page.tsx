@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Users, ArrowLeft, Clock } from "lucide-react";
 import { formatDate } from "@/lib/utils";
 import ApproveRejectButtons from "@/components/clients/approve-reject-buttons";
+import DeleteClientButton from "@/components/clients/delete-client-button";
 import { getT } from "@/lib/i18n/server";
 
 const statusColors: Record<string, string> = {
@@ -124,7 +125,7 @@ export default async function AdminSubscribersPage({
                 </div>
               </div>
 
-              <div className="flex items-center gap-2 flex-shrink-0">
+              <div className="flex items-center gap-2 flex-shrink-0 flex-wrap justify-end">
                 {client.status === "pending" && (
                   <ApproveRejectButtons
                     clientId={client.id}
@@ -133,9 +134,10 @@ export default async function AdminSubscribersPage({
                   />
                 )}
                 <Link href={`/admin/subscribers/${client.id}`}
-                  className="px-3 py-1.5 text-xs font-medium border border-gray-200 dark:border-gray-700 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors whitespace-nowrap self-start">
+                  className="px-3 py-1.5 text-xs font-medium border border-gray-200 dark:border-gray-700 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors whitespace-nowrap">
                   View →
                 </Link>
+                <DeleteClientButton clientId={client.id} clientName={client.name} redirectTo="/admin/subscribers" />
               </div>
             </div>
           ))}

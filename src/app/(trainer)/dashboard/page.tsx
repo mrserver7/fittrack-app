@@ -2,8 +2,9 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { formatDateTime, getGreeting } from "@/lib/utils";
 import Link from "next/link";
-import { Users, Activity, AlertTriangle, CheckSquare, TrendingUp, UserPlus } from "lucide-react";
+import { Users, Activity, CheckSquare, UserPlus } from "lucide-react";
 import { getT } from "@/lib/i18n/server";
+import DashboardAlerts from "@/components/dashboard/dashboard-alerts";
 
 export default async function DashboardPage() {
   const [session, t] = await Promise.all([auth(), getT()]);
@@ -133,47 +134,19 @@ export default async function DashboardPage() {
         {/* Alerts */}
         <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm">
           <div className="flex items-center justify-between p-5 border-b border-gray-100 dark:border-gray-800">
-            <div className="flex items-center gap-2">
-              <h2 className="font-semibold text-gray-900 dark:text-gray-50">{t.dashboard.attentionNeeded}</h2>
-              {totalAlerts > 0 && (
-                <span className="bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">
-                  {totalAlerts}
-                </span>
-              )}
-            </div>
+            <h2 className="font-semibold text-gray-900 dark:text-gray-50">{t.dashboard.attentionNeeded}</h2>
             <Link href="/tasks" className="text-sm text-emerald-600 hover:underline">{t.dashboard.taskList}</Link>
           </div>
           <div className="p-5">
-            {totalAlerts === 0 ? (
-              <div className="text-center py-8">
-                <TrendingUp className="w-8 h-8 text-emerald-300 mx-auto mb-2" />
-                <p className="text-emerald-600 text-sm font-medium">{t.dashboard.allClear}</p>
-                <p className="text-gray-400 dark:text-gray-500 text-xs mt-1">{t.dashboard.allClearSub}</p>
-              </div>
-            ) : (
-              <div className="space-y-3">
-                {recentPainFlags.map((pf) => (
-                  <Link key={pf.id} href={`/clients/${pf.clientId}`}
-                    className="flex items-start gap-3 p-3 bg-red-50 dark:bg-red-950/30 rounded-xl hover:bg-red-100 dark:hover:bg-red-950/50 transition-colors">
-                    <AlertTriangle className="w-4 h-4 text-red-500 mt-0.5 flex-shrink-0" />
-                    <div className="min-w-0">
-                      <p className="text-sm font-semibold text-red-800 dark:text-red-300">{pf.client.name}</p>
-                      <p className="text-xs text-red-600 dark:text-red-400">{t.dashboard.painFlag}: {pf.bodyRegion} — {t.dashboard.severity} {pf.severity}/5</p>
-                    </div>
-                  </Link>
-                ))}
-                {staleClients.map((c) => (
-                  <Link key={c.id} href={`/clients/${c.id}`}
-                    className="flex items-start gap-3 p-3 bg-orange-50 dark:bg-orange-950/30 rounded-xl hover:bg-orange-100 dark:hover:bg-orange-950/50 transition-colors">
-                    <AlertTriangle className="w-4 h-4 text-orange-500 mt-0.5 flex-shrink-0" />
-                    <div className="min-w-0">
-                      <p className="text-sm font-semibold text-orange-800 dark:text-orange-300">{c.name}</p>
-                      <p className="text-xs text-orange-600 dark:text-orange-400">{t.dashboard.noSessions7Days}</p>
-                    </div>
-                  </Link>
-                ))}
-              </div>
-            )}
+            <DashboardAlerts
+              staleClients={staleClients.map((c) => ({ id: c.id, name: c.name }))}
+              recentPainFlags={recentPainFlags.map((pf) => ({ id: pf.id, clientId: pf.clientId, bodyRegion: pf.bodyRegion, severity: pf.severity, client: pf.client }))}
+              allClearLabel={t.dashboard.allClear}
+              allClearSub={t.dashboard.allClearSub}
+              noSessions7DaysLabel={t.dashboard.noSessions7Days}
+              painFlagLabel={t.dashboard.painFlag}
+              severityLabel={t.dashboard.severity}
+            />
           </div>
         </div>
       </div>
