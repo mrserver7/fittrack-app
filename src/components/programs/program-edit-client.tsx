@@ -1,9 +1,9 @@
 "use client";
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { toast } from "sonner";
-import { ArrowLeft, Plus, Trash2, Save, X } from "lucide-react";
+import { ArrowLeft, Plus, Trash2, Save, X, ChevronDown } from "lucide-react";
 import ExerciseSelect from "@/components/programs/exercise-select";
 
 type ExerciseOption = { id: string; name: string };
@@ -64,7 +64,7 @@ type ProgramData = {
   }>;
 };
 
-const DAY_LABELS = ["Day A", "Day B", "Day C", "Day D", "Day E", "Day F", "Day G"];
+const DAY_LABELS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 
 const exerciseFields: { label: string; field: keyof ExerciseState; min: number; max: number }[] = [
   { label: "Sets", field: "sets", min: 1, max: 20 },
@@ -86,6 +86,18 @@ export default function ProgramEditClient({
   const [saving, setSaving] = useState(false);
   const [activeWeek, setActiveWeek] = useState(0);
   const [activeDay, setActiveDay] = useState(0);
+  const [dayPickerOpen, setDayPickerOpen] = useState<number | null>(null);
+  const dayPickerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (dayPickerRef.current && !dayPickerRef.current.contains(e.target as Node)) {
+        setDayPickerOpen(null);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   const [weeks, setWeeks] = useState<WeekState[]>(() =>
     program.weeks.map((w) => ({
@@ -119,14 +131,27 @@ export default function ProgramEditClient({
     setWeeks((prev) =>
       prev.map((w, wi) => {
         if (wi !== activeWeek || w.days.length >= 7) return w;
-        const nextLabel = DAY_LABELS[w.days.length] ?? `Day ${w.days.length + 1}`;
+        const usedLabels = new Set(w.days.map((d) => d.dayLabel));
+        const nextLabel = DAY_LABELS.find((l) => !usedLabels.has(l)) ?? "Sunday";
         return {
           ...w,
           days: [...w.days, { id: "", weekId: w.id, dayLabel: nextLabel, exercises: [] }],
         };
       })
     );
-    setActiveDay(weeks[activeWeek].days.length); // switch to the new day
+    setActiveDay(weeks[activeWeek].days.length);
+  };
+
+  const renameDay = (dayIndex: number, newLabel: string) => {
+    setWeeks((prev) =>
+      prev.map((w, wi) =>
+        wi !== activeWeek ? w : {
+          ...w,
+          days: w.days.map((d, di) => di !== dayIndex ? d : { ...d, dayLabel: newLabel }),
+        }
+      )
+    );
+    setDayPickerOpen(null);
   };
 
   const removeDay = (di: number) => {
@@ -292,7 +317,7 @@ export default function ProgramEditClient({
         {/* Day tabs + add day button */}
         <div className="flex items-stretch border-b border-gray-100 dark:border-gray-800 overflow-x-auto">
           {weeks[activeWeek]?.days.map((d, di) => (
-            <div key={di} className="flex items-stretch flex-shrink-0">
+            <div key={di} className="flex items-stretch flex-shrink-0 relative" ref={activeDay === di ? dayPickerRef : undefined}>
               <button
                 type="button"
                 onClick={() => setActiveDay(di)}
@@ -305,6 +330,43 @@ export default function ProgramEditClient({
                 {d.dayLabel}
                 {!d.id && <span className="ml-1 text-xs text-emerald-500">•</span>}
               </button>
+              {activeDay === di && (
+                <>
+                  <button
+                    type="button"
+                    onClick={() => setDayPickerOpen(dayPickerOpen === di ? null : di)}
+                    className="px-1 text-gray-400 dark:text-gray-500 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors"
+                    title="Rename day"
+                  >
+                    <ChevronDown className="w-3.5 h-3.5" />
+                  </button>
+                  {dayPickerOpen === di && (
+                    <div className="absolute top-full left-0 z-20 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg py-1 min-w-[140px]">
+                      {DAY_LABELS.map((label) => {
+                        const isUsed = weeks[activeWeek].days.some((day, idx) => idx !== di && day.dayLabel === label);
+                        const isCurrent = d.dayLabel === label;
+                        return (
+                          <button
+                            key={label}
+                            type="button"
+                            disabled={isUsed}
+                            onClick={() => !isUsed && renameDay(di, label)}
+                            className={`w-full text-left px-4 py-1.5 text-sm transition-colors ${
+                              isCurrent
+                                ? "text-emerald-600 dark:text-emerald-400 font-medium"
+                                : isUsed
+                                ? "opacity-40 cursor-not-allowed text-gray-500 dark:text-gray-400"
+                                : "text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
+                            }`}
+                          >
+                            {label}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  )}
+                </>
+              )}
               {weeks[activeWeek].days.length > 1 && (
                 <button
                   type="button"

@@ -66,6 +66,8 @@ export async function PUT(req: NextRequest, { params }: Params) {
         },
       });
       resolvedDayId = newDay.id;
+    } else if (day.dayId && day.dayLabel) {
+      await prisma.workoutDay.update({ where: { id: resolvedDayId }, data: { dayLabel: day.dayLabel } });
     }
 
     const { exercises } = day;

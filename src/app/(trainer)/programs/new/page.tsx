@@ -33,9 +33,9 @@ export default function NewProgramPage() {
     {
       weekNumber: 1, isDeload: false,
       days: [
-        { dayLabel: "Day A", dayOrder: 0, exercises: [] },
-        { dayLabel: "Day B", dayOrder: 1, exercises: [] },
-        { dayLabel: "Day C", dayOrder: 2, exercises: [] },
+        { dayLabel: "Monday", dayOrder: 0, exercises: [] },
+        { dayLabel: "Wednesday", dayOrder: 1, exercises: [] },
+        { dayLabel: "Friday", dayOrder: 2, exercises: [] },
       ],
     },
   ]);
@@ -46,22 +46,23 @@ export default function NewProgramPage() {
   const [activeDay, setActiveDay] = useState(0);
   const router = useRouter();
 
-  const DAY_LABELS = ["Day A", "Day B", "Day C", "Day D", "Day E", "Day F", "Day G"];
+  const DAY_LABELS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
   const dayDisplayLabels: Record<string, string> = {
-    "Day A": t.programs.dayA,
-    "Day B": t.programs.dayB,
-    "Day C": t.programs.dayC,
-    "Day D": t.programs.dayD ?? "Day D",
-    "Day E": t.programs.dayE ?? "Day E",
-    "Day F": t.programs.dayF ?? "Day F",
-    "Day G": t.programs.dayG ?? "Day G",
+    "Sunday": t.programs.sunday,
+    "Monday": t.programs.monday,
+    "Tuesday": t.programs.tuesday,
+    "Wednesday": t.programs.wednesday,
+    "Thursday": t.programs.thursday,
+    "Friday": t.programs.friday,
+    "Saturday": t.programs.saturday,
   };
 
   const addDay = () => {
     const updated = [...weeks];
     const currentDays = updated[activeWeek].days;
     if (currentDays.length >= 7) return;
-    const nextLabel = DAY_LABELS[currentDays.length];
+    const usedLabels = new Set(currentDays.map((d) => d.dayLabel));
+    const nextLabel = DAY_LABELS.find((l) => !usedLabels.has(l)) ?? "Sunday";
     updated[activeWeek].days.push({ dayLabel: nextLabel, dayOrder: currentDays.length, exercises: [] });
     setWeeks(updated);
     setActiveDay(updated[activeWeek].days.length - 1);
@@ -116,9 +117,9 @@ export default function NewProgramPage() {
     setWeeks([...weeks, {
       weekNumber: weeks.length + 1, isDeload: false,
       days: [
-        { dayLabel: "Day A", dayOrder: 0, exercises: [] },
-        { dayLabel: "Day B", dayOrder: 1, exercises: [] },
-        { dayLabel: "Day C", dayOrder: 2, exercises: [] },
+        { dayLabel: "Monday", dayOrder: 0, exercises: [] },
+        { dayLabel: "Wednesday", dayOrder: 1, exercises: [] },
+        { dayLabel: "Friday", dayOrder: 2, exercises: [] },
       ],
     }]);
   };

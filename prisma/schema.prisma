@@ -55,15 +55,16 @@ model Client {
   updatedAt                DateTime  @updatedAt
   deletedAt                DateTime?
 
-  trainer         Trainer?        @relation(fields: [trainerId], references: [id])
-  clientPrograms  ClientProgram[]
-  sessionLogs     SessionLog[]
-  measurements    Measurement[]
-  personalRecords PersonalRecord[]
-  checkIns        CheckIn[]
-  messages        Message[]
-  goalMilestones  GoalMilestone[]
-  painFlags       PainFlag[]
+  trainer           Trainer?                  @relation(fields: [trainerId], references: [id])
+  clientPrograms    ClientProgram[]
+  sessionLogs       SessionLog[]
+  measurements      Measurement[]
+  personalRecords   PersonalRecord[]
+  checkIns          CheckIn[]
+  messages          Message[]
+  goalMilestones    GoalMilestone[]
+  painFlags         PainFlag[]
+  scheduleOverrides WorkoutScheduleOverride[]
 }
 
 model Program {
@@ -103,9 +104,10 @@ model WorkoutDay {
   dayOrder      Int
   description   String?
 
-  programWeek ProgramWeek       @relation(fields: [programWeekId], references: [id], onDelete: Cascade)
-  exercises   WorkoutExercise[]
-  sessionLogs SessionLog[]
+  programWeek       ProgramWeek               @relation(fields: [programWeekId], references: [id], onDelete: Cascade)
+  exercises         WorkoutExercise[]
+  sessionLogs       SessionLog[]
+  scheduleOverrides WorkoutScheduleOverride[]
 }
 
 model WorkoutExercise {
@@ -361,4 +363,18 @@ model AuditEvent {
   createdAt    DateTime @default(now())
 
   trainer Trainer? @relation(fields: [actorId], references: [id])
+}
+
+model WorkoutScheduleOverride {
+  id            String   @id @default(cuid())
+  clientId      String
+  workoutDayId  String
+  weekStartDate String
+  action        String
+  originalDay   String
+  newDay        String?
+  createdAt     DateTime @default(now())
+
+  client     Client     @relation(fields: [clientId], references: [id])
+  workoutDay WorkoutDay @relation(fields: [workoutDayId], references: [id])
 }

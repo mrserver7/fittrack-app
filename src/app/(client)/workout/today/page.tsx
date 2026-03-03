@@ -2,12 +2,19 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 import WorkoutLogger from "@/components/workout/workout-logger";
-import { Dumbbell, CheckCircle } from "lucide-react";
+import WorkoutDayOptions from "@/components/workout/workout-day-options";
+import { Dumbbell, CheckCircle, Moon } from "lucide-react";
+import { WEEKDAYS, getWeekStart } from "@/lib/utils";
 
 export default async function TodayWorkoutPage({ searchParams }: { searchParams: Promise<{ redo?: string }> }) {
   const { redo } = await searchParams;
   const session = await auth();
   const clientId = session!.user!.id!;
+
+  const todayDate = new Date();
+  const todayWeekday = WEEKDAYS[todayDate.getDay()]; // e.g. "Monday"
+  const todayStr = todayDate.toISOString().split("T")[0];
+  const weekStartDate = getWeekStart(todayDate);
 
   const client = await prisma.client.findUnique({
     where: { id: clientId },
@@ -45,50 +52,102 @@ export default async function TodayWorkoutPage({ searchParams }: { searchParams:
   if (!activeProgram) {
     return (
       <div className="p-6 md:p-8 max-w-2xl mx-auto">
-        <div className="text-center py-20 bg-white rounded-2xl border border-dashed border-gray-300">
+        <div className="text-center py-20 bg-white dark:bg-gray-900 rounded-2xl border border-dashed border-gray-300 dark:border-gray-700">
           <Dumbbell className="w-10 h-10 text-gray-300 mx-auto mb-4" />
-          <h2 className="text-xl font-bold text-gray-900 mb-2">No program assigned</h2>
-          <p className="text-gray-500 text-sm">Your trainer hasn&apos;t assigned a program yet. Check back soon!</p>
+          <h2 className="text-xl font-bold text-gray-900 dark:text-gray-50 mb-2">No program assigned</h2>
+          <p className="text-gray-500 dark:text-gray-400 text-sm">Your trainer hasn&apos;t assigned a program yet. Check back soon!</p>
           <Link href="/home" className="mt-4 inline-block text-emerald-600 hover:underline text-sm">← Back to home</Link>
         </div>
       </div>
     );
   }
-
-  const startDate = new Date(activeProgram.startDate);
-  const daysSinceStart = Math.floor((Date.now() - startDate.getTime()) / (1000 * 60 * 60 * 24));
-  const weeksElapsed = Math.floor(daysSinceStart / 7);
-  const today = new Date().getDay(); // 0=Sun, 1=Mon, ...
 
   const program = activeProgram.program;
-  const allDays = program.weeks.flatMap((w) => w.days.map((d) => ({ ...d, weekNumber: w.weekNumber })));
 
-  // Handle program with no workout days yet
-  if (allDays.length === 0) {
+  if (program.weeks.flatMap((w) => w.days).length === 0) {
     return (
       <div className="p-6 md:p-8 max-w-2xl mx-auto">
-        <div className="text-center py-20 bg-white rounded-2xl border border-dashed border-gray-300">
+        <div className="text-center py-20 bg-white dark:bg-gray-900 rounded-2xl border border-dashed border-gray-300 dark:border-gray-700">
           <Dumbbell className="w-10 h-10 text-gray-300 mx-auto mb-4" />
-          <h2 className="text-xl font-bold text-gray-900 mb-2">Program has no workouts yet</h2>
-          <p className="text-gray-500 text-sm">Your trainer is still building your program <strong>{program.name}</strong>. Check back soon!</p>
+          <h2 className="text-xl font-bold text-gray-900 dark:text-gray-50 mb-2">Program has no workouts yet</h2>
+          <p className="text-gray-500 dark:text-gray-400 text-sm">Your trainer is still building your program <strong>{program.name}</strong>. Check back soon!</p>
           <Link href="/home" className="mt-4 inline-block text-emerald-600 hover:underline text-sm">← Back to home</Link>
         </div>
       </div>
     );
   }
 
-  // Find next unlogged day
-  const loggedDayIds = (await prisma.sessionLog.findMany({
-    where: { clientId, status: { in: ["completed", "in_progress"] } },
-    select: { workoutDayId: true },
-  })).map((s) => s.workoutDayId).filter(Boolean);
+  // Compute current program week using calendar math
+  const startDate = new Date(activeProgram.startDate);
+  const daysSinceStart = Math.floor((Date.now() - startDate.getTime()) / (1000 * 60 * 60 * 24));
+  const weekIndex = Math.floor(daysSinceStart / 7);
+  const effectiveWeekIndex = weekIndex % program.weeks.length;
+  const currentProgramWeek = program.weeks[effectiveWeekIndex];
 
-  const nextDay = allDays.find((d) => !loggedDayIds.includes(d.id)) || allDays[0];
+  // Get overrides for this client + weekStartDate
+  const overrides = await prisma.workoutScheduleOverride.findMany({
+    where: { clientId, weekStartDate },
+  });
 
-  // Check if today's workout was already completed today (and user didn't choose to redo)
-  const todayStr = new Date().toISOString().split("T")[0];
+  // Determine today's workout
+  let workoutDay: typeof currentProgramWeek.days[0] | null = null;
+
+  // Check if something was moved TO today
+  const movedHere = overrides.find((o) => o.newDay === todayWeekday && o.action === "moved");
+  if (movedHere) {
+    workoutDay = currentProgramWeek.days.find((d) => d.id === movedHere.workoutDayId) ?? null;
+  } else {
+    // Check original day scheduled for today
+    const originalToday = currentProgramWeek.days.find((d) => d.dayLabel === todayWeekday);
+    if (originalToday) {
+      // Check if it was moved away or skipped
+      const movedAway = overrides.find((o) => o.workoutDayId === originalToday.id);
+      if (!movedAway) {
+        workoutDay = originalToday;
+      }
+    }
+  }
+
+  // Compute available days for moving (days not occupied by program + not already targeted by override)
+  const programDayLabels = new Set(currentProgramWeek.days.map((d) => d.dayLabel));
+  const overrideTargets = new Set(overrides.filter((o) => o.action === "moved" && o.newDay).map((o) => o.newDay!));
+  // Also exclude today and past days
+  const todayWeekdayIndex = todayDate.getDay(); // 0=Sun
+  const availableDays = WEEKDAYS.filter((day) => {
+    if (programDayLabels.has(day)) return false;
+    if (overrideTargets.has(day)) return false;
+    if (day === todayWeekday) return false; // can't move to today (it is today)
+    // Exclude past days
+    const dayIdx = WEEKDAYS.indexOf(day);
+    // Days from start of week (Monday=1, Tue=2, ... Sun=0)
+    // Compare day positions in week relative to Monday
+    const daysFromMonday = (di: number) => di === 0 ? 6 : di - 1;
+    if (daysFromMonday(dayIdx) < daysFromMonday(todayWeekdayIndex)) return false;
+    return true;
+  });
+
+  // Rest day screen
+  if (!workoutDay) {
+    return (
+      <div className="p-6 md:p-8 max-w-2xl mx-auto">
+        <div className="text-center py-20 bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-700">
+          <div className="w-16 h-16 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-4">
+            <Moon className="w-8 h-8 text-gray-400 dark:text-gray-500" />
+          </div>
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-50 mb-2">Rest Day</h2>
+          <p className="text-gray-500 dark:text-gray-400 text-sm mb-8">No workout scheduled today. Rest up!</p>
+          <Link href="/home"
+            className="px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-xl text-sm transition-colors">
+            ← Back to Home
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  // Check if already completed today
   const todayCompletedSession = !redo && await prisma.sessionLog.findFirst({
-    where: { clientId, workoutDayId: nextDay.id, status: "completed", scheduledDate: todayStr },
+    where: { clientId, workoutDayId: workoutDay.id, status: "completed", scheduledDate: todayStr },
   });
 
   if (todayCompletedSession) {
@@ -100,7 +159,7 @@ export default async function TodayWorkoutPage({ searchParams }: { searchParams:
           </div>
           <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-50 mb-2">Workout Complete! 🎉</h2>
           <p className="text-gray-500 dark:text-gray-400 text-sm mb-2">
-            You already completed <strong>{nextDay.dayLabel}</strong> today.
+            You already completed <strong>{workoutDay.dayLabel}</strong> today.
           </p>
           <p className="text-gray-400 dark:text-gray-500 text-xs mb-8">Great work! Come back tomorrow for your next session.</p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center px-8">
@@ -119,17 +178,25 @@ export default async function TodayWorkoutPage({ searchParams }: { searchParams:
   }
 
   const existingSession = await prisma.sessionLog.findFirst({
-    where: { clientId, workoutDayId: nextDay?.id, status: "in_progress" },
+    where: { clientId, workoutDayId: workoutDay.id, status: "in_progress" },
     include: { sets: true, painFlags: true },
   });
 
   return (
-    <WorkoutLogger
-      clientId={clientId}
-      workoutDay={JSON.parse(JSON.stringify(nextDay))}
-      programName={program.name}
-      existingSession={existingSession ? JSON.parse(JSON.stringify(existingSession)) : null}
-      clientProgramId={activeProgram.id}
-    />
+    <div>
+      <WorkoutDayOptions
+        workoutDayId={workoutDay.id}
+        weekStartDate={weekStartDate}
+        originalDay={workoutDay.dayLabel}
+        availableDays={availableDays}
+      />
+      <WorkoutLogger
+        clientId={clientId}
+        workoutDay={JSON.parse(JSON.stringify(workoutDay))}
+        programName={program.name}
+        existingSession={existingSession ? JSON.parse(JSON.stringify(existingSession)) : null}
+        clientProgramId={activeProgram.id}
+      />
+    </div>
   );
 }

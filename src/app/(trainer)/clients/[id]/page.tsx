@@ -2,7 +2,7 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { formatDate, formatDateTime, getStatusColor } from "@/lib/utils";
+import { formatDate, formatDateTime, getStatusColor, getWeekStart, WEEKDAYS } from "@/lib/utils";
 import { ArrowLeft, Target, AlertTriangle, Calendar, MessageSquare, ClipboardList, ChevronRight } from "lucide-react";
 import AssignProgramButton from "@/components/clients/assign-program-button";
 import SendCheckinButton from "@/components/clients/send-checkin-button";
@@ -48,6 +48,37 @@ export default async function ClientProfilePage({ params }: Params) {
   ]);
 
   if (!client) notFound();
+
+  // Week schedule data
+  const weekStartDate = getWeekStart();
+  const [overrides, weekSessions] = await Promise.all([
+    prisma.workoutScheduleOverride.findMany({
+      where: { clientId: id, weekStartDate },
+      include: { workoutDay: true },
+      orderBy: { createdAt: "desc" },
+    }),
+    prisma.sessionLog.findMany({
+      where: { clientId: id, scheduledDate: { gte: weekStartDate } },
+      select: { workoutDayId: true, status: true, scheduledDate: true },
+    }),
+  ]);
+
+  // Compute current program week for schedule display
+  const activeClientProgram = client.clientPrograms[0];
+  let currentWeekDays: Array<{ id: string; dayLabel: string; dayOrder: number }> = [];
+  if (activeClientProgram) {
+    const prog = await prisma.program.findUnique({
+      where: { id: activeClientProgram.programId },
+      include: { weeks: { orderBy: { weekNumber: "asc" }, include: { days: { orderBy: { dayOrder: "asc" } } } } },
+    });
+    if (prog) {
+      const startDate = new Date(activeClientProgram.startDate);
+      const daysSinceStart = Math.floor((Date.now() - startDate.getTime()) / (1000 * 60 * 60 * 24));
+      const weekIdx = Math.floor(daysSinceStart / 7);
+      const effectiveIdx = weekIdx % prog.weeks.length;
+      currentWeekDays = prog.weeks[effectiveIdx]?.days ?? [];
+    }
+  }
 
   const completedSessions = client.sessionLogs.filter((s) => s.status === "completed").length;
   const scheduledSessions = client.sessionLogs.length;
@@ -217,6 +248,84 @@ export default async function ClientProfilePage({ params }: Params) {
                   );
                 })}
               </div>
+            </div>
+          )}
+
+          {/* This Week's Schedule */}
+          {currentWeekDays.length > 0 && (
+            <div className="bg-white rounded-2xl border border-gray-200 p-5">
+              <h3 className="font-semibold text-gray-900 text-sm mb-4">This Week&apos;s Schedule</h3>
+              <div className="grid grid-cols-7 gap-1 mb-4">
+                {WEEKDAYS.map((day) => {
+                  const programDay = currentWeekDays.find((d) => d.dayLabel === day);
+                  const movedHere = overrides.find((o) => o.newDay === day && o.action === "moved");
+                  const movedAway = programDay ? overrides.find((o) => o.workoutDayId === programDay.id && o.action === "moved") : null;
+                  const skipped = programDay ? overrides.find((o) => o.workoutDayId === programDay.id && o.action === "skipped") : null;
+
+                  // Determine effective workout for this day
+                  let effectiveDay: typeof programDay | null = null;
+                  if (movedHere) {
+                    effectiveDay = currentWeekDays.find((d) => d.id === movedHere.workoutDayId) ?? null;
+                  } else if (programDay && !movedAway && !skipped) {
+                    effectiveDay = programDay;
+                  }
+
+                  const completed = effectiveDay
+                    ? weekSessions.some((s) => s.workoutDayId === effectiveDay!.id && s.status === "completed")
+                    : false;
+
+                  let cellClass = "bg-gray-50 text-gray-300";
+                  let statusIcon = null;
+                  let subText = null;
+
+                  if (skipped) {
+                    cellClass = "bg-red-50 text-red-500 line-through";
+                  } else if (movedAway) {
+                    cellClass = "bg-orange-50 text-orange-500";
+                    subText = `→ ${movedAway.newDay?.slice(0, 3)}`;
+                  } else if (movedHere) {
+                    cellClass = "bg-orange-50 text-orange-500";
+                    subText = `← ${movedHere.originalDay?.slice(0, 3)}`;
+                  } else if (effectiveDay && completed) {
+                    cellClass = "bg-emerald-50 text-emerald-700";
+                    statusIcon = "✓";
+                  } else if (effectiveDay) {
+                    cellClass = "bg-emerald-50 text-emerald-600";
+                  }
+
+                  return (
+                    <div key={day} className={`rounded-xl p-2 text-center ${cellClass}`}>
+                      <p className="text-xs font-semibold">{day.slice(0, 3)}</p>
+                      {effectiveDay ? (
+                        <>
+                          <p className="text-xs mt-0.5 truncate" title={effectiveDay.dayLabel}>
+                            {effectiveDay.dayLabel.slice(0, 8)}
+                          </p>
+                          {statusIcon && <p className="text-xs font-bold">{statusIcon}</p>}
+                          {subText && <p className="text-xs font-medium">{subText}</p>}
+                        </>
+                      ) : (
+                        <p className="text-xs mt-0.5 text-gray-300">—</p>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+
+              {overrides.length > 0 && (
+                <div className="border-t border-gray-100 pt-3 space-y-1.5">
+                  <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">Override History</p>
+                  {overrides.map((o) => (
+                    <p key={o.id} className="text-xs text-gray-500">
+                      {o.action === "skipped"
+                        ? `Skipped ${o.originalDay} workout`
+                        : `Moved ${o.originalDay} workout → ${o.newDay}`}
+                      {" · "}
+                      <span className="text-gray-400">{formatDateTime(o.createdAt)}</span>
+                    </p>
+                  ))}
+                </div>
+              )}
             </div>
           )}
 
