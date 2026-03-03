@@ -184,12 +184,14 @@ export default async function TodayWorkoutPage({ searchParams }: { searchParams:
 
   return (
     <div>
-      <WorkoutDayOptions
-        workoutDayId={workoutDay.id}
-        weekStartDate={weekStartDate}
-        originalDay={workoutDay.dayLabel}
-        availableDays={availableDays}
-      />
+      <div className="flex justify-end px-6 md:px-8 pt-4 max-w-2xl mx-auto">
+        <WorkoutDayOptions
+          workoutDayId={workoutDay.id}
+          weekStartDate={weekStartDate}
+          originalDay={workoutDay.dayLabel}
+          availableDays={availableDays}
+        />
+      </div>
       <WorkoutLogger
         clientId={clientId}
         workoutDay={JSON.parse(JSON.stringify(workoutDay))}

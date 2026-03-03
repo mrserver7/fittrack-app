@@ -1,0 +1,74 @@
+"use client";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
+import { ClipboardList, CheckCircle } from "lucide-react";
+
+type Program = {
+  id: string; // ClientProgram id
+  name: string;
+  startDate: string;
+  durationWeeks: number;
+  weekCount: number;
+};
+
+export default function ProgramSwitcher({ programs }: { programs: Program[] }) {
+  const router = useRouter();
+  const [loading, setLoading] = useState<string | null>(null);
+
+  async function choose(clientProgramId: string) {
+    setLoading(clientProgramId);
+    try {
+      const res = await fetch(`/api/clients/programs/${clientProgramId}/activate`, { method: "POST" });
+      if (!res.ok) { toast.error("Something went wrong. Try again."); return; }
+      toast.success("Program activated!");
+      router.refresh();
+    } catch {
+      toast.error("Network error.");
+    } finally {
+      setLoading(null);
+    }
+  }
+
+  return (
+    <div className="p-6 md:p-8 max-w-2xl mx-auto">
+      <div className="mb-6">
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-50 mb-1">Choose Your Program</h1>
+        <p className="text-gray-500 dark:text-gray-400 text-sm">
+          You have {programs.length} programs assigned. Pick one to follow — the others will be removed.
+        </p>
+      </div>
+
+      <div className="space-y-3">
+        {programs.map((p) => (
+          <div key={p.id}
+            className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-700 p-5 flex items-center gap-4">
+            <div className="w-10 h-10 bg-emerald-100 dark:bg-emerald-900/30 rounded-xl flex items-center justify-center flex-shrink-0">
+              <ClipboardList className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="font-semibold text-gray-900 dark:text-gray-50 truncate">{p.name}</p>
+              <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">
+                {p.durationWeeks} week program · {p.weekCount} week{p.weekCount !== 1 ? "s" : ""} of content · Started {p.startDate}
+              </p>
+            </div>
+            <button
+              disabled={!!loading}
+              onClick={() => choose(p.id)}
+              className="flex-shrink-0 flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold rounded-xl transition-colors disabled:opacity-60"
+            >
+              {loading === p.id ? (
+                <span className="animate-pulse">Choosing…</span>
+              ) : (
+                <>
+                  <CheckCircle className="w-4 h-4" />
+                  Choose this plan
+                </>
+              )}
+            </button>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
