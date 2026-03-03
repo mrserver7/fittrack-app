@@ -109,19 +109,22 @@ export default async function DashboardPage() {
             </div>
           );
         })}
-        {/* Unread Alerts — separate so we can add mark-all button */}
-        <div className="bg-white dark:bg-gray-900 rounded-2xl border border-orange-100 dark:border-orange-800 p-5 shadow-sm">
+        {/* Unread Alerts */}
+        <Link href="#notifications" className="block bg-white dark:bg-gray-900 rounded-2xl border border-orange-100 dark:border-orange-800 p-5 shadow-sm hover:border-orange-300 dark:hover:border-orange-600 transition-colors">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">{t.dashboard.unreadAlerts}</p>
               <p className="text-3xl font-bold text-gray-900 dark:text-gray-50 mt-1">{notifications.length}</p>
-              {notifications.length > 0 && <MarkAllReadButton />}
+              {notifications.length > 0
+                ? <p className="text-xs text-orange-500 font-medium mt-1">Tap to view ↓</p>
+                : <p className="text-xs text-gray-400 mt-1">All clear</p>
+              }
             </div>
             <div className="p-3 rounded-xl bg-orange-50 dark:bg-orange-900/30">
-              <CheckSquare className="w-5 h-5 text-orange-600" />
+              <Bell className="w-5 h-5 text-orange-600" />
             </div>
           </div>
-        </div>
+        </Link>
       </div>
 
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
@@ -184,7 +187,7 @@ export default async function DashboardPage() {
 
       {/* Notifications list */}
       {enrichedNotifications.length > 0 && (
-        <div className="mt-6 bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm">
+        <div id="notifications" className="mt-6 bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm">
           <div className="flex items-center justify-between p-5 border-b border-gray-100 dark:border-gray-800">
             <div className="flex items-center gap-2">
               <Bell className="w-4 h-4 text-orange-500" />
