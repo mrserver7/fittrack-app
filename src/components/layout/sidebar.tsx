@@ -5,7 +5,7 @@ import { signOut, useSession } from "next-auth/react";
 import { cn } from "@/lib/utils";
 import {
   LayoutDashboard, Users, Dumbbell, ClipboardList, BarChart3,
-  CheckSquare, LogOut, Menu, X, MessageSquare, Shield, Settings,
+  CheckSquare, LogOut, Menu, X, MessageSquare, Shield, Settings, CalendarDays,
 } from "lucide-react";
 import { useState } from "react";
 import { useLanguage } from "@/contexts/language-context";
@@ -36,6 +36,7 @@ export default function Sidebar({ role, isAdmin }: { role: "trainer" | "client";
 
   const clientNav = [
     { href: "/home", label: t.nav.dashboard, icon: LayoutDashboard },
+    { href: "/schedule", label: t.nav.schedule, icon: CalendarDays },
     { href: "/workouts", label: t.nav.workouts, icon: Dumbbell },
     { href: "/progress", label: t.nav.progress, icon: BarChart3 },
     { href: "/messages", label: t.nav.messages, icon: MessageSquare },
