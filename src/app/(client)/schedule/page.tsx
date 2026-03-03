@@ -5,9 +5,10 @@ import { WEEKDAYS, getWeekStart, formatDate } from "@/lib/utils";
 import { CalendarDays, Dumbbell, ChevronRight } from "lucide-react";
 import WorkoutDayOptions from "@/components/workout/workout-day-options";
 import ProgramSwitcher from "@/components/clients/program-switcher";
+import { getT } from "@/lib/i18n/server";
 
 export default async function SchedulePage() {
-  const session = await auth();
+  const [session, t] = await Promise.all([auth(), getT()]);
   const clientId = session!.user!.id!;
 
   const todayDate = new Date();
@@ -47,15 +48,27 @@ export default async function SchedulePage() {
 
   const activePrograms = client?.clientPrograms ?? [];
 
+  // Day name translation helper
+  const dayTranslations: Record<string, string> = {
+    Sunday: t.programs.sunday,
+    Monday: t.programs.monday,
+    Tuesday: t.programs.tuesday,
+    Wednesday: t.programs.wednesday,
+    Thursday: t.programs.thursday,
+    Friday: t.programs.friday,
+    Saturday: t.programs.saturday,
+  };
+  const tDay = (day: string) => dayTranslations[day] ?? day;
+
   // No program
   if (activePrograms.length === 0) {
     return (
       <div className="p-6 md:p-8 max-w-3xl mx-auto">
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-50 mb-6">My Schedule</h1>
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-50 mb-6">{t.schedule.title}</h1>
         <div className="text-center py-20 bg-white dark:bg-gray-900 rounded-2xl border border-dashed border-gray-300 dark:border-gray-700">
           <Dumbbell className="w-10 h-10 text-gray-300 mx-auto mb-4" />
-          <h2 className="text-xl font-bold text-gray-900 dark:text-gray-50 mb-2">No program assigned</h2>
-          <p className="text-gray-500 dark:text-gray-400 text-sm">Your trainer hasn&apos;t assigned a program yet.</p>
+          <h2 className="text-xl font-bold text-gray-900 dark:text-gray-50 mb-2">{t.schedule.noProgramAssigned}</h2>
+          <p className="text-gray-500 dark:text-gray-400 text-sm">{t.schedule.noProgramSub}</p>
         </div>
       </div>
     );
@@ -141,21 +154,21 @@ export default async function SchedulePage() {
       <div className="flex items-center gap-3">
         <CalendarDays className="w-6 h-6 text-emerald-600" />
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-50">My Schedule</h1>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-50">{t.schedule.title}</h1>
           <p className="text-sm text-gray-400 dark:text-gray-500 mt-0.5">
-            {program.name} · Week {currentWeekNumber} of {program.weeks.length} · Started {formatDate(cp.startDate)}
+            {program.name} · {t.schedule.week} {currentWeekNumber} {t.schedule.of} {program.weeks.length} · {t.schedule.started} {formatDate(cp.startDate)}
           </p>
         </div>
         <Link href="/workout/today"
           className="ml-auto flex-shrink-0 flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold rounded-xl transition-colors">
           <Dumbbell className="w-4 h-4" />
-          Today&apos;s Workout
+          {t.workouts.todaysWorkout}
         </Link>
       </div>
 
       {/* This Week grid */}
       <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-700 p-5">
-        <h2 className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-4">This Week</h2>
+        <h2 className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-4">{t.schedule.thisWeek}</h2>
         <div className="grid grid-cols-7 gap-1.5 mb-4">
           {WEEKDAYS.map((day) => {
             const isToday = day === todayWeekday;
@@ -200,11 +213,11 @@ export default async function SchedulePage() {
         {/* Legend */}
         <div className="flex flex-wrap gap-4">
           {[
-            { color: "bg-emerald-400", label: "Scheduled" },
-            { color: "bg-emerald-700", label: "Completed" },
-            { color: "bg-red-400", label: "Skipped" },
-            { color: "bg-orange-400", label: "Moved" },
-            { color: "bg-gray-300 dark:bg-gray-600", label: "Rest day" },
+            { color: "bg-emerald-400", label: t.schedule.scheduled },
+            { color: "bg-emerald-700", label: t.schedule.completed },
+            { color: "bg-red-400", label: t.schedule.skipped },
+            { color: "bg-orange-400", label: t.schedule.moved },
+            { color: "bg-gray-300 dark:bg-gray-600", label: t.schedule.restDay },
           ].map((l) => (
             <div key={l.label} className="flex items-center gap-1.5">
               <div className={`w-2.5 h-2.5 rounded-sm ${l.color}`} />
@@ -216,7 +229,7 @@ export default async function SchedulePage() {
 
       {/* Full Program */}
       <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-700 p-5">
-        <h2 className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-4">Full Program — All Weeks</h2>
+        <h2 className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-4">{t.schedule.fullProgram}</h2>
         <div className="space-y-6">
           {program.weeks.map((week) => {
             const isCurrent = program.weeks.indexOf(week) === effectiveIdx;
@@ -228,12 +241,12 @@ export default async function SchedulePage() {
                       ? "bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-400"
                       : "bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400"
                   }`}>
-                    Week {week.weekNumber}{week.isDeload ? " 🔄" : ""}{isCurrent ? " · Current" : ""}
+                    {t.schedule.week} {week.weekNumber}{week.isDeload ? " 🔄" : ""}{isCurrent ? ` · ${t.schedule.current}` : ""}
                   </span>
                 </div>
 
                 {week.days.length === 0 ? (
-                  <p className="text-xs text-gray-400 dark:text-gray-500">No workout days yet.</p>
+                  <p className="text-xs text-gray-400 dark:text-gray-500">{t.schedule.noWorkoutDays}</p>
                 ) : (
                   <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
                     {week.days.map((day) => {
@@ -266,13 +279,13 @@ export default async function SchedulePage() {
                           <div className="flex items-start justify-between gap-2 mb-2">
                             <div>
                               <span className="text-xs font-semibold text-gray-700 dark:text-gray-300">
-                                {day.dayLabel}
-                                {isToday && <span className="ml-1.5 text-emerald-600 dark:text-emerald-400">· Today</span>}
+                                {tDay(day.dayLabel)}
+                                {isToday && <span className="ml-1.5 text-emerald-600 dark:text-emerald-400">· {t.schedule.today}</span>}
                               </span>
-                              {isDone && <span className="ml-2 text-xs text-emerald-600 dark:text-emerald-400 font-bold">✓ Done</span>}
-                              {skippedOverride && <span className="ml-2 text-xs text-red-500 font-medium">Skipped</span>}
+                              {isDone && <span className="ml-2 text-xs text-emerald-600 dark:text-emerald-400 font-bold">✓ {t.schedule.done}</span>}
+                              {skippedOverride && <span className="ml-2 text-xs text-red-500 font-medium">{t.schedule.skipped}</span>}
                               {movedAwayOverride && (
-                                <span className="ml-2 text-xs text-orange-500 font-medium">→ {movedAwayOverride.newDay}</span>
+                                <span className="ml-2 text-xs text-orange-500 font-medium">→ {tDay(movedAwayOverride.newDay!)}</span>
                               )}
                             </div>
                             {canReschedule && (
@@ -287,7 +300,7 @@ export default async function SchedulePage() {
                           </div>
 
                           {day.exercises.length === 0 ? (
-                            <p className="text-xs text-gray-400 dark:text-gray-500">No exercises yet</p>
+                            <p className="text-xs text-gray-400 dark:text-gray-500">{t.schedule.noExercisesYet}</p>
                           ) : (
                             <ul className="space-y-0.5">
                               {day.exercises.slice(0, 4).map((ex) => (
@@ -301,7 +314,7 @@ export default async function SchedulePage() {
                               ))}
                               {day.exercises.length > 4 && (
                                 <li className="text-xs text-gray-400 dark:text-gray-500 pl-2.5">
-                                  +{day.exercises.length - 4} more
+                                  +{day.exercises.length - 4} {t.schedule.more}
                                 </li>
                               )}
                             </ul>
@@ -310,7 +323,7 @@ export default async function SchedulePage() {
                           {isToday && !isDone && !skippedOverride && !movedAwayOverride && (
                             <Link href="/workout/today"
                               className="mt-2.5 flex items-center justify-center gap-1 text-xs text-emerald-600 dark:text-emerald-400 font-semibold hover:underline">
-                              Start workout <ChevronRight className="w-3 h-3" />
+                              {t.schedule.startWorkout} <ChevronRight className="w-3 h-3" />
                             </Link>
                           )}
                         </div>

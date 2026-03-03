@@ -67,7 +67,7 @@ export default async function ClientHomePage() {
     <div className="p-6 md:p-8 max-w-5xl mx-auto">
       <div className="mb-8">
         <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-50">
-          Hey, {session?.user?.name?.split(" ")[0]} 👋
+          {t.home.greeting}, {session?.user?.name?.split(" ")[0]} 👋
         </h1>
         <p className="text-gray-500 dark:text-gray-400 text-sm mt-1">
           {new Date().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" })}
@@ -79,17 +79,17 @@ export default async function ClientHomePage() {
       <div className="grid grid-cols-3 gap-4 mb-8">
         <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-700 p-4 text-center">
           <div className="text-2xl font-bold text-gray-900 dark:text-gray-50">{completedCount}</div>
-          <div className="text-xs text-gray-400 dark:text-gray-500 mt-1">Sessions Done</div>
+          <div className="text-xs text-gray-400 dark:text-gray-500 mt-1">{t.home.sessionsDone}</div>
         </div>
         <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-700 p-4 text-center">
           <div className="text-2xl font-bold text-emerald-600 flex items-center justify-center gap-1">
             <Flame className="w-5 h-5" /> {streak}
           </div>
-          <div className="text-xs text-gray-400 dark:text-gray-500 mt-1">Streak</div>
+          <div className="text-xs text-gray-400 dark:text-gray-500 mt-1">{t.home.streak}</div>
         </div>
         <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-700 p-4 text-center">
           <div className="text-2xl font-bold text-gray-900 dark:text-gray-50">{adherence}%</div>
-          <div className="text-xs text-gray-400 dark:text-gray-500 mt-1">Adherence</div>
+          <div className="text-xs text-gray-400 dark:text-gray-500 mt-1">{t.home.adherence}</div>
         </div>
       </div>
 
@@ -103,7 +103,7 @@ export default async function ClientHomePage() {
             <div>
               <p className="text-xs text-white/70">{t.workout.today}</p>
               <p className="font-bold text-lg leading-tight">
-                {todayDone ? "Workout Done Today! 🎉" : t.workout.startWorkout}
+                {todayDone ? t.home.workoutDoneToday : t.workout.startWorkout}
               </p>
             </div>
           </div>
@@ -113,7 +113,7 @@ export default async function ClientHomePage() {
             <p className="text-white/50 text-sm">{t.workout.noProgram}</p>
           )}
           <div className="mt-4 flex items-center gap-1 text-sm font-medium">
-            {todayDone ? "Do it again? →" : t.workout.openWorkout + " "}
+            {todayDone ? t.home.doItAgain : t.workout.openWorkout + " "}
             <span className="group-hover:translate-x-1 transition-transform">→</span>
           </div>
         </Link>
@@ -145,7 +145,7 @@ export default async function ClientHomePage() {
           <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-700 p-5">
             <div className="flex items-center gap-2 mb-3">
               <Award className="w-4 h-4 text-amber-500" />
-              <h2 className="font-semibold text-gray-900 dark:text-gray-50">Your PRs 🏆</h2>
+              <h2 className="font-semibold text-gray-900 dark:text-gray-50">{t.home.yourPRs} 🏆</h2>
             </div>
             <div className="grid grid-cols-2 gap-2">
               {recentPRs.map((pr) => (
@@ -161,10 +161,10 @@ export default async function ClientHomePage() {
         <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-700 p-5">
           <div className="flex items-center gap-2 mb-3">
             <TrendingUp className="w-4 h-4 text-emerald-600" />
-            <h2 className="font-semibold text-gray-900 dark:text-gray-50">Recent Sessions</h2>
+            <h2 className="font-semibold text-gray-900 dark:text-gray-50">{t.home.recentSessions}</h2>
           </div>
           {recentSessions.length === 0 ? (
-            <p className="text-sm text-gray-400 dark:text-gray-500 py-4 text-center">No sessions yet</p>
+            <p className="text-sm text-gray-400 dark:text-gray-500 py-4 text-center">{t.home.noSessionsYet}</p>
           ) : (
             <div className="space-y-2">
               {recentSessions.slice(0, 5).map((s) => (

@@ -5,9 +5,10 @@ import WorkoutLogger from "@/components/workout/workout-logger";
 import WorkoutDayOptions from "@/components/workout/workout-day-options";
 import { Dumbbell, CheckCircle, Moon } from "lucide-react";
 import { WEEKDAYS, getWeekStart } from "@/lib/utils";
+import { getT } from "@/lib/i18n/server";
 
 export default async function TodayWorkoutPage({ searchParams }: { searchParams: Promise<{ redo?: string }> }) {
-  const { redo } = await searchParams;
+  const [{ redo }, t] = await Promise.all([searchParams, getT()]);
   const session = await auth();
   const clientId = session!.user!.id!;
 
@@ -54,9 +55,9 @@ export default async function TodayWorkoutPage({ searchParams }: { searchParams:
       <div className="p-6 md:p-8 max-w-2xl mx-auto">
         <div className="text-center py-20 bg-white dark:bg-gray-900 rounded-2xl border border-dashed border-gray-300 dark:border-gray-700">
           <Dumbbell className="w-10 h-10 text-gray-300 mx-auto mb-4" />
-          <h2 className="text-xl font-bold text-gray-900 dark:text-gray-50 mb-2">No program assigned</h2>
-          <p className="text-gray-500 dark:text-gray-400 text-sm">Your trainer hasn&apos;t assigned a program yet. Check back soon!</p>
-          <Link href="/home" className="mt-4 inline-block text-emerald-600 hover:underline text-sm">← Back to home</Link>
+          <h2 className="text-xl font-bold text-gray-900 dark:text-gray-50 mb-2">{t.workout.noProgramAssigned}</h2>
+          <p className="text-gray-500 dark:text-gray-400 text-sm">{t.workout.noProgramSub}</p>
+          <Link href="/home" className="mt-4 inline-block text-emerald-600 hover:underline text-sm">{t.workout.backToHome}</Link>
         </div>
       </div>
     );
@@ -69,9 +70,11 @@ export default async function TodayWorkoutPage({ searchParams }: { searchParams:
       <div className="p-6 md:p-8 max-w-2xl mx-auto">
         <div className="text-center py-20 bg-white dark:bg-gray-900 rounded-2xl border border-dashed border-gray-300 dark:border-gray-700">
           <Dumbbell className="w-10 h-10 text-gray-300 mx-auto mb-4" />
-          <h2 className="text-xl font-bold text-gray-900 dark:text-gray-50 mb-2">Program has no workouts yet</h2>
-          <p className="text-gray-500 dark:text-gray-400 text-sm">Your trainer is still building your program <strong>{program.name}</strong>. Check back soon!</p>
-          <Link href="/home" className="mt-4 inline-block text-emerald-600 hover:underline text-sm">← Back to home</Link>
+          <h2 className="text-xl font-bold text-gray-900 dark:text-gray-50 mb-2">{t.workout.programNoWorkouts}</h2>
+          <p className="text-gray-500 dark:text-gray-400 text-sm">
+            <strong>{program.name}</strong> — {t.workout.checkBackSoon}
+          </p>
+          <Link href="/home" className="mt-4 inline-block text-emerald-600 hover:underline text-sm">{t.workout.backToHome}</Link>
         </div>
       </div>
     );
@@ -134,11 +137,11 @@ export default async function TodayWorkoutPage({ searchParams }: { searchParams:
           <div className="w-16 h-16 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-4">
             <Moon className="w-8 h-8 text-gray-400 dark:text-gray-500" />
           </div>
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-50 mb-2">Rest Day</h2>
-          <p className="text-gray-500 dark:text-gray-400 text-sm mb-8">No workout scheduled today. Rest up!</p>
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-50 mb-2">{t.workout.restDay}</h2>
+          <p className="text-gray-500 dark:text-gray-400 text-sm mb-8">{t.workout.noWorkoutToday}</p>
           <Link href="/home"
             className="px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-xl text-sm transition-colors">
-            ← Back to Home
+            {t.workout.backToHome}
           </Link>
         </div>
       </div>
@@ -157,19 +160,19 @@ export default async function TodayWorkoutPage({ searchParams }: { searchParams:
           <div className="w-16 h-16 bg-emerald-100 dark:bg-emerald-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
             <CheckCircle className="w-8 h-8 text-emerald-600 dark:text-emerald-400" />
           </div>
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-50 mb-2">Workout Complete! 🎉</h2>
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-50 mb-2">{t.workout.workoutComplete}</h2>
           <p className="text-gray-500 dark:text-gray-400 text-sm mb-2">
-            You already completed <strong>{workoutDay.dayLabel}</strong> today.
+            {t.workout.alreadyCompleted} <strong>{workoutDay.dayLabel}</strong> {t.workout.todayLabel}
           </p>
-          <p className="text-gray-400 dark:text-gray-500 text-xs mb-8">Great work! Come back tomorrow for your next session.</p>
+          <p className="text-gray-400 dark:text-gray-500 text-xs mb-8">{t.workout.greatWork}</p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center px-8">
             <Link href="/home"
               className="px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-xl text-sm transition-colors">
-              ← Back to Home
+              {t.workout.backToHome}
             </Link>
             <Link href="/workout/today?redo=1"
               className="px-6 py-2.5 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 font-medium rounded-xl text-sm transition-colors">
-              Do it again
+              {t.workout.doItAgain}
             </Link>
           </div>
         </div>
