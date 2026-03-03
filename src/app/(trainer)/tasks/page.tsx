@@ -62,7 +62,7 @@ export default async function TasksPage() {
       client: ci.client,
       label: t.tasks.checkInAwaiting,
       detail: `${t.tasks.form}: ${ci.checkInForm.name}`,
-      href: `/clients/${ci.clientId}`,
+      href: `/clients/${ci.clientId}/checkins/${ci.id}`,
     })),
   ];
 

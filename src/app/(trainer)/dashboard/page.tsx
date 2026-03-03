@@ -1,8 +1,8 @@
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { formatDateTime, getGreeting } from "@/lib/utils";
+import { formatDateTime, formatDate, getGreeting } from "@/lib/utils";
 import Link from "next/link";
-import { Users, Activity, CheckSquare, UserPlus } from "lucide-react";
+import { Users, Activity, CheckSquare, UserPlus, Bell } from "lucide-react";
 import { getT } from "@/lib/i18n/server";
 import DashboardAlerts from "@/components/dashboard/dashboard-alerts";
 import MarkAllReadButton from "@/components/dashboard/mark-all-read-button";
@@ -47,6 +47,26 @@ export default async function DashboardPage() {
     ]);
 
   const activeClients = clients.filter((c) => c.status === "active");
+
+  // Enrich notifications with navigation links
+  const checkInIds = notifications.filter((n) => n.type === "check_in_submitted" && n.referenceId).map((n) => n.referenceId!);
+  const overrideIds = notifications.filter((n) => n.type === "workout_rescheduled" && n.referenceId).map((n) => n.referenceId!);
+  const [notifCheckIns, notifOverrides] = await Promise.all([
+    checkInIds.length ? prisma.checkIn.findMany({ where: { id: { in: checkInIds } }, select: { id: true, clientId: true } }) : [],
+    overrideIds.length ? prisma.workoutScheduleOverride.findMany({ where: { id: { in: overrideIds } }, select: { id: true, clientId: true } }) : [],
+  ]);
+  const ciMap = Object.fromEntries(notifCheckIns.map((ci) => [ci.id, ci.clientId]));
+  const ovMap = Object.fromEntries(notifOverrides.map((ov) => [ov.id, ov.clientId]));
+
+  const enrichedNotifications = notifications.map((n) => {
+    let href: string | null = null;
+    if (n.type === "check_in_submitted" && n.referenceId && ciMap[n.referenceId]) {
+      href = `/clients/${ciMap[n.referenceId]}/checkins/${n.referenceId}`;
+    } else if (n.type === "workout_rescheduled" && n.referenceId && ovMap[n.referenceId]) {
+      href = `/clients/${ovMap[n.referenceId]}`;
+    }
+    return { ...n, href };
+  });
 
   const stats = [
     { label: t.dashboard.activeClients, value: activeClients.length, icon: Users, color: "text-emerald-600", bg: "bg-emerald-50 dark:bg-emerald-900/30", border: "border-emerald-100 dark:border-emerald-800" },
@@ -161,6 +181,46 @@ export default async function DashboardPage() {
           </div>
         </div>
       </div>
+
+      {/* Notifications list */}
+      {enrichedNotifications.length > 0 && (
+        <div className="mt-6 bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm">
+          <div className="flex items-center justify-between p-5 border-b border-gray-100 dark:border-gray-800">
+            <div className="flex items-center gap-2">
+              <Bell className="w-4 h-4 text-orange-500" />
+              <h2 className="font-semibold text-gray-900 dark:text-gray-50">Unread Notifications</h2>
+              <span className="text-xs bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-400 px-2 py-0.5 rounded-full font-medium">
+                {enrichedNotifications.length}
+              </span>
+            </div>
+            <MarkAllReadButton />
+          </div>
+          <div className="divide-y divide-gray-100 dark:divide-gray-800">
+            {enrichedNotifications.map((n) => {
+              const inner = (
+                <div className="flex items-start gap-4 p-4 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+                  <div className="w-9 h-9 bg-orange-100 dark:bg-orange-900/30 rounded-xl flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <Bell className="w-4 h-4 text-orange-500" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-semibold text-gray-900 dark:text-gray-50">{n.title}</p>
+                    {n.body && <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{n.body}</p>}
+                    <p className="text-xs text-gray-300 dark:text-gray-600 mt-1">{formatDateTime(n.createdAt)}</p>
+                  </div>
+                  {n.href && (
+                    <span className="text-xs text-emerald-600 dark:text-emerald-400 font-medium flex-shrink-0">View →</span>
+                  )}
+                </div>
+              );
+              return n.href ? (
+                <Link key={n.id} href={n.href}>{inner}</Link>
+              ) : (
+                <div key={n.id}>{inner}</div>
+              );
+            })}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
