@@ -365,6 +365,18 @@ model AuditEvent {
   trainer Trainer? @relation(fields: [actorId], references: [id])
 }
 
+model LoginAttempt {
+  id        String   @id @default(cuid())
+  email     String
+  success   Boolean
+  role      String?
+  userId    String?
+  reason    String?
+  ipAddress String?
+  userAgent String?
+  createdAt DateTime @default(now())
+}
+
 model WorkoutScheduleOverride {
   id            String   @id @default(cuid())
   clientId      String

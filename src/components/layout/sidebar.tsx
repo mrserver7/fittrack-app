@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils";
 import {
   LayoutDashboard, Users, Dumbbell, ClipboardList, BarChart3,
   CheckSquare, LogOut, Menu, X, MessageSquare, Shield, Settings, CalendarDays,
+  ShieldX, Activity,
 } from "lucide-react";
 import { useState } from "react";
 import { useLanguage } from "@/contexts/language-context";
@@ -48,7 +49,9 @@ export default function Sidebar({ role, isAdmin }: { role: "trainer" | "client";
     { href: "/admin", label: t.nav.adminOverview, icon: Shield },
     { href: "/admin/trainers", label: t.nav.trainers, icon: Users },
     { href: "/admin/subscribers", label: t.nav.allSubscribers, icon: Users },
+    { href: "/admin/banned", label: t.nav.bannedUsers, icon: ShieldX },
     { href: "/admin/messages", label: t.nav.messages, icon: MessageSquare },
+    { href: "/admin/login-log", label: t.nav.loginLog, icon: Activity },
   ];
 
   const nav = role === "trainer" ? trainerNav : clientNav;

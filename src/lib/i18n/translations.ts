@@ -20,6 +20,8 @@ export const translations = {
       adminOverview: "Admin Overview",
       trainers: "Trainers",
       allSubscribers: "All Subscribers",
+      bannedUsers: "Banned Users",
+      loginLog: "Sign-in Log",
       admin: "Admin",
     },
     auth: {
@@ -433,6 +435,8 @@ export const translations = {
       adminOverview: "لوحة الإدارة",
       trainers: "المدربون",
       allSubscribers: "جميع المشتركين",
+      bannedUsers: "المحظورون",
+      loginLog: "سجل الدخول",
       admin: "الإدارة",
     },
     auth: {
