@@ -86,9 +86,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           await logAttempt({ email, success: false, role: "client", userId: client.id, reason: "wrong_password", ipAddress: ip, userAgent });
           return null;
         }
-        // Block pending/invited/archived accounts
-        if (["pending", "invited", "archived"].includes(client.status)) {
-          await logAttempt({ email, success: false, role: "client", userId: client.id, reason: "blocked", ipAddress: ip, userAgent });
+        // Block pending/invited/archived/rejected accounts
+        if (["pending", "invited", "archived", "rejected"].includes(client.status)) {
+          await logAttempt({ email, success: false, role: "client", userId: client.id, reason: client.status, ipAddress: ip, userAgent });
           return null;
         }
         await logAttempt({ email, success: true, role: "client", userId: client.id, ipAddress: ip, userAgent });
