@@ -50,6 +50,8 @@ export default function ClientLayout() {
         }}
       />
       <Tabs.Screen name="checkins" options={{ href: null }} />
+      <Tabs.Screen name="workouts" options={{ href: null }} />
+      <Tabs.Screen name="workout-detail" options={{ href: null }} />
     </Tabs>
   );
 }

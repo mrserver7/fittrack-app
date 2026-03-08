@@ -111,7 +111,12 @@ export default function ClientHome() {
             {/* Recent sessions */}
             {data.recentSessions.length > 0 && (
               <View style={s.section}>
-                <Text style={s.sectionTitle}>Recent Sessions</Text>
+                <View style={s.sectionHeader}>
+                  <Text style={s.sectionTitle}>Recent Sessions</Text>
+                  <TouchableOpacity onPress={() => router.push("/(client)/workouts" as never)}>
+                    <Text style={s.seeAll}>See all →</Text>
+                  </TouchableOpacity>
+                </View>
                 <View style={s.card}>
                   {data.recentSessions.map((session, i) => (
                     <View
@@ -197,8 +202,9 @@ const s = StyleSheet.create({
   checkinText: { color: "#1d4ed8", fontSize: 13, fontWeight: "500" },
 
   section: { marginBottom: 20 },
-  sectionHeader: { flexDirection: "row", alignItems: "center", marginBottom: 10 },
-  sectionTitle: { fontSize: 15, fontWeight: "600", color: "#111827", marginBottom: 10 },
+  sectionHeader: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 10 },
+  sectionTitle: { fontSize: 15, fontWeight: "600", color: "#111827" },
+  seeAll: { fontSize: 13, color: "#059669", fontWeight: "500" },
   card: { backgroundColor: "#fff", borderRadius: 14, borderWidth: 1, borderColor: "#e5e7eb", overflow: "hidden" },
 
   sessionRow: { flexDirection: "row", alignItems: "center", gap: 12, padding: 14 },
