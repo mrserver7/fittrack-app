@@ -1,14 +1,14 @@
-import { auth } from "@/lib/auth";
+import { getAuthUser } from "@/lib/get-auth-user";
 import { prisma } from "@/lib/prisma";
 import { NextRequest, NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 
 export async function POST(req: NextRequest) {
-  const session = await auth();
-  if (!session?.user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const user = await getAuthUser(req);
+  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const role = (session.user as Record<string, unknown>).role as string;
-  const id = session.user.id!;
+  const role = user.role;
+  const id = user.id;
   const { currentPassword, newPassword } = await req.json();
 
   if (!currentPassword || !newPassword) {

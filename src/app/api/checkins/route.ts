@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
+import { getAuthUser } from "@/lib/get-auth-user";
 import { prisma } from "@/lib/prisma";
 
 export async function GET(req: NextRequest) {
-  const session = await auth();
-  if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  const clientId = session.user!.id!;
+  const user = await getAuthUser(req);
+  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const clientId = user.id;
 
   const checkIns = await prisma.checkIn.findMany({
     where: { clientId },
@@ -16,8 +16,8 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
-  const session = await auth();
-  if (!session || (session.user as Record<string, unknown>).role !== "trainer")
+  const user = await getAuthUser(req);
+  if (!user || user.role !== "trainer")
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   const body = await req.json();
 

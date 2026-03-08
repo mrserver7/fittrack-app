@@ -49,6 +49,7 @@ export default function ClientLayout() {
           tabBarIcon: ({ color, size }) => <Settings color={color} size={size} />,
         }}
       />
+      <Tabs.Screen name="checkins" options={{ href: null }} />
     </Tabs>
   );
 }
