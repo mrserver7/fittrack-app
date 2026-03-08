@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAuthUser } from "@/lib/get-auth-user";
 import { prisma } from "@/lib/prisma";
+import { sendPush } from "@/lib/push";
 
 type Params = { params: Promise<{ clientId: string }> };
 
@@ -63,7 +64,7 @@ export async function POST(req: NextRequest, { params }: Params) {
     },
   });
 
-  // Notify recipient
+  // Notify recipient (DB + push)
   const recipientId = role === "trainer" ? clientId : client.trainerId;
   const recipientRole = role === "trainer" ? "client" : "trainer";
   await prisma.notification.create({
@@ -77,6 +78,16 @@ export async function POST(req: NextRequest, { params }: Params) {
       body: body.body.substring(0, 100),
     },
   });
+
+  // Send push notification to recipient
+  if (recipientRole === "client") {
+    const recipient = await prisma.client.findUnique({ where: { id: recipientId }, select: { pushToken: true, trainerId: true } });
+    const senderTrainer = await prisma.trainer.findUnique({ where: { id: client.trainerId }, select: { name: true } });
+    await sendPush(recipient?.pushToken, `${senderTrainer?.name ?? "Your trainer"}`, body.body.substring(0, 100), { screen: "messages" });
+  } else {
+    const recipient = await prisma.trainer.findUnique({ where: { id: recipientId }, select: { pushToken: true } });
+    await sendPush(recipient?.pushToken, `${client.name}`, body.body.substring(0, 100), { screen: "messages", clientId });
+  }
 
   return NextResponse.json({ message }, { status: 201 });
 }

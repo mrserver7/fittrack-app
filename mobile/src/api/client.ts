@@ -1,7 +1,7 @@
 import { useAuthStore } from "@/src/store/auth-store";
 
 // Point to your deployed Next.js API
-export const API_BASE = "https://fittrack-app.vercel.app";
+export const API_BASE = "https://fittrack-rosy.vercel.app";
 
 async function request<T>(
   path: string,

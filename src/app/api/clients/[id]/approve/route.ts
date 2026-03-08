@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAuthUser } from "@/lib/get-auth-user";
 import { prisma } from "@/lib/prisma";
+import { sendPush } from "@/lib/push";
 
 type Params = { params: Promise<{ id: string }> };
 
@@ -38,7 +39,7 @@ export async function POST(req: NextRequest, { params }: Params) {
     },
   });
 
-  // Notify the subscriber
+  // Notify the subscriber (DB + push)
   await prisma.notification.create({
     data: {
       recipientId: id,
@@ -48,6 +49,14 @@ export async function POST(req: NextRequest, { params }: Params) {
       body: "You can now sign in to FitTrack and start your fitness journey.",
     },
   });
+
+  const clientForPush = await prisma.client.findUnique({ where: { id }, select: { pushToken: true } });
+  await sendPush(
+    clientForPush?.pushToken,
+    "Account approved! 🎉",
+    "You can now access FitTrack and start your fitness journey.",
+    { screen: "home" }
+  );
 
   return NextResponse.json({ client: updated });
 }

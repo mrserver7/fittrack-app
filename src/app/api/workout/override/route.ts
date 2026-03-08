@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getAuthUser } from "@/lib/get-auth-user";
 import { prisma } from "@/lib/prisma";
 import { WEEKDAYS, getWeekStart } from "@/lib/utils";
+import { sendPush } from "@/lib/push";
 
 export async function POST(req: NextRequest) {
   const user = await getAuthUser(req);
@@ -135,7 +136,13 @@ export async function POST(req: NextRequest) {
         body: body2,
       },
     });
-    void actionLabel; // suppress unused warning
+
+    const trainer = await prisma.trainer.findUnique({
+      where: { id: client.trainerId },
+      select: { pushToken: true },
+    });
+    await sendPush(trainer?.pushToken, title, body2, { screen: "clients", clientId });
+    void actionLabel;
   }
 
   return NextResponse.json({ success: true, override });

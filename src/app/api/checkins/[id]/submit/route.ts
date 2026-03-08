@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAuthUser } from "@/lib/get-auth-user";
 import { prisma } from "@/lib/prisma";
+import { sendPush } from "@/lib/push";
 
 type Params = { params: Promise<{ id: string }> };
 
@@ -25,18 +26,31 @@ export async function POST(req: NextRequest, { params }: Params) {
     },
   });
 
-  // Notify trainer
-  await prisma.notification.create({
-    data: {
-      recipientId: checkIn.client.trainerId,
-      recipientRole: "trainer",
-      type: "check_in_submitted",
-      referenceId: id,
-      referenceType: "CheckIn",
-      title: `${checkIn.client.name} submitted their check-in`,
-      body: "Tap to review their responses.",
-    },
-  });
+  // Notify trainer (DB + push)
+  if (checkIn.client.trainerId) {
+    await prisma.notification.create({
+      data: {
+        recipientId: checkIn.client.trainerId,
+        recipientRole: "trainer",
+        type: "check_in_submitted",
+        referenceId: id,
+        referenceType: "CheckIn",
+        title: `${checkIn.client.name} submitted their check-in`,
+        body: "Tap to review their responses.",
+      },
+    });
+
+    const trainer = await prisma.trainer.findUnique({
+      where: { id: checkIn.client.trainerId },
+      select: { pushToken: true },
+    });
+    await sendPush(
+      trainer?.pushToken,
+      `📋 ${checkIn.client.name} submitted a check-in`,
+      "Tap to review their responses.",
+      { screen: "clients", clientId: checkIn.clientId }
+    );
+  }
 
   return NextResponse.json({ checkIn: updated });
 }
