@@ -39,7 +39,7 @@ export default function LoginScreen() {
     setBlocked(null);
 
     try {
-      const res = await fetch(`${API_BASE}/api/auth/mobile-login`, {
+      const res = await fetch(`${API_BASE}/api/mobile/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email: email.toLowerCase().trim(), password }),
@@ -53,7 +53,7 @@ export default function LoginScreen() {
       }
 
       // Failed — check specific reason
-      const statusRes = await fetch(`${API_BASE}/api/auth/check-status`, {
+      const statusRes = await fetch(`${API_BASE}/api/mobile/check-status`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email }),
