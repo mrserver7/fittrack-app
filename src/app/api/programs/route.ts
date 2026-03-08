@@ -1,14 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
+import { getAuthUser } from "@/lib/get-auth-user";
 import { prisma } from "@/lib/prisma";
 
 export async function GET(req: NextRequest) {
-  const session = await auth();
-  if (!session || (session.user as Record<string, unknown>).role !== "trainer")
+  const user = await getAuthUser(req);
+  if (!user || user.role !== "trainer")
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
   const programs = await prisma.program.findMany({
-    where: { trainerId: session.user.id!, deletedAt: null },
+    where: { trainerId: user.id, deletedAt: null },
     include: {
       weeks: { include: { days: { include: { exercises: { include: { exercise: true } } } } } },
       _count: { select: { clientPrograms: { where: { status: "active" } } } },
@@ -19,8 +19,8 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
-  const session = await auth();
-  if (!session || (session.user as Record<string, unknown>).role !== "trainer")
+  const user = await getAuthUser(req);
+  if (!user || user.role !== "trainer")
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
   const body = await req.json();
@@ -37,7 +37,7 @@ export async function POST(req: NextRequest) {
 
   const program = await prisma.program.create({
     data: {
-      trainerId: session.user.id!,
+      trainerId: user.id,
       name,
       description,
       durationWeeks: durationWeeks || 4,

@@ -1,15 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
+import { getAuthUser } from "@/lib/get-auth-user";
 import { prisma } from "@/lib/prisma";
 
 type Params = { params: Promise<{ clientId: string }> };
 
 export async function GET(req: NextRequest, { params }: Params) {
-  const session = await auth();
-  if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const user = await getAuthUser(req);
+  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   const { clientId } = await params;
-  const role = (session.user! as Record<string, unknown>).role as string;
-  if (role === "client" && session.user!.id !== clientId)
+  const role = user.role;
+  if (role === "client" && user.id !== clientId)
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
   const measurements = await prisma.measurement.findMany({
@@ -21,11 +21,11 @@ export async function GET(req: NextRequest, { params }: Params) {
 }
 
 export async function POST(req: NextRequest, { params }: Params) {
-  const session = await auth();
-  if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const user = await getAuthUser(req);
+  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   const { clientId } = await params;
-  const role = (session.user! as Record<string, unknown>).role as string;
-  if (role === "client" && session.user!.id !== clientId)
+  const role = user.role;
+  if (role === "client" && user.id !== clientId)
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
   const body = await req.json();
