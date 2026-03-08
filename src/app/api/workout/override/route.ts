@@ -1,15 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
+import { getAuthUser } from "@/lib/get-auth-user";
 import { prisma } from "@/lib/prisma";
 import { WEEKDAYS, getWeekStart } from "@/lib/utils";
 
 export async function POST(req: NextRequest) {
-  const session = await auth();
-  if (!session || (session.user as Record<string, unknown>).role !== "client") {
+  const user = await getAuthUser(req);
+  if (!user || user.role !== "client") {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
-  const clientId = session.user!.id!;
+  const clientId = user.id;
   const body = await req.json();
   const { workoutDayId, action, originalDay, newDay, weekStartDate } = body as {
     workoutDayId: string;

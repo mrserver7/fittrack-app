@@ -1,16 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
+import { getAuthUser } from "@/lib/get-auth-user";
 import { prisma } from "@/lib/prisma";
 
 export async function GET(req: NextRequest) {
-  const session = await auth();
-  if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const user = await getAuthUser(req);
+  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const role = (session.user as Record<string, unknown>).role as string;
   const { searchParams } = new URL(req.url);
-  const clientId = searchParams.get("clientId") || session.user.id!;
+  const clientId = searchParams.get("clientId") || user.id;
 
-  if (role === "client" && clientId !== session.user.id!)
+  if (user.role === "client" && clientId !== user.id)
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
   const sessions = await prisma.sessionLog.findMany({
@@ -27,12 +26,11 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
-  const session = await auth();
-  if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const user = await getAuthUser(req);
+  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const role = (session.user as Record<string, unknown>).role as string;
   const body = await req.json();
-  const clientId = role === "client" ? session.user.id! : body.clientId;
+  const clientId = user.role === "client" ? user.id : body.clientId;
 
   const log = await prisma.sessionLog.create({
     data: {
