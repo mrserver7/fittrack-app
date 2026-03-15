@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useLanguage } from "@/contexts/language-context";
 import LogoMark from "@/components/ui/logo-mark";
+import ThemeToggle from "@/components/ui/theme-toggle";
 import { AlertCircle, XCircle, Clock, Mail, Ban } from "lucide-react";
 
 type BlockedStatus = "pending" | "invited" | "archived" | "rejected" | "invalid" | null;
@@ -84,15 +85,18 @@ export default function LoginPage() {
   const cfg = blocked && blocked !== "invalid" ? statusConfig[blocked] : null;
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-950 flex items-center justify-center p-4">
+    <div className="relative min-h-screen bg-gradient-to-br from-gray-50 via-gray-50 to-emerald-50/50 dark:from-gray-950 dark:via-gray-950 dark:to-gray-950 flex items-center justify-center p-4">
+      <div className="absolute top-4 right-4">
+        <ThemeToggle />
+      </div>
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <Link href="/" className="inline-flex items-center gap-2">
-            <LogoMark size={36} />
+            <LogoMark size={40} />
             <span className="font-bold text-xl text-gray-900 dark:text-gray-50">FitTrack</span>
           </Link>
         </div>
-        <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-8">
+        <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-[0_2px_16px_rgba(0,0,0,0.08)] dark:shadow-none border border-gray-200/80 dark:border-gray-700 p-8">
           <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-50 mb-1">{t.auth.welcomeBack}</h1>
           <p className="text-gray-500 dark:text-gray-400 text-sm mb-6">{t.auth.signInToAccount}</p>
 
@@ -102,7 +106,7 @@ export default function LoginPage() {
               <input
                 type="email" value={email} onChange={(e) => { setEmail(e.target.value); setBlocked(null); }} required
                 placeholder={t.auth.emailPlaceholder} autoComplete="email"
-                className="w-full px-3.5 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-50 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                className="w-full px-3.5 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-gray-50 text-sm placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-colors"
               />
             </div>
             <div>
@@ -110,7 +114,7 @@ export default function LoginPage() {
               <input
                 type="password" value={password} onChange={(e) => { setPassword(e.target.value); setBlocked(null); }} required
                 placeholder="••••••••" autoComplete="current-password"
-                className="w-full px-3.5 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-50 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                className="w-full px-3.5 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-gray-50 text-sm placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-colors"
               />
             </div>
 
