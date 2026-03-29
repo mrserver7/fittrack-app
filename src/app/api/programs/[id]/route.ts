@@ -51,6 +51,9 @@ export async function DELETE(req: NextRequest, { params }: Params) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   const { id } = await params;
 
+  const existing = await prisma.program.findUnique({ where: { id, trainerId: session.user.id!, deletedAt: null } });
+  if (!existing) return NextResponse.json({ error: "Not found" }, { status: 404 });
+
   await prisma.program.update({ where: { id }, data: { deletedAt: new Date() } });
   return NextResponse.json({ success: true });
 }
