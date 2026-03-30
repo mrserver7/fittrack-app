@@ -7,20 +7,24 @@ export default async function HabitsPage() {
   const [session, t] = await Promise.all([auth(), getT()]);
 
   return (
-    <div className="p-6 md:p-8 max-w-3xl mx-auto">
-      <div className="mb-6">
-        <div className="flex items-center gap-3 mb-1">
-          <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-xl flex items-center justify-center">
-            <Target className="w-5 h-5 text-blue-600 dark:text-blue-400" />
-          </div>
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-50">{t.nav.habits}</h1>
-            <p className="text-sm text-gray-500 dark:text-gray-400">Track your daily habits assigned by your trainer</p>
-          </div>
+    <div className="page-container max-w-3xl">
+      {/* Page header */}
+      <div className="flex items-center gap-3.5 mb-8">
+        <div className="w-11 h-11 rounded-xl bg-primary/10 flex items-center justify-center ring-1 ring-primary/20">
+          <Target className="w-5 h-5 text-primary" />
+        </div>
+        <div>
+          <h1 className="text-2xl sm:text-3xl font-bold text-foreground tracking-tight">
+            {t.nav.habits}
+          </h1>
+          <p className="text-sm text-muted-foreground mt-0.5">
+            Track your daily habits assigned by your trainer
+          </p>
         </div>
       </div>
 
-      <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-700 p-5">
+      {/* Habit tracker */}
+      <div className="section-card-padded">
         <HabitTracker />
       </div>
     </div>

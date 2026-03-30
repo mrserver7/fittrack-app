@@ -37,29 +37,29 @@ export default function AssignProgramButton({ clientId, programs }: { clientId: 
       </button>
 
       {open && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" onClick={() => setOpen(false)}>
-          <div className="bg-white rounded-2xl p-6 w-full max-w-md shadow-xl" onClick={(e) => e.stopPropagation()}>
-            <h2 className="font-bold text-gray-900 mb-4">Assign Program</h2>
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4" onClick={() => setOpen(false)}>
+          <div className="bg-card rounded-2xl border border-border shadow-xl p-6 w-full max-w-md" onClick={(e) => e.stopPropagation()}>
+            <h2 className="font-bold text-foreground mb-4">Assign Program</h2>
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">Select Program</label>
+                <label className="block text-sm font-medium text-foreground mb-1.5">Select Program</label>
                 <select value={selectedProgram} onChange={(e) => setSelectedProgram(e.target.value)}
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
-                  <option value="">— Choose a program —</option>
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-border bg-card text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                  <option value="">-- Choose a program --</option>
                   {programs.map((p) => (
                     <option key={p.id} value={p.id}>{p.name} ({p.durationWeeks}w)</option>
                   ))}
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">Start Date</label>
+                <label className="block text-sm font-medium text-foreground mb-1.5">Start Date</label>
                 <input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)}
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-border bg-card text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500" />
               </div>
             </div>
             <div className="flex gap-3 mt-6">
               <button onClick={() => setOpen(false)}
-                className="flex-1 py-2.5 border border-gray-200 text-gray-700 rounded-xl text-sm font-medium hover:bg-gray-50 transition-colors">
+                className="flex-1 py-2.5 border border-border text-foreground rounded-xl text-sm font-medium hover:bg-muted/60 transition-colors">
                 Cancel
               </button>
               <button onClick={assign} disabled={loading}

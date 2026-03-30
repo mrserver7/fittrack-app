@@ -52,12 +52,12 @@ export default async function LoginLogPage({
   }
 
   return (
-    <div className="p-6 md:p-8 max-w-6xl mx-auto">
+    <div className="page-container">
       <div className="flex items-center gap-3 mb-6">
         <Activity className="w-6 h-6 text-blue-500" />
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-50">Sign-in Log</h1>
-          <p className="text-sm text-gray-400 dark:text-gray-500 mt-0.5">
+          <h1 className="text-2xl font-bold text-foreground">Sign-in Log</h1>
+          <p className="text-sm text-muted-foreground mt-0.5">
             {total} total attempts
           </p>
         </div>
@@ -74,7 +74,7 @@ export default async function LoginLogPage({
               className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
                 filter === f.value || (!filter && !f.value)
                   ? "bg-blue-600 text-white"
-                  : "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700"
+                  : "bg-muted text-muted-foreground hover:bg-muted/60"
               }`}
             >
               {f.label}
@@ -84,27 +84,27 @@ export default async function LoginLogPage({
       </div>
 
       {attempts.length === 0 ? (
-        <div className="text-center py-20 bg-white dark:bg-gray-900 rounded-2xl border border-dashed border-gray-300 dark:border-gray-700">
-          <Activity className="w-10 h-10 text-gray-300 dark:text-gray-600 mx-auto mb-3" />
-          <p className="text-gray-500 dark:text-gray-400">No login attempts yet.</p>
+        <div className="text-center py-20 section-card border-dashed">
+          <Activity className="w-10 h-10 text-muted-foreground mx-auto mb-3" />
+          <p className="text-muted-foreground">No login attempts yet.</p>
         </div>
       ) : (
         <>
-          <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-700 overflow-hidden">
+          <div className="section-card overflow-hidden">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50">
-                  <th className="text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide px-4 py-3">Result</th>
-                  <th className="text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide px-4 py-3">Email</th>
-                  <th className="text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide px-4 py-3">Role</th>
-                  <th className="text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide px-4 py-3">Reason</th>
-                  <th className="text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide px-4 py-3">IP</th>
-                  <th className="text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide px-4 py-3">Time</th>
+                <tr className="border-b border-border bg-muted/50">
+                  <th className="text-left text-xs font-semibold text-muted-foreground uppercase tracking-wide px-4 py-3">Result</th>
+                  <th className="text-left text-xs font-semibold text-muted-foreground uppercase tracking-wide px-4 py-3">Email</th>
+                  <th className="text-left text-xs font-semibold text-muted-foreground uppercase tracking-wide px-4 py-3">Role</th>
+                  <th className="text-left text-xs font-semibold text-muted-foreground uppercase tracking-wide px-4 py-3">Reason</th>
+                  <th className="text-left text-xs font-semibold text-muted-foreground uppercase tracking-wide px-4 py-3">IP</th>
+                  <th className="text-left text-xs font-semibold text-muted-foreground uppercase tracking-wide px-4 py-3">Time</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
+              <tbody className="divide-y divide-border">
                 {attempts.map((a) => (
-                  <tr key={a.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/40 transition-colors">
+                  <tr key={a.id} className="hover:bg-muted/60 transition-colors">
                     <td className="px-4 py-3">
                       {a.success ? (
                         <CheckCircle className="w-4 h-4 text-emerald-500" />
@@ -112,23 +112,23 @@ export default async function LoginLogPage({
                         <XCircle className="w-4 h-4 text-red-500" />
                       )}
                     </td>
-                    <td className="px-4 py-3 font-medium text-gray-900 dark:text-gray-100">{a.email}</td>
+                    <td className="px-4 py-3 font-medium text-foreground">{a.email}</td>
                     <td className="px-4 py-3">
                       {a.role ? (
-                        <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${roleColors[a.role] ?? "bg-gray-100 text-gray-600"}`}>
+                        <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${roleColors[a.role] ?? "bg-muted text-muted-foreground"}`}>
                           {a.role}
                         </span>
                       ) : (
-                        <span className="text-gray-300 dark:text-gray-600">—</span>
+                        <span className="text-muted-foreground/50">--</span>
                       )}
                     </td>
-                    <td className="px-4 py-3 text-gray-500 dark:text-gray-400 text-xs">
-                      {a.reason ? reasonLabels[a.reason] ?? a.reason : "—"}
+                    <td className="px-4 py-3 text-muted-foreground text-xs">
+                      {a.reason ? reasonLabels[a.reason] ?? a.reason : "--"}
                     </td>
-                    <td className="px-4 py-3 text-gray-400 dark:text-gray-500 text-xs font-mono">
-                      {a.ipAddress ?? "—"}
+                    <td className="px-4 py-3 text-muted-foreground text-xs font-mono">
+                      {a.ipAddress ?? "--"}
                     </td>
-                    <td className="px-4 py-3 text-gray-400 dark:text-gray-500 text-xs whitespace-nowrap">
+                    <td className="px-4 py-3 text-muted-foreground text-xs whitespace-nowrap">
                       {a.createdAt.toLocaleString("en-GB", {
                         day: "2-digit", month: "short", year: "numeric",
                         hour: "2-digit", minute: "2-digit", second: "2-digit",
@@ -145,17 +145,17 @@ export default async function LoginLogPage({
             <div className="flex items-center justify-center gap-2 mt-6">
               {page > 1 && (
                 <a href={pageUrl(page - 1)}
-                  className="px-4 py-2 text-sm rounded-lg border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
-                  ← Prev
+                  className="px-4 py-2 text-sm rounded-lg border border-border text-foreground hover:bg-muted/60 transition-colors">
+                  Prev
                 </a>
               )}
-              <span className="text-sm text-gray-400 dark:text-gray-500">
+              <span className="text-sm text-muted-foreground">
                 Page {page} of {totalPages}
               </span>
               {page < totalPages && (
                 <a href={pageUrl(page + 1)}
-                  className="px-4 py-2 text-sm rounded-lg border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
-                  Next →
+                  className="px-4 py-2 text-sm rounded-lg border border-border text-foreground hover:bg-muted/60 transition-colors">
+                  Next
                 </a>
               )}
             </div>

@@ -47,25 +47,25 @@ export default async function BannedUsersPage() {
 
   const statusColors: Record<string, string> = {
     rejected: "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400",
-    archived: "bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400",
+    archived: "bg-muted text-muted-foreground",
   };
 
   return (
-    <div className="p-6 md:p-8 max-w-5xl mx-auto">
+    <div className="page-container">
       <div className="flex items-center gap-3 mb-6">
         <ShieldX className="w-6 h-6 text-red-500" />
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-50">Banned / Removed Users</h1>
-          <p className="text-sm text-gray-400 dark:text-gray-500 mt-0.5">
-            {bannedClients.length} user{bannedClients.length !== 1 ? "s" : ""} — rejected or deleted accounts
+          <h1 className="text-2xl font-bold text-foreground">Banned / Removed Users</h1>
+          <p className="text-sm text-muted-foreground mt-0.5">
+            {bannedClients.length} user{bannedClients.length !== 1 ? "s" : ""} -- rejected or deleted accounts
           </p>
         </div>
       </div>
 
       {bannedClients.length === 0 ? (
-        <div className="text-center py-20 bg-white dark:bg-gray-900 rounded-2xl border border-dashed border-gray-300 dark:border-gray-700">
-          <ShieldX className="w-10 h-10 text-gray-300 dark:text-gray-600 mx-auto mb-3" />
-          <p className="text-gray-500 dark:text-gray-400">No banned or removed users.</p>
+        <div className="text-center py-20 section-card border-dashed">
+          <ShieldX className="w-10 h-10 text-muted-foreground mx-auto mb-3" />
+          <p className="text-muted-foreground">No banned or removed users.</p>
         </div>
       ) : (
         <div className="space-y-4">
@@ -75,22 +75,22 @@ export default async function BannedUsersPage() {
             const lastAttempt = attempts[0];
 
             return (
-              <div key={client.id} className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-700 overflow-hidden">
+              <div key={client.id} className="section-card overflow-hidden">
                 {/* User header row */}
                 <div className="flex items-center gap-4 p-4">
                   {/* Avatar */}
-                  <div className="w-10 h-10 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center flex-shrink-0 overflow-hidden">
+                  <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center flex-shrink-0 overflow-hidden">
                     {client.photoUrl ? (
                       <img src={client.photoUrl} alt={client.name} className="w-full h-full object-cover" />
                     ) : (
-                      <User className="w-5 h-5 text-gray-400" />
+                      <User className="w-5 h-5 text-muted-foreground" />
                     )}
                   </div>
 
                   {/* Info */}
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <p className="text-sm font-semibold text-gray-900 dark:text-gray-50">{client.name}</p>
+                      <p className="text-sm font-semibold text-foreground">{client.name}</p>
                       <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${statusColors[client.status] ?? ""}`}>
                         {client.status}
                       </span>
@@ -100,7 +100,7 @@ export default async function BannedUsersPage() {
                         </span>
                       )}
                     </div>
-                    <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">
+                    <p className="text-xs text-muted-foreground mt-0.5">
                       {client.email}
                       {client.trainer ? ` · ${client.trainer.name}` : " · No trainer"}
                       {" · Joined "}{formatDate(client.createdAt.toISOString())}
@@ -121,8 +121,8 @@ export default async function BannedUsersPage() {
 
                 {/* Login attempt log */}
                 {attempts.length > 0 && (
-                  <div className="border-t border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/40 px-4 py-3">
-                    <p className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wide mb-2">
+                  <div className="border-t border-border bg-muted/50 px-4 py-3">
+                    <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">
                       Sign-in attempts ({attempts.length})
                     </p>
                     <div className="space-y-1 max-h-48 overflow-y-auto">
@@ -136,13 +136,13 @@ export default async function BannedUsersPage() {
                           <span className={`font-medium w-14 flex-shrink-0 ${a.success ? "text-emerald-600 dark:text-emerald-400" : "text-red-600 dark:text-red-400"}`}>
                             {a.success ? "Success" : "Failed"}
                           </span>
-                          <span className="text-gray-500 dark:text-gray-400 flex-shrink-0">
-                            {a.reason ? reasonLabels[a.reason] ?? a.reason : "—"}
+                          <span className="text-muted-foreground flex-shrink-0">
+                            {a.reason ? reasonLabels[a.reason] ?? a.reason : "--"}
                           </span>
                           {a.ipAddress && (
-                            <span className="text-gray-300 dark:text-gray-600 font-mono flex-shrink-0">{a.ipAddress}</span>
+                            <span className="text-muted-foreground/50 font-mono flex-shrink-0">{a.ipAddress}</span>
                           )}
-                          <span className="text-gray-300 dark:text-gray-600 ml-auto flex-shrink-0 whitespace-nowrap">
+                          <span className="text-muted-foreground/50 ml-auto flex-shrink-0 whitespace-nowrap">
                             {a.createdAt.toLocaleString("en-GB", {
                               day: "2-digit", month: "short", year: "numeric",
                               hour: "2-digit", minute: "2-digit",
@@ -155,8 +155,8 @@ export default async function BannedUsersPage() {
                 )}
 
                 {attempts.length === 0 && (
-                  <div className="border-t border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/40 px-4 py-2">
-                    <p className="text-xs text-gray-400 dark:text-gray-500">No sign-in attempts recorded.</p>
+                  <div className="border-t border-border bg-muted/50 px-4 py-2">
+                    <p className="text-xs text-muted-foreground">No sign-in attempts recorded.</p>
                   </div>
                 )}
               </div>

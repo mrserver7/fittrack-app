@@ -90,7 +90,7 @@ export default async function ClientProfilePage({ params }: Params) {
   const statusColors: Record<string, string> = {
     active: "bg-emerald-100 text-emerald-700",
     paused: "bg-yellow-100 text-yellow-700",
-    archived: "bg-gray-100 text-gray-500",
+    archived: "bg-muted text-muted-foreground",
     invited: "bg-blue-100 text-blue-700",
   };
 
@@ -102,12 +102,12 @@ export default async function ClientProfilePage({ params }: Params) {
   };
 
   return (
-    <div className="p-6 md:p-8 max-w-6xl mx-auto">
+    <div className="page-container">
       {/* Header */}
       <div className="flex items-center gap-3 mb-6">
         <Link href="/clients">
-          <button className="p-2 rounded-xl border border-gray-200 hover:bg-gray-50 transition-colors">
-            <ArrowLeft className="w-4 h-4 text-gray-600" />
+          <button className="p-2 rounded-xl border border-border hover:bg-muted/60 transition-colors">
+            <ArrowLeft className="w-4 h-4 text-muted-foreground" />
           </button>
         </Link>
         <div className="flex-1 flex items-center gap-4">
@@ -116,17 +116,17 @@ export default async function ClientProfilePage({ params }: Params) {
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h1 className="text-2xl font-bold text-gray-900">{client.name}</h1>
+              <h1 className="text-2xl font-bold text-foreground">{client.name}</h1>
               <span className={`text-xs px-2.5 py-1 rounded-lg font-medium ${statusColors[client.status]}`}>
                 {client.status}
               </span>
             </div>
-            <p className="text-gray-400 text-sm">{client.email}</p>
+            <p className="text-muted-foreground text-sm">{client.email}</p>
           </div>
         </div>
         <div className="flex gap-2">
           <Link href={`/clients/${id}/messages`}>
-            <button className="flex items-center gap-2 px-4 py-2 border border-gray-200 rounded-xl text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors">
+            <button className="flex items-center gap-2 px-4 py-2 border border-border rounded-xl text-sm font-medium text-muted-foreground hover:bg-muted/60 transition-colors">
               <MessageSquare className="w-4 h-4" /> Message
             </button>
           </Link>
@@ -141,12 +141,12 @@ export default async function ClientProfilePage({ params }: Params) {
         {[
           { label: "Sessions Done", value: client._count.sessionLogs },
           { label: "Adherence", value: `${adherence}%` },
-          { label: "Current Weight", value: lastMeasurement?.weightKg ? `${lastMeasurement.weightKg}kg` : "—" },
+          { label: "Current Weight", value: lastMeasurement?.weightKg ? `${lastMeasurement.weightKg}kg` : "--" },
           { label: "PRs", value: client.personalRecords.length },
         ].map((s) => (
-          <div key={s.label} className="bg-white rounded-2xl border border-gray-200 p-4 text-center">
-            <p className="text-2xl font-bold text-gray-900">{s.value}</p>
-            <p className="text-xs text-gray-400 mt-1">{s.label}</p>
+          <div key={s.label} className="section-card p-4 text-center">
+            <p className="text-2xl font-bold text-foreground">{s.value}</p>
+            <p className="text-xs text-muted-foreground mt-1">{s.label}</p>
           </div>
         ))}
       </div>
@@ -155,60 +155,60 @@ export default async function ClientProfilePage({ params }: Params) {
         {/* Left column: profile details */}
         <div className="space-y-4">
           {/* Goals */}
-          <div className="bg-white rounded-2xl border border-gray-200 p-5">
+          <div className="section-card-padded">
             <div className="flex items-center gap-2 mb-3">
               <Target className="w-4 h-4 text-emerald-600" />
-              <h3 className="font-semibold text-gray-900 text-sm">Goals</h3>
+              <h3 className="font-semibold text-foreground text-sm">Goals</h3>
             </div>
-            <p className="text-sm text-gray-600 leading-relaxed">{client.goalsText || "No goals recorded."}</p>
+            <p className="text-sm text-muted-foreground leading-relaxed">{client.goalsText || "No goals recorded."}</p>
           </div>
 
           {/* Injuries */}
           {client.injuriesText && (
-            <div className="bg-white rounded-2xl border border-red-200 p-5">
+            <div className="bg-card rounded-2xl border border-red-200 dark:border-red-800 shadow-sm p-5 sm:p-6">
               <div className="flex items-center gap-2 mb-3">
                 <AlertTriangle className="w-4 h-4 text-red-500" />
-                <h3 className="font-semibold text-red-800 text-sm">Injuries / Contraindications</h3>
+                <h3 className="font-semibold text-red-800 dark:text-red-400 text-sm">Injuries / Contraindications</h3>
               </div>
-              <p className="text-sm text-red-700 leading-relaxed">{client.injuriesText}</p>
+              <p className="text-sm text-red-700 dark:text-red-400 leading-relaxed">{client.injuriesText}</p>
             </div>
           )}
 
           {/* Active Program */}
-          <div className="bg-white rounded-2xl border border-gray-200 p-5">
+          <div className="section-card-padded">
             <div className="flex items-center gap-2 mb-3">
               <ClipboardList className="w-4 h-4 text-blue-600" />
-              <h3 className="font-semibold text-gray-900 text-sm">Active Program</h3>
+              <h3 className="font-semibold text-foreground text-sm">Active Program</h3>
             </div>
             {client.clientPrograms.length > 0 ? (
               <div className="space-y-2">
                 {client.clientPrograms.map((cp) => (
-                  <div key={cp.id} className="p-3 bg-blue-50 rounded-xl">
+                  <div key={cp.id} className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-xl">
                     <div className="flex items-center justify-between gap-2">
-                      <p className="text-sm font-semibold text-blue-900 truncate">{cp.program.name}</p>
+                      <p className="text-sm font-semibold text-blue-900 dark:text-blue-300 truncate">{cp.program.name}</p>
                       <Link href={`/programs/${cp.program.id}/edit`}
-                        className="text-xs text-blue-600 hover:text-blue-800 font-medium whitespace-nowrap flex-shrink-0 underline">
+                        className="text-xs text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 font-medium whitespace-nowrap flex-shrink-0 underline">
                         Edit Plan
                       </Link>
                     </div>
-                    <p className="text-xs text-blue-600 mt-0.5">
-                      Started: {formatDate(cp.startDate)} · {cp.program.durationWeeks} weeks
+                    <p className="text-xs text-blue-600 dark:text-blue-400 mt-0.5">
+                      Started: {formatDate(cp.startDate)} -- {cp.program.durationWeeks} weeks
                     </p>
                   </div>
                 ))}
               </div>
             ) : (
-              <p className="text-sm text-gray-400">No program assigned.</p>
+              <p className="text-sm text-muted-foreground">No program assigned.</p>
             )}
           </div>
 
           {/* Tags */}
           {client.tags && (
-            <div className="bg-white rounded-2xl border border-gray-200 p-5">
-              <h3 className="font-semibold text-gray-900 text-sm mb-3">Tags</h3>
+            <div className="section-card-padded">
+              <h3 className="font-semibold text-foreground text-sm mb-3">Tags</h3>
               <div className="flex flex-wrap gap-2">
                 {client.tags.split(",").map((t) => (
-                  <span key={t} className="text-xs bg-gray-100 text-gray-600 px-3 py-1.5 rounded-full">{t.trim()}</span>
+                  <span key={t} className="text-xs bg-muted text-muted-foreground px-3 py-1.5 rounded-full">{t.trim()}</span>
                 ))}
               </div>
             </div>
@@ -216,9 +216,9 @@ export default async function ClientProfilePage({ params }: Params) {
 
           {/* Trainer notes */}
           {client.trainerNotes && (
-            <div className="bg-white rounded-2xl border border-yellow-200 p-5">
-              <h3 className="font-semibold text-yellow-800 text-sm mb-2">Private Notes</h3>
-              <p className="text-sm text-yellow-700 leading-relaxed">{client.trainerNotes}</p>
+            <div className="bg-card rounded-2xl border border-yellow-200 dark:border-yellow-800 shadow-sm p-5 sm:p-6">
+              <h3 className="font-semibold text-yellow-800 dark:text-yellow-400 text-sm mb-2">Private Notes</h3>
+              <p className="text-sm text-yellow-700 dark:text-yellow-400 leading-relaxed">{client.trainerNotes}</p>
             </div>
           )}
         </div>
@@ -227,8 +227,8 @@ export default async function ClientProfilePage({ params }: Params) {
         <div className="lg:col-span-2 space-y-4">
           {/* Goal Milestones */}
           {client.goalMilestones.length > 0 && (
-            <div className="bg-white rounded-2xl border border-gray-200 p-5">
-              <h3 className="font-semibold text-gray-900 text-sm mb-4">Goal Milestones</h3>
+            <div className="section-card-padded">
+              <h3 className="font-semibold text-foreground text-sm mb-4">Goal Milestones</h3>
               <div className="space-y-3">
                 {client.goalMilestones.map((m) => {
                   const pct = m.targetValue && m.progressValue
@@ -237,12 +237,12 @@ export default async function ClientProfilePage({ params }: Params) {
                   return (
                     <div key={m.id}>
                       <div className="flex items-center justify-between mb-1">
-                        <p className="text-sm font-medium text-gray-900">{m.title}</p>
-                        <span className={`text-xs ${m.achievedAt ? "text-emerald-600" : "text-gray-400"}`}>
-                          {m.achievedAt ? "✓ Achieved" : `${pct}%`}
+                        <p className="text-sm font-medium text-foreground">{m.title}</p>
+                        <span className={`text-xs ${m.achievedAt ? "text-emerald-600" : "text-muted-foreground"}`}>
+                          {m.achievedAt ? "Achieved" : `${pct}%`}
                         </span>
                       </div>
-                      <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
+                      <div className="h-2 bg-muted rounded-full overflow-hidden">
                         <div className={`h-full rounded-full transition-all ${m.achievedAt ? "bg-emerald-500" : "bg-blue-400"}`}
                           style={{ width: `${pct}%` }} />
                       </div>
@@ -255,8 +255,8 @@ export default async function ClientProfilePage({ params }: Params) {
 
           {/* This Week's Schedule */}
           {currentWeekDays.length > 0 && (
-            <div className="bg-white rounded-2xl border border-gray-200 p-5">
-              <h3 className="font-semibold text-gray-900 text-sm mb-4">This Week&apos;s Schedule</h3>
+            <div className="section-card-padded">
+              <h3 className="font-semibold text-foreground text-sm mb-4">This Week&apos;s Schedule</h3>
               <div className="grid grid-cols-7 gap-1 mb-4">
                 {WEEKDAYS.map((day) => {
                   const programDay = currentWeekDays.find((d) => d.dayLabel === day);
@@ -276,23 +276,23 @@ export default async function ClientProfilePage({ params }: Params) {
                     ? weekSessions.some((s) => s.workoutDayId === effectiveDay!.id && s.status === "completed")
                     : false;
 
-                  let cellClass = "bg-gray-50 text-gray-300";
+                  let cellClass = "bg-muted text-muted-foreground";
                   let statusIcon = null;
                   let subText = null;
 
                   if (skipped) {
-                    cellClass = "bg-red-50 text-red-500 line-through";
+                    cellClass = "bg-red-50 dark:bg-red-900/20 text-red-500 line-through";
                   } else if (movedAway) {
-                    cellClass = "bg-orange-50 text-orange-500";
-                    subText = `→ ${movedAway.newDay?.slice(0, 3)}`;
+                    cellClass = "bg-orange-50 dark:bg-orange-900/20 text-orange-500";
+                    subText = `-> ${movedAway.newDay?.slice(0, 3)}`;
                   } else if (movedHere) {
-                    cellClass = "bg-orange-50 text-orange-500";
-                    subText = `← ${movedHere.originalDay?.slice(0, 3)}`;
+                    cellClass = "bg-orange-50 dark:bg-orange-900/20 text-orange-500";
+                    subText = `<- ${movedHere.originalDay?.slice(0, 3)}`;
                   } else if (effectiveDay && completed) {
-                    cellClass = "bg-emerald-50 text-emerald-700";
-                    statusIcon = "✓";
+                    cellClass = "bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400";
+                    statusIcon = "Done";
                   } else if (effectiveDay) {
-                    cellClass = "bg-emerald-50 text-emerald-600";
+                    cellClass = "bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400";
                   }
 
                   return (
@@ -307,7 +307,7 @@ export default async function ClientProfilePage({ params }: Params) {
                           {subText && <p className="text-xs font-medium">{subText}</p>}
                         </>
                       ) : (
-                        <p className="text-xs mt-0.5 text-gray-300">—</p>
+                        <p className="text-xs mt-0.5 text-muted-foreground">--</p>
                       )}
                     </div>
                   );
@@ -315,15 +315,15 @@ export default async function ClientProfilePage({ params }: Params) {
               </div>
 
               {overrides.length > 0 && (
-                <div className="border-t border-gray-100 pt-3 space-y-1.5">
-                  <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">Override History</p>
+                <div className="border-t border-border pt-3 space-y-1.5">
+                  <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">Override History</p>
                   {overrides.map((o) => (
-                    <p key={o.id} className="text-xs text-gray-500">
+                    <p key={o.id} className="text-xs text-muted-foreground">
                       {o.action === "skipped"
                         ? `Skipped ${o.originalDay} workout`
-                        : `Moved ${o.originalDay} workout → ${o.newDay}`}
-                      {" · "}
-                      <span className="text-gray-400">{formatDateTime(o.createdAt)}</span>
+                        : `Moved ${o.originalDay} workout -> ${o.newDay}`}
+                      {" -- "}
+                      <span className="text-muted-foreground">{formatDateTime(o.createdAt)}</span>
                     </p>
                   ))}
                 </div>
@@ -332,22 +332,22 @@ export default async function ClientProfilePage({ params }: Params) {
           )}
 
           {/* Recent Sessions */}
-          <div className="bg-white rounded-2xl border border-gray-200 p-5">
+          <div className="section-card-padded">
             <div className="flex items-center gap-2 mb-4">
-              <Calendar className="w-4 h-4 text-gray-400" />
-              <h3 className="font-semibold text-gray-900 text-sm">Recent Sessions</h3>
+              <Calendar className="w-4 h-4 text-muted-foreground" />
+              <h3 className="font-semibold text-foreground text-sm">Recent Sessions</h3>
             </div>
             {client.sessionLogs.length === 0 ? (
-              <p className="text-sm text-gray-400 py-4 text-center">No sessions logged yet.</p>
+              <p className="text-sm text-muted-foreground py-4 text-center">No sessions logged yet.</p>
             ) : (
               <div className="space-y-2">
                 {client.sessionLogs.slice(0, 10).map((s) => (
                   <Link key={s.id} href={`/clients/${id}/sessions/${s.id}`}
-                    className="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-50 transition-colors group">
+                    className="flex items-center gap-3 p-3 rounded-xl hover:bg-muted/60 transition-colors group">
                     <div className={`w-2.5 h-2.5 rounded-full flex-shrink-0 ${sessionStatusColors[s.status]}`} />
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
-                        <p className="text-sm font-medium text-gray-900">
+                        <p className="text-sm font-medium text-foreground">
                           {formatDate(s.scheduledDate)}
                         </p>
                         {s.overallFeedbackEmoji && (
@@ -357,12 +357,12 @@ export default async function ClientProfilePage({ params }: Params) {
                           <AlertTriangle className="w-3 h-3 text-red-400" />
                         )}
                       </div>
-                      <p className="text-xs text-gray-400">
-                        {s.status} {s.totalVolumeKg ? `· ${s.totalVolumeKg}kg vol` : ""} {s.avgRpe ? `· RPE ${s.avgRpe}` : ""}
-                        {s.notes ? ` · "${s.notes.slice(0, 40)}${s.notes.length > 40 ? "…" : ""}"` : ""}
+                      <p className="text-xs text-muted-foreground">
+                        {s.status} {s.totalVolumeKg ? `-- ${s.totalVolumeKg}kg vol` : ""} {s.avgRpe ? `-- RPE ${s.avgRpe}` : ""}
+                        {s.notes ? ` -- "${s.notes.slice(0, 40)}${s.notes.length > 40 ? "..." : ""}"` : ""}
                       </p>
                     </div>
-                    <ChevronRight className="w-3.5 h-3.5 text-gray-300 group-hover:text-gray-500 transition-colors flex-shrink-0" />
+                    <ChevronRight className="w-3.5 h-3.5 text-muted-foreground group-hover:text-foreground transition-colors flex-shrink-0" />
                   </Link>
                 ))}
               </div>
@@ -371,14 +371,14 @@ export default async function ClientProfilePage({ params }: Params) {
 
           {/* PRs */}
           {client.personalRecords.length > 0 && (
-            <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-700 p-5">
-              <h3 className="font-semibold text-gray-900 dark:text-gray-50 text-sm mb-4">Personal Records 🏆</h3>
+            <div className="section-card-padded">
+              <h3 className="font-semibold text-foreground text-sm mb-4">Personal Records</h3>
               <div className="grid grid-cols-2 gap-3">
                 {client.personalRecords.map((pr) => (
                   <div key={pr.id} className="p-3 bg-amber-50 dark:bg-amber-900/20 rounded-xl">
                     <p className="text-xs text-amber-600 dark:text-amber-400 font-medium">{pr.exercise.name}</p>
                     <p className="text-lg font-bold text-amber-800 dark:text-amber-300">{pr.valueKg}kg</p>
-                    {pr.repsAtPr && <p className="text-xs text-amber-600 dark:text-amber-400">× {pr.repsAtPr} reps</p>}
+                    {pr.repsAtPr && <p className="text-xs text-amber-600 dark:text-amber-400">x {pr.repsAtPr} reps</p>}
                     <p className="text-xs text-amber-400 dark:text-amber-500 mt-1">{formatDate(pr.recordedAt)}</p>
                   </div>
                 ))}
@@ -390,8 +390,8 @@ export default async function ClientProfilePage({ params }: Params) {
           <EngagementBadge clientId={id} showDetail />
 
           {/* Progress Photos */}
-          <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-700 p-5">
-            <h3 className="font-semibold text-gray-900 dark:text-gray-50 text-sm mb-4">Progress Photos</h3>
+          <div className="section-card-padded">
+            <h3 className="font-semibold text-foreground text-sm mb-4">Progress Photos</h3>
             <ProgressPhotos clientId={id} />
           </div>
         </div>

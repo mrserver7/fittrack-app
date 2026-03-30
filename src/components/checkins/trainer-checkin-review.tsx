@@ -36,22 +36,22 @@ export default function TrainerCheckinReview({
   }
 
   return (
-    <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-700 p-5">
+    <div className="bg-card rounded-2xl border border-border p-5">
       <div className="flex items-center gap-2 mb-3">
         <MessageSquare className="w-4 h-4 text-emerald-600" />
-        <h3 className="font-semibold text-gray-900 dark:text-gray-50 text-sm">Your Comment</h3>
+        <h3 className="font-semibold text-foreground text-sm">Your Comment</h3>
       </div>
       <textarea
         value={comment}
         onChange={(e) => setComment(e.target.value)}
         rows={4}
-        placeholder="Write feedback for the client…"
-        className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-gray-50 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 resize-none"
+        placeholder="Write feedback for the client..."
+        className="w-full px-4 py-3 rounded-xl border border-border bg-muted text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 resize-none"
       />
       <div className="flex justify-end gap-3 mt-3">
         <button
           onClick={() => { setComment(existingComment); }}
-          className="px-4 py-2 border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 text-sm font-medium rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+          className="px-4 py-2 border border-border text-muted-foreground text-sm font-medium rounded-xl hover:bg-muted/60 transition-colors"
         >
           Reset
         </button>
@@ -60,7 +60,7 @@ export default function TrainerCheckinReview({
           disabled={saving}
           className="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold rounded-xl transition-colors disabled:opacity-60"
         >
-          {saving ? "Saving…" : "Save Comment"}
+          {saving ? "Saving..." : "Save Comment"}
         </button>
       </div>
     </div>

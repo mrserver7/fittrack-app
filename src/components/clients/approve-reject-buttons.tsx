@@ -57,9 +57,9 @@ export default function ApproveRejectButtons({ clientId, clientTrainerId, traine
         <select
           value={selectedTrainerId}
           onChange={(e) => setSelectedTrainerId(e.target.value)}
-          className="text-xs border border-gray-300 dark:border-gray-600 rounded-lg px-2 py-1.5 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 w-full"
+          className="text-xs border border-border rounded-lg px-2 py-1.5 bg-card text-foreground w-full"
         >
-          <option value="">{clientTrainerId ? "— Keep current —" : "— Select trainer —"}</option>
+          <option value="">{clientTrainerId ? "-- Keep current --" : "-- Select trainer --"}</option>
           {trainers.map((tr) => (
             <option key={tr.id} value={tr.id}>
               {tr.name}{tr.businessName ? ` · ${tr.businessName}` : ""}
@@ -71,7 +71,7 @@ export default function ApproveRejectButtons({ clientId, clientTrainerId, traine
         <button
           onClick={reject}
           disabled={!!loading}
-          className="flex items-center gap-1.5 px-3 py-2 border border-red-200 text-red-600 rounded-xl text-xs font-medium hover:bg-red-50 transition-colors disabled:opacity-50">
+          className="flex items-center gap-1.5 px-3 py-2 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 rounded-xl text-xs font-medium hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors disabled:opacity-50">
           <XCircle className="w-3.5 h-3.5" />
           {loading === "reject" ? "..." : "Reject"}
         </button>

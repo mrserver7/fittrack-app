@@ -56,15 +56,15 @@ export default function MessageThread({
       {/* Messages */}
       <div className="flex-1 overflow-y-auto p-5 space-y-3">
         {messages.length === 0 && (
-          <div className="text-center py-12 text-gray-400 text-sm">No messages yet. Start the conversation!</div>
+          <div className="text-center py-12 text-muted-foreground text-sm">No messages yet. Start the conversation!</div>
         )}
         {messages.map((msg) => (
           <div key={msg.id} className={`flex ${isMe(msg) ? "justify-end" : "justify-start"}`}>
             <div className={`max-w-[75%] rounded-2xl px-4 py-2.5 ${
-              isMe(msg) ? "bg-emerald-600 text-white rounded-br-sm" : "bg-white border border-gray-200 text-gray-900 rounded-bl-sm"
+              isMe(msg) ? "bg-emerald-600 text-white rounded-br-sm" : "bg-card border border-border text-foreground rounded-bl-sm"
             }`}>
               <p className="text-sm leading-relaxed">{msg.body}</p>
-              <p className={`text-xs mt-1 ${isMe(msg) ? "text-emerald-200" : "text-gray-400"}`}>
+              <p className={`text-xs mt-1 ${isMe(msg) ? "text-emerald-200" : "text-muted-foreground"}`}>
                 {formatDateTime(msg.createdAt)}
               </p>
             </div>
@@ -74,13 +74,13 @@ export default function MessageThread({
       </div>
 
       {/* Input */}
-      <form onSubmit={send} className="flex gap-3 p-4 border-t border-gray-200 bg-white">
+      <form onSubmit={send} className="flex gap-3 p-4 border-t border-border bg-card">
         <input
           value={body}
           onChange={(e) => setBody(e.target.value)}
           placeholder="Type a message..."
           maxLength={2000}
-          className="flex-1 px-4 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 resize-none"
+          className="flex-1 px-4 py-2.5 rounded-xl border border-border bg-card text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 resize-none"
           onKeyDown={(e) => {
             if (e.key === "Enter" && !e.shiftKey) {
               e.preventDefault();

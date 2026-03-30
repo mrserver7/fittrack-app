@@ -64,10 +64,10 @@ function RegisterForm() {
     }
   };
 
-  const inputClass = "w-full px-3.5 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-gray-50 text-sm placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-colors";
+  const inputClass = "w-full px-3.5 py-2.5 rounded-xl border border-border bg-muted/50 text-foreground text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all";
 
   return (
-    <div className="relative min-h-screen bg-gradient-to-br from-gray-50 via-gray-50 to-emerald-50/50 dark:from-gray-950 dark:via-gray-950 dark:to-gray-950 flex items-center justify-center p-4">
+    <div className="relative min-h-screen bg-background bg-gradient-to-br from-emerald-500/5 via-transparent to-emerald-500/3 flex items-center justify-center p-4">
       <div className="absolute top-4 right-4">
         <ThemeToggle />
       </div>
@@ -75,14 +75,14 @@ function RegisterForm() {
         <div className="text-center mb-8">
           <Link href="/" className="inline-flex items-center gap-2">
             <LogoMark size={40} />
-            <span className="font-bold text-xl text-gray-900 dark:text-gray-50">FitTrack</span>
+            <span className="font-bold text-xl text-foreground">FitTrack</span>
           </Link>
         </div>
-        <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-[0_2px_16px_rgba(0,0,0,0.08)] dark:shadow-none border border-gray-200/80 dark:border-gray-700 p-8">
-          <div className="flex rounded-xl border border-gray-200 dark:border-gray-700 p-1 mb-6">
+        <div className="bg-card rounded-2xl shadow-lg shadow-black/5 dark:shadow-black/20 border border-border p-7 sm:p-8">
+          <div className="flex rounded-xl border border-border p-1 mb-6">
             {(["trainer", "subscriber"] as const).map((tabKey) => (
               <button key={tabKey} type="button" onClick={() => setTab(tabKey)}
-                className={`flex-1 py-2 text-sm rounded-lg font-medium transition-all ${tab === tabKey ? "bg-emerald-500 text-white shadow-sm" : "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"}`}>
+                className={`flex-1 py-2 text-sm rounded-lg font-medium transition-all ${tab === tabKey ? "bg-emerald-600 text-white shadow-sm" : "text-muted-foreground hover:text-foreground"}`}>
                 {tabKey === "trainer" ? t.auth.trainerTab : t.auth.subscriberTab}
               </button>
             ))}
@@ -90,76 +90,76 @@ function RegisterForm() {
 
           {tab === "trainer" ? (
             <>
-              <h1 className="text-xl font-bold text-gray-900 dark:text-gray-50 mb-1">{t.auth.createTrainerAccount}</h1>
-              <p className="text-gray-500 dark:text-gray-400 text-sm mb-5">{t.auth.startManaging}</p>
+              <h1 className="text-xl font-bold text-foreground mb-1">{t.auth.createTrainerAccount}</h1>
+              <p className="text-muted-foreground text-sm mb-5">{t.auth.startManaging}</p>
               <form onSubmit={submitTrainer} className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">{t.auth.fullName} *</label>
+                  <label className="block text-sm font-medium text-foreground mb-1.5">{t.auth.fullName} *</label>
                   <input value={trainerForm.name} onChange={(e) => setTrainerForm({ ...trainerForm, name: e.target.value })} required placeholder={t.auth.trainerNamePlaceholder} className={inputClass} />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">{t.auth.businessName}</label>
+                  <label className="block text-sm font-medium text-foreground mb-1.5">{t.auth.businessName}</label>
                   <input value={trainerForm.businessName} onChange={(e) => setTrainerForm({ ...trainerForm, businessName: e.target.value })} placeholder={t.auth.businessNamePlaceholder} className={inputClass} />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">{t.auth.email} *</label>
+                  <label className="block text-sm font-medium text-foreground mb-1.5">{t.auth.email} *</label>
                   <input type="email" value={trainerForm.email} onChange={(e) => setTrainerForm({ ...trainerForm, email: e.target.value })} required placeholder={t.auth.trainerEmailPlaceholder} className={inputClass} />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">{t.auth.password} *</label>
+                  <label className="block text-sm font-medium text-foreground mb-1.5">{t.auth.password} *</label>
                   <input type="password" value={trainerForm.password} onChange={(e) => setTrainerForm({ ...trainerForm, password: e.target.value })} required placeholder={t.auth.minPassword} minLength={8} className={inputClass} />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">{t.auth.confirmPassword} *</label>
+                  <label className="block text-sm font-medium text-foreground mb-1.5">{t.auth.confirmPassword} *</label>
                   <input type="password" value={trainerForm.confirmPassword} onChange={(e) => setTrainerForm({ ...trainerForm, confirmPassword: e.target.value })} required placeholder={t.auth.minPassword} minLength={8} className={inputClass} />
                 </div>
-                <button type="submit" disabled={loading} className="w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-lg text-sm transition-colors disabled:opacity-60">
+                <button type="submit" disabled={loading} className="w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-xl shadow-sm hover:shadow-md text-sm transition-all disabled:opacity-60">
                   {loading ? t.auth.creatingAccount : t.auth.createTrainerBtn}
                 </button>
               </form>
             </>
           ) : (
             <>
-              <h1 className="text-xl font-bold text-gray-900 dark:text-gray-50 mb-1">{t.auth.joinAsSubscriber}</h1>
-              <p className="text-gray-500 dark:text-gray-400 text-sm mb-5">{t.auth.adminAssignsTrainer}</p>
+              <h1 className="text-xl font-bold text-foreground mb-1">{t.auth.joinAsSubscriber}</h1>
+              <p className="text-muted-foreground text-sm mb-5">{t.auth.adminAssignsTrainer}</p>
               <form onSubmit={submitSubscriber} className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">{t.auth.fullName} *</label>
+                  <label className="block text-sm font-medium text-foreground mb-1.5">{t.auth.fullName} *</label>
                   <input value={subForm.name} onChange={(e) => setSubForm({ ...subForm, name: e.target.value })} required placeholder={t.auth.namePlaceholder} className={inputClass} />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">{t.auth.email} *</label>
+                  <label className="block text-sm font-medium text-foreground mb-1.5">{t.auth.email} *</label>
                   <input type="email" value={subForm.email} onChange={(e) => setSubForm({ ...subForm, email: e.target.value })} required placeholder={t.auth.emailPlaceholder} className={inputClass} />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">{t.auth.password} *</label>
+                  <label className="block text-sm font-medium text-foreground mb-1.5">{t.auth.password} *</label>
                   <input type="password" value={subForm.password} onChange={(e) => setSubForm({ ...subForm, password: e.target.value })} required placeholder={t.auth.minPassword} minLength={8} className={inputClass} />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">{t.auth.confirmPassword} *</label>
+                  <label className="block text-sm font-medium text-foreground mb-1.5">{t.auth.confirmPassword} *</label>
                   <input type="password" value={subForm.confirmPassword} onChange={(e) => setSubForm({ ...subForm, confirmPassword: e.target.value })} required placeholder={t.auth.minPassword} minLength={8} className={inputClass} />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">{t.auth.phone}</label>
+                  <label className="block text-sm font-medium text-foreground mb-1.5">{t.auth.phone}</label>
                   <input value={subForm.phone} onChange={(e) => setSubForm({ ...subForm, phone: e.target.value })} placeholder={t.auth.phonePlaceholder} className={inputClass} />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">{t.auth.goals}</label>
+                  <label className="block text-sm font-medium text-foreground mb-1.5">{t.auth.goals}</label>
                   <textarea rows={2} value={subForm.goalsText} onChange={(e) => setSubForm({ ...subForm, goalsText: e.target.value })}
                     placeholder={t.auth.goalsPlaceholder} className={`${inputClass} resize-none`} />
                 </div>
                 <div className="p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl">
                   <p className="text-xs text-amber-800 dark:text-amber-300">{t.auth.healthDisclaimer}</p>
                 </div>
-                <button type="submit" disabled={loading} className="w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-lg text-sm transition-colors disabled:opacity-60">
+                <button type="submit" disabled={loading} className="w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-xl shadow-sm hover:shadow-md text-sm transition-all disabled:opacity-60">
                   {loading ? t.auth.sendingRequest : t.auth.requestToJoin}
                 </button>
               </form>
             </>
           )}
 
-          <div className="mt-4 pt-4 border-t border-gray-100 dark:border-gray-800 text-center">
-            <p className="text-sm text-gray-500 dark:text-gray-400">
+          <div className="mt-4 pt-4 border-t border-border text-center">
+            <p className="text-sm text-muted-foreground">
               {t.auth.alreadyHaveAccount}{" "}
               <Link href="/login" className="text-emerald-600 font-medium hover:underline">{t.auth.signIn}</Link>
             </p>

@@ -31,7 +31,7 @@ type ExerciseGroupState = {
 
 type DayState = {
   id: string;       // "" for newly added days (not yet in DB)
-  weekId: string;   // parent week ID — needed when creating new days
+  weekId: string;   // parent week ID -- needed when creating new days
   dayLabel: string;
   exercises: ExerciseState[];
   groups: ExerciseGroupState[];
@@ -323,7 +323,7 @@ export default function ProgramEditClient({
 
     setSaving(true);
 
-    // Build the days payload — new days have id: ""
+    // Build the days payload -- new days have id: ""
     const days = weeks.flatMap((w) =>
       w.days.map((d) => ({
         dayId: d.id || undefined,        // undefined = new day
@@ -370,17 +370,17 @@ export default function ProgramEditClient({
   };
 
   return (
-    <div className="p-6 md:p-8 max-w-5xl mx-auto">
+    <div className="page-container">
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
           <Link href={`/programs/${program.id}`}>
-            <button className="p-2 rounded-xl border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
-              <ArrowLeft className="w-4 h-4 text-gray-600 dark:text-gray-400" />
+            <button className="p-2 rounded-xl border border-border hover:bg-muted/60 transition-colors">
+              <ArrowLeft className="w-4 h-4 text-muted-foreground" />
             </button>
           </Link>
           <div>
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-50">{program.name}</h1>
-            <p className="text-sm text-gray-400 dark:text-gray-500">Edit exercises per day</p>
+            <h1 className="text-2xl font-bold text-foreground">{program.name}</h1>
+            <p className="text-sm text-muted-foreground">Edit exercises per day</p>
           </div>
         </div>
         <button
@@ -389,13 +389,13 @@ export default function ProgramEditClient({
           className="flex items-center gap-2 px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-xl text-sm transition-colors disabled:opacity-60"
         >
           <Save className="w-4 h-4" />
-          {saving ? "Saving…" : "Save Changes"}
+          {saving ? "Saving..." : "Save Changes"}
         </button>
       </div>
 
-      <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-700 overflow-hidden">
+      <div className="section-card overflow-hidden">
         {/* Week tabs */}
-        <div className="flex gap-2 p-4 border-b border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-800 overflow-x-auto">
+        <div className="flex gap-2 p-4 border-b border-border bg-muted overflow-x-auto">
           {weeks.map((w, wi) => (
             <button
               key={wi}
@@ -403,17 +403,17 @@ export default function ProgramEditClient({
               onClick={() => { setActiveWeek(wi); setActiveDay(0); }}
               className={`px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-colors ${
                 activeWeek === wi
-                  ? "bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900"
-                  : "bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 text-gray-600 dark:text-gray-300 hover:border-gray-300"
+                  ? "bg-foreground text-card"
+                  : "bg-card border border-border text-muted-foreground hover:border-foreground/30"
               }`}
             >
-              Week {w.weekNumber}{w.isDeload ? " 🔄" : ""}
+              Week {w.weekNumber}{w.isDeload ? " (deload)" : ""}
             </button>
           ))}
         </div>
 
         {/* Day tabs + add day button */}
-        <div className="flex items-stretch border-b border-gray-100 dark:border-gray-800 overflow-x-auto">
+        <div className="flex items-stretch border-b border-border overflow-x-auto">
           {weeks[activeWeek]?.days.map((d, di) => (
             <div key={di} className="flex items-stretch flex-shrink-0 relative" ref={activeDay === di ? dayPickerRef : undefined}>
               <button
@@ -422,24 +422,24 @@ export default function ProgramEditClient({
                 className={`px-4 py-2.5 text-sm font-medium whitespace-nowrap transition-colors ${
                   activeDay === di
                     ? "text-emerald-700 dark:text-emerald-400 border-b-2 border-emerald-500"
-                    : "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
+                    : "text-muted-foreground hover:text-foreground"
                 }`}
               >
                 {d.dayLabel}
-                {!d.id && <span className="ml-1 text-xs text-emerald-500">•</span>}
+                {!d.id && <span className="ml-1 text-xs text-emerald-500">*</span>}
               </button>
               {activeDay === di && (
                 <>
                   <button
                     type="button"
                     onClick={() => setDayPickerOpen(dayPickerOpen === di ? null : di)}
-                    className="px-1 text-gray-400 dark:text-gray-500 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors"
+                    className="px-1 text-muted-foreground hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors"
                     title="Rename day"
                   >
                     <ChevronDown className="w-3.5 h-3.5" />
                   </button>
                   {dayPickerOpen === di && (
-                    <div className="absolute top-full left-0 z-20 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg py-1 min-w-[140px]">
+                    <div className="absolute top-full left-0 z-20 bg-card border border-border rounded-xl shadow-lg py-1 min-w-[140px]">
                       {DAY_LABELS.map((label) => {
                         const isUsed = weeks[activeWeek].days.some((day, idx) => idx !== di && day.dayLabel === label);
                         const isCurrent = d.dayLabel === label;
@@ -453,8 +453,8 @@ export default function ProgramEditClient({
                               isCurrent
                                 ? "text-emerald-600 dark:text-emerald-400 font-medium"
                                 : isUsed
-                                ? "opacity-40 cursor-not-allowed text-gray-500 dark:text-gray-400"
-                                : "text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
+                                ? "opacity-40 cursor-not-allowed text-muted-foreground"
+                                : "text-foreground hover:bg-muted/60"
                             }`}
                           >
                             {label}
@@ -469,7 +469,7 @@ export default function ProgramEditClient({
                 <button
                   type="button"
                   onClick={() => removeDay(di)}
-                  className="pr-1 text-gray-300 dark:text-gray-600 hover:text-red-500 dark:hover:text-red-400 transition-colors"
+                  className="pr-1 text-muted-foreground/50 hover:text-red-500 dark:hover:text-red-400 transition-colors"
                   title="Remove day"
                 >
                   <X className="w-3 h-3" />
@@ -481,7 +481,7 @@ export default function ProgramEditClient({
             <button
               type="button"
               onClick={addDay}
-              className="px-3 py-2.5 text-xs text-gray-400 dark:text-gray-500 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors whitespace-nowrap flex items-center gap-1 border-l border-gray-100 dark:border-gray-800 flex-shrink-0"
+              className="px-3 py-2.5 text-xs text-muted-foreground hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors whitespace-nowrap flex items-center gap-1 border-l border-border flex-shrink-0"
             >
               <Plus className="w-3 h-3" /> Day
             </button>
@@ -491,8 +491,8 @@ export default function ProgramEditClient({
         {/* Exercises */}
         <div className="p-5">
           {currentDay?.exercises.length === 0 && (
-            <p className="text-center text-sm text-gray-400 dark:text-gray-500 py-6">
-              No exercises yet — add one below.
+            <p className="text-center text-sm text-muted-foreground py-6">
+              No exercises yet -- add one below.
             </p>
           )}
           <div className="space-y-4">
@@ -512,13 +512,13 @@ export default function ProgramEditClient({
                     </span>
                   </div>
                 )}
-              <div className={`p-4 bg-gray-50 dark:bg-gray-800 rounded-xl border transition-colors ${
+              <div className={`p-4 bg-muted rounded-xl border transition-colors ${
                 ex.groupId
                   ? "border-purple-300 dark:border-purple-700 border-l-4"
-                  : "border-gray-200 dark:border-gray-700"
+                  : "border-border"
               }`}>
                 <div className="flex items-center gap-2 mb-3">
-                  <span className="text-xs font-bold text-gray-400 w-5">{exIdx + 1}</span>
+                  <span className="text-xs font-bold text-muted-foreground w-5">{exIdx + 1}</span>
                   <div className="flex-1">
                     <ExerciseSelect
                       value={ex.exerciseId}
@@ -561,34 +561,34 @@ export default function ProgramEditClient({
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-3">
                   {exerciseFields.map((f) => (
                     <div key={f.field}>
-                      <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">{f.label}</label>
+                      <label className="block text-xs font-medium text-muted-foreground mb-1">{f.label}</label>
                       <input
                         type="number"
                         min={f.min}
                         max={f.max}
                         value={(ex as Record<string, unknown>)[f.field] as number}
                         onChange={(e) => updateExercise(exIdx, f.field, +e.target.value)}
-                        className="w-full px-2.5 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-50 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                        className="w-full px-2.5 py-2 rounded-lg border border-border bg-card text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
                       />
                     </div>
                   ))}
                   <div>
-                    <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Tempo</label>
+                    <label className="block text-xs font-medium text-muted-foreground mb-1">Tempo</label>
                     <input
                       value={ex.tempo}
                       onChange={(e) => updateExercise(exIdx, "tempo", e.target.value)}
                       placeholder="3-1-1-0"
-                      className="w-full px-2.5 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-50 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                      className="w-full px-2.5 py-2 rounded-lg border border-border bg-card text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
                     />
                   </div>
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Coaching Note</label>
+                  <label className="block text-xs font-medium text-muted-foreground mb-1">Coaching Note</label>
                   <input
                     value={ex.coachingNote}
                     onChange={(e) => updateExercise(exIdx, "coachingNote", e.target.value)}
-                    placeholder="Tips for the client…"
-                    className="w-full px-2.5 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-50 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                    placeholder="Tips for the client..."
+                    className="w-full px-2.5 py-2 rounded-lg border border-border bg-card text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
                   />
                 </div>
               </div>
@@ -609,7 +609,7 @@ export default function ProgramEditClient({
           <button
             type="button"
             onClick={addExercise}
-            className="mt-4 w-full py-2.5 border border-dashed border-gray-300 dark:border-gray-600 rounded-xl text-sm text-gray-500 dark:text-gray-400 hover:border-emerald-400 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors flex items-center justify-center gap-2"
+            className="mt-4 w-full py-2.5 border border-dashed border-muted-foreground/40 rounded-xl text-sm text-muted-foreground hover:border-emerald-400 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors flex items-center justify-center gap-2"
           >
             <Plus className="w-4 h-4" /> Add Exercise
           </button>

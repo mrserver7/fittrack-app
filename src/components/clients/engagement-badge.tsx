@@ -39,8 +39,8 @@ export default function EngagementBadge({ clientId, showDetail = false }: { clie
           <span className={`text-xl font-bold text-${color}-600 dark:text-${color}-400`}>{score}</span>
         </div>
         <div>
-          <p className="text-sm font-semibold text-gray-900 dark:text-gray-50">Engagement Score</p>
-          <p className="text-xs text-gray-500 dark:text-gray-400">Last 7 days</p>
+          <p className="text-sm font-semibold text-foreground">Engagement Score</p>
+          <p className="text-xs text-muted-foreground">Last 7 days</p>
         </div>
       </div>
       <div className="grid grid-cols-4 gap-2 text-center">
@@ -51,13 +51,13 @@ export default function EngagementBadge({ clientId, showDetail = false }: { clie
           { label: "Habits", value: data.breakdown.habits.count },
         ].map((item) => (
           <div key={item.label}>
-            <p className="text-lg font-bold text-gray-900 dark:text-gray-50">{item.value}</p>
-            <p className="text-[10px] text-gray-500">{item.label}</p>
+            <p className="text-lg font-bold text-foreground">{item.value}</p>
+            <p className="text-[10px] text-muted-foreground">{item.label}</p>
           </div>
         ))}
       </div>
       {data.lastActive && (
-        <p className="text-xs text-gray-400 mt-2">
+        <p className="text-xs text-muted-foreground mt-2">
           Last active: {new Date(data.lastActive).toLocaleDateString("en", { month: "short", day: "numeric" })}
         </p>
       )}

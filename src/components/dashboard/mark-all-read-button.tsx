@@ -21,9 +21,9 @@ export default function MarkAllReadButton() {
     <button
       onClick={markAll}
       disabled={loading}
-      className="text-xs text-orange-500 hover:text-orange-700 font-medium mt-1 disabled:opacity-50"
+      className="text-xs text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 font-medium mt-1 disabled:opacity-50 transition-colors"
     >
-      {loading ? "Clearing…" : "Mark all read"}
+      {loading ? "Clearing..." : "Mark all read"}
     </button>
   );
 }

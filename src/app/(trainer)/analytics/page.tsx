@@ -46,21 +46,21 @@ export default async function AnalyticsPage() {
   ];
 
   return (
-    <div className="p-6 md:p-8 max-w-7xl mx-auto">
+    <div className="page-container">
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-50">{t.analytics.title}</h1>
-        <p className="text-gray-500 dark:text-gray-400 text-sm mt-1">{t.analytics.subtitle}</p>
+        <h1 className="text-2xl font-bold text-foreground">{t.analytics.title}</h1>
+        <p className="text-muted-foreground text-sm mt-1">{t.analytics.subtitle}</p>
       </div>
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         {stats.map((s) => {
           const Icon = s.icon;
           return (
-            <div key={s.label} className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-700 p-5">
+            <div key={s.label} className="section-card-padded">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">{s.label}</p>
-                  <p className="text-3xl font-bold text-gray-900 dark:text-gray-50 mt-1">{s.value}</p>
+                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{s.label}</p>
+                  <p className="text-3xl font-bold text-foreground mt-1">{s.value}</p>
                 </div>
                 <div className={`p-3 rounded-xl ${s.bg}`}>
                   <Icon className={`w-5 h-5 ${s.color}`} />
@@ -73,8 +73,8 @@ export default async function AnalyticsPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Top Exercises */}
-        <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-700 p-5">
-          <h2 className="font-semibold text-gray-900 dark:text-gray-50 mb-4">{t.analytics.topExercises}</h2>
+        <div className="section-card-padded">
+          <h2 className="font-semibold text-foreground mb-4">{t.analytics.topExercises}</h2>
           <div className="space-y-3">
             {topExercises.map((ex) => {
               const maxCount = topExercises[0]._count.exerciseId;
@@ -83,45 +83,45 @@ export default async function AnalyticsPage() {
                 <div key={ex.exerciseId}>
                   <div className="flex items-center justify-between mb-1">
                     <span className="text-sm text-gray-700 dark:text-gray-300 truncate">{nameMap[ex.exerciseId] || "Unknown"}</span>
-                    <span className="text-sm font-semibold text-gray-900 dark:text-gray-50 ml-2">{ex._count.exerciseId} {t.analytics.sets}</span>
+                    <span className="text-sm font-semibold text-foreground ml-2">{ex._count.exerciseId} {t.analytics.sets}</span>
                   </div>
-                  <div className="h-2 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
+                  <div className="h-2 bg-muted rounded-full overflow-hidden">
                     <div className="h-full bg-emerald-500 rounded-full transition-all" style={{ width: `${pct}%` }} />
                   </div>
                 </div>
               );
             })}
             {topExercises.length === 0 && (
-              <p className="text-sm text-gray-400 dark:text-gray-500 py-4 text-center">{t.analytics.noSessionData}</p>
+              <p className="text-sm text-muted-foreground py-4 text-center">{t.analytics.noSessionData}</p>
             )}
           </div>
         </div>
 
         {/* Recent PRs */}
-        <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-700 p-5">
-          <h2 className="font-semibold text-gray-900 dark:text-gray-50 mb-4 flex items-center gap-2">
+        <div className="section-card-padded">
+          <h2 className="font-semibold text-foreground mb-4 flex items-center gap-2">
             {t.analytics.recentPRs} <Award className="w-4 h-4 text-amber-500" />
           </h2>
           <div className="space-y-3">
             {recentPRs.map((pr) => (
               <div key={pr.id} className="flex items-center gap-3 p-2.5 rounded-xl hover:bg-amber-50 dark:hover:bg-amber-900/20 transition-colors">
                 <div className="w-8 h-8 bg-amber-100 dark:bg-amber-900/30 rounded-full flex items-center justify-center text-amber-700 font-bold text-xs flex-shrink-0">
-                  🏆
+                  PR
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-gray-900 dark:text-gray-50 truncate">{pr.client.name}</p>
-                  <p className="text-xs text-gray-400 dark:text-gray-500">{pr.exercise.name}</p>
+                  <p className="text-sm font-medium text-foreground truncate">{pr.client.name}</p>
+                  <p className="text-xs text-muted-foreground">{pr.exercise.name}</p>
                 </div>
                 <div className="text-right">
                   <p className="text-sm font-bold text-amber-600">{pr.valueKg}kg</p>
                   {pr.previousPrKg && (
-                    <p className="text-xs text-emerald-600">↑ {(pr.valueKg - pr.previousPrKg).toFixed(1)}kg</p>
+                    <p className="text-xs text-emerald-600">+{(pr.valueKg - pr.previousPrKg).toFixed(1)}kg</p>
                   )}
                 </div>
               </div>
             ))}
             {recentPRs.length === 0 && (
-              <p className="text-sm text-gray-400 dark:text-gray-500 py-4 text-center">{t.analytics.noPRs}</p>
+              <p className="text-sm text-muted-foreground py-4 text-center">{t.analytics.noPRs}</p>
             )}
           </div>
         </div>

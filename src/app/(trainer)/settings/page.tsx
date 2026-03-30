@@ -15,29 +15,29 @@ export default async function TrainerSettingsPage() {
   if (!trainer) redirect("/login");
 
   return (
-    <div className="p-6 md:p-8 max-w-2xl mx-auto">
+    <div className="page-container max-w-2xl">
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-50">{t.settings.title}</h1>
+        <h1 className="text-2xl font-bold text-foreground">{t.settings.title}</h1>
       </div>
 
       <div className="space-y-6">
         {/* Profile section */}
-        <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-700 p-6">
-          <h2 className="text-base font-semibold text-gray-900 dark:text-gray-50 mb-5">{t.settings.profile}</h2>
+        <div className="section-card-padded">
+          <h2 className="text-base font-semibold text-foreground mb-5">{t.settings.profile}</h2>
           <ProfileForm currentName={trainer.name} currentPhotoUrl={trainer.photoUrl} />
         </div>
 
         {/* Account section */}
-        <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-700 p-6">
-          <h2 className="text-base font-semibold text-gray-900 dark:text-gray-50 mb-5">{t.settings.account}</h2>
+        <div className="section-card-padded">
+          <h2 className="text-base font-semibold text-foreground mb-5">{t.settings.account}</h2>
           <AccountForm currentEmail={trainer.email} />
         </div>
 
         {/* Danger zone */}
         {!trainer.isAdmin && (
-          <div className="bg-white dark:bg-gray-900 rounded-2xl border border-red-200 dark:border-red-800 p-6">
+          <div className="section-card p-6 border-red-200 dark:border-red-800">
             <h2 className="text-base font-semibold text-red-700 dark:text-red-400 mb-2">Danger Zone</h2>
-            <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">Permanently delete your account and all associated data.</p>
+            <p className="text-sm text-muted-foreground mb-4">Permanently delete your account and all associated data.</p>
             <DeleteAccountButton />
           </div>
         )}

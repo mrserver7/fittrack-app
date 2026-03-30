@@ -26,18 +26,18 @@ export default async function ClientMessagesPage({ params }: Params) {
 
   return (
     <div className="h-full flex flex-col">
-      <div className="flex items-center gap-3 p-5 border-b border-gray-200 bg-white">
+      <div className="flex items-center gap-3 p-5 border-b border-border bg-card">
         <Link href={`/clients/${id}`}>
-          <button className="p-2 rounded-xl border border-gray-200 hover:bg-gray-50 transition-colors">
-            <ArrowLeft className="w-4 h-4 text-gray-600" />
+          <button className="p-2 rounded-xl border border-border hover:bg-muted/60 transition-colors">
+            <ArrowLeft className="w-4 h-4 text-muted-foreground" />
           </button>
         </Link>
-        <div className="w-9 h-9 bg-emerald-100 rounded-full flex items-center justify-center text-emerald-700 font-bold text-sm">
+        <div className="w-9 h-9 bg-emerald-100 dark:bg-emerald-900/40 rounded-full flex items-center justify-center text-emerald-700 dark:text-emerald-400 font-bold text-sm">
           {client.name.charAt(0)}
         </div>
         <div>
-          <h1 className="font-semibold text-gray-900">{client.name}</h1>
-          <p className="text-xs text-gray-400">Messages</p>
+          <h1 className="font-semibold text-foreground">{client.name}</h1>
+          <p className="text-xs text-muted-foreground">Messages</p>
         </div>
       </div>
       <MessageThread

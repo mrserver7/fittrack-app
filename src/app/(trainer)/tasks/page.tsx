@@ -73,10 +73,10 @@ export default async function TasksPage() {
   };
 
   return (
-    <div className="p-6 md:p-8 max-w-4xl mx-auto">
+    <div className="page-container max-w-4xl">
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-50">{t.tasks.title}</h1>
-        <p className="text-gray-500 dark:text-gray-400 text-sm mt-1">
+        <h1 className="text-2xl font-bold text-foreground">{t.tasks.title}</h1>
+        <p className="text-muted-foreground text-sm mt-1">
           {tasks.length} {tasks.length !== 1 ? t.tasks.itemsRequiringAttention : t.tasks.itemRequiringAttention}
         </p>
       </div>

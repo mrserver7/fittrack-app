@@ -95,7 +95,7 @@ export default function ProfileForm({ currentName, currentPhotoUrl }: ProfileFor
     }
   }
 
-  const inputClass = "w-full px-3.5 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-50 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500";
+  const inputClass = "w-full px-3.5 py-2.5 rounded-xl border border-border bg-card text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500";
 
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
@@ -118,8 +118,8 @@ export default function ProfileForm({ currentName, currentPhotoUrl }: ProfileFor
           </label>
         </div>
         <div>
-          <p className="text-sm font-medium text-gray-900 dark:text-gray-50">{t.settings.uploadPhoto}</p>
-          <p className="text-xs text-gray-400 dark:text-gray-500">{uploading ? "Uploading..." : "JPG, PNG, WebP"}</p>
+          <p className="text-sm font-medium text-foreground">{t.settings.uploadPhoto}</p>
+          <p className="text-xs text-muted-foreground">{uploading ? "Uploading..." : "JPG, PNG, WebP"}</p>
           {photoUrl && (
             <button type="button" onClick={handleRemovePhoto} disabled={removingPhoto}
               className="mt-1.5 flex items-center gap-1 text-xs text-red-500 hover:text-red-600 disabled:opacity-50 transition-colors">
@@ -131,7 +131,7 @@ export default function ProfileForm({ currentName, currentPhotoUrl }: ProfileFor
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">{t.settings.name}</label>
+        <label className="block text-sm font-medium text-foreground mb-1.5">{t.settings.name}</label>
         <input
           type="text"
           value={name}

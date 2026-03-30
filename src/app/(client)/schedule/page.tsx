@@ -20,7 +20,7 @@ export default async function SchedulePage() {
     where: { id: clientId },
     include: {
       clientPrograms: {
-        where: { status: "active" },
+        where: { status: "active", program: { deletedAt: null } },
         include: {
           program: {
             include: {
@@ -63,18 +63,18 @@ export default async function SchedulePage() {
   // No program
   if (activePrograms.length === 0) {
     return (
-      <div className="p-6 md:p-8 max-w-3xl mx-auto">
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-50 mb-6">{t.schedule.title}</h1>
-        <div className="text-center py-20 bg-white dark:bg-gray-900 rounded-2xl border border-dashed border-gray-300 dark:border-gray-700">
-          <Dumbbell className="w-10 h-10 text-gray-300 mx-auto mb-4" />
-          <h2 className="text-xl font-bold text-gray-900 dark:text-gray-50 mb-2">{t.schedule.noProgramAssigned}</h2>
-          <p className="text-gray-500 dark:text-gray-400 text-sm">{t.schedule.noProgramSub}</p>
+      <div className="page-container max-w-3xl">
+        <h1 className="text-2xl font-bold text-foreground mb-6">{t.schedule.title}</h1>
+        <div className="text-center py-20 section-card border-dashed">
+          <Dumbbell className="w-10 h-10 text-muted-foreground/50 mx-auto mb-4" />
+          <h2 className="text-xl font-bold text-foreground mb-2">{t.schedule.noProgramAssigned}</h2>
+          <p className="text-muted-foreground text-sm">{t.schedule.noProgramSub}</p>
         </div>
       </div>
     );
   }
 
-  // Multiple active programs — force selection
+  // Multiple active programs -- force selection
   if (activePrograms.length > 1) {
     return (
       <ProgramSwitcher
@@ -89,7 +89,7 @@ export default async function SchedulePage() {
     );
   }
 
-  // Single active program — show full schedule
+  // Single active program -- show full schedule
   const cp = activePrograms[0];
   const program = cp.program;
 
@@ -121,7 +121,7 @@ export default async function SchedulePage() {
   const daysFromMonday = (di: number) => (di === 0 ? 6 : di - 1);
   const todayOffset = daysFromMonday(todayDayIndex);
 
-  // Compute available days for moving (relative to today — can't move to past days)
+  // Compute available days for moving (relative to today -- can't move to past days)
   function getAvailableDays(excludeDay: string): string[] {
     return WEEKDAYS.filter((day) => {
       if (programDayLabels.has(day)) return false;
@@ -150,12 +150,12 @@ export default async function SchedulePage() {
   }
 
   return (
-    <div className="p-6 md:p-8 max-w-4xl mx-auto space-y-8">
+    <div className="page-container max-w-4xl space-y-8">
       <div className="flex items-center gap-3">
         <CalendarDays className="w-6 h-6 text-emerald-600" />
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-50">{t.schedule.title}</h1>
-          <p className="text-sm text-gray-400 dark:text-gray-500 mt-0.5">
+          <h1 className="text-2xl font-bold text-foreground">{t.schedule.title}</h1>
+          <p className="text-sm text-muted-foreground mt-0.5">
             {program.name} · {t.schedule.week} {currentWeekNumber} {t.schedule.of} {program.weeks.length} · {t.schedule.started} {formatDate(cp.startDate)}
           </p>
         </div>
@@ -167,8 +167,8 @@ export default async function SchedulePage() {
       </div>
 
       {/* This Week grid */}
-      <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-700 p-5">
-        <h2 className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-4">{t.schedule.thisWeek}</h2>
+      <div className="section-card-padded">
+        <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-4">{t.schedule.thisWeek}</h2>
         <div className="grid grid-cols-7 gap-1.5 mb-4">
           {WEEKDAYS.map((day) => {
             const isToday = day === todayWeekday;
@@ -179,8 +179,8 @@ export default async function SchedulePage() {
             const movedHereOverride = overrides.find((o) => o.newDay === day && o.action === "moved");
             const movedAwayOverride = override?.action === "moved" && !movedHereOverride ? override : null;
 
-            let bg = "bg-gray-50 dark:bg-gray-800/50";
-            let textColor = "text-gray-300 dark:text-gray-600";
+            let bg = "bg-muted/50";
+            let textColor = "text-muted-foreground/50";
             if (skipped) { bg = "bg-red-50 dark:bg-red-900/20"; textColor = "text-red-400"; }
             else if (movedAwayOverride) { bg = "bg-orange-50 dark:bg-orange-900/20"; textColor = "text-orange-500"; }
             else if (movedHereOverride && effectiveDay) { bg = "bg-orange-50 dark:bg-orange-900/20"; textColor = "text-orange-600"; }
@@ -190,7 +190,7 @@ export default async function SchedulePage() {
             return (
               <div key={day}
                 className={`rounded-xl p-2 text-center relative ${bg} ${isToday ? "ring-2 ring-emerald-500" : ""} ${isPast ? "opacity-60" : ""}`}>
-                <p className={`text-xs font-bold mb-1 ${isToday ? "text-emerald-600 dark:text-emerald-400" : "text-gray-500 dark:text-gray-400"}`}>
+                <p className={`text-xs font-bold mb-1 ${isToday ? "text-emerald-600 dark:text-emerald-400" : "text-muted-foreground"}`}>
                   {day.slice(0, 3)}
                 </p>
                 {effectiveDay ? (
@@ -204,7 +204,7 @@ export default async function SchedulePage() {
                   </p>
                 )}
                 {isToday && effectiveDay && !done && (
-                  <div className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-emerald-500 rounded-full border-2 border-white dark:border-gray-900" />
+                  <div className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-emerald-500 rounded-full border-2 border-card" />
                 )}
               </div>
             );
@@ -217,19 +217,19 @@ export default async function SchedulePage() {
             { color: "bg-emerald-700", label: t.schedule.completed },
             { color: "bg-red-400", label: t.schedule.skipped },
             { color: "bg-orange-400", label: t.schedule.moved },
-            { color: "bg-gray-300 dark:bg-gray-600", label: t.schedule.restDay },
+            { color: "bg-muted-foreground/40", label: t.schedule.restDay },
           ].map((l) => (
             <div key={l.label} className="flex items-center gap-1.5">
               <div className={`w-2.5 h-2.5 rounded-sm ${l.color}`} />
-              <span className="text-xs text-gray-400 dark:text-gray-500">{l.label}</span>
+              <span className="text-xs text-muted-foreground">{l.label}</span>
             </div>
           ))}
         </div>
       </div>
 
       {/* Full Program */}
-      <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-700 p-5">
-        <h2 className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-4">{t.schedule.fullProgram}</h2>
+      <div className="section-card-padded">
+        <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-4">{t.schedule.fullProgram}</h2>
         <div className="space-y-6">
           {program.weeks.map((week) => {
             const isCurrent = program.weeks.indexOf(week) === effectiveIdx;
@@ -239,14 +239,14 @@ export default async function SchedulePage() {
                   <span className={`text-xs font-bold px-2.5 py-1 rounded-full ${
                     isCurrent
                       ? "bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-400"
-                      : "bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400"
+                      : "bg-muted text-muted-foreground"
                   }`}>
                     {t.schedule.week} {week.weekNumber}{week.isDeload ? " 🔄" : ""}{isCurrent ? ` · ${t.schedule.current}` : ""}
                   </span>
                 </div>
 
                 {week.days.length === 0 ? (
-                  <p className="text-xs text-gray-400 dark:text-gray-500">{t.schedule.noWorkoutDays}</p>
+                  <p className="text-xs text-muted-foreground">{t.schedule.noWorkoutDays}</p>
                 ) : (
                   <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
                     {week.days.map((day) => {
@@ -268,7 +268,7 @@ export default async function SchedulePage() {
                       const canReschedule = isCurrentWeek && !isPastDay && !isDone && !skippedOverride && !movedAwayOverride;
                       const availableDays = canReschedule ? getAvailableDays(day.dayLabel) : [];
 
-                      let cardClass = "bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700";
+                      let cardClass = "bg-muted border-border";
                       if (isDone) cardClass = "bg-emerald-50 dark:bg-emerald-900/20 border-emerald-200 dark:border-emerald-800";
                       else if (skippedOverride) cardClass = "bg-red-50 dark:bg-red-900/10 border-red-200 dark:border-red-900";
                       else if (movedAwayOverride) cardClass = "bg-orange-50 dark:bg-orange-900/10 border-orange-200 dark:border-orange-900";
@@ -278,7 +278,7 @@ export default async function SchedulePage() {
                         <div key={day.id} className={`p-3 rounded-xl border ${cardClass}`}>
                           <div className="flex items-start justify-between gap-2 mb-2">
                             <div>
-                              <span className="text-xs font-semibold text-gray-700 dark:text-gray-300">
+                              <span className="text-xs font-semibold text-foreground/80">
                                 {tDay(day.dayLabel)}
                                 {isToday && <span className="ml-1.5 text-emerald-600 dark:text-emerald-400">· {t.schedule.today}</span>}
                               </span>
@@ -300,20 +300,20 @@ export default async function SchedulePage() {
                           </div>
 
                           {day.exercises.length === 0 ? (
-                            <p className="text-xs text-gray-400 dark:text-gray-500">{t.schedule.noExercisesYet}</p>
+                            <p className="text-xs text-muted-foreground">{t.schedule.noExercisesYet}</p>
                           ) : (
                             <ul className="space-y-0.5">
                               {day.exercises.slice(0, 4).map((ex) => (
-                                <li key={ex.id} className="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1.5">
-                                  <span className="w-1 h-1 rounded-full bg-gray-300 dark:bg-gray-600 flex-shrink-0" />
+                                <li key={ex.id} className="text-xs text-muted-foreground flex items-center gap-1.5">
+                                  <span className="w-1 h-1 rounded-full bg-muted-foreground/30 flex-shrink-0" />
                                   {ex.exercise.name}
-                                  <span className="text-gray-300 dark:text-gray-600">
+                                  <span className="text-muted-foreground/50">
                                     · {ex.sets}×{ex.repsMin ?? "?"}–{ex.repsMax ?? "?"}
                                   </span>
                                 </li>
                               ))}
                               {day.exercises.length > 4 && (
-                                <li className="text-xs text-gray-400 dark:text-gray-500 pl-2.5">
+                                <li className="text-xs text-muted-foreground pl-2.5">
                                   +{day.exercises.length - 4} {t.schedule.more}
                                 </li>
                               )}

@@ -160,7 +160,7 @@ export default function NewProgramPage() {
     }
   };
 
-  const inputClass = "w-full px-3 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-50 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500";
+  const inputClass = "w-full px-3 py-2 rounded-xl border border-border bg-card text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500";
   const currentDay = weeks[activeWeek]?.days[activeDay];
 
   const exerciseFields = [
@@ -173,31 +173,31 @@ export default function NewProgramPage() {
   ];
 
   return (
-    <div className="p-6 md:p-8 max-w-5xl mx-auto">
+    <div className="page-container">
       <div className="flex items-center gap-3 mb-6">
         <Link href="/programs">
-          <button className="p-2 rounded-xl border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
-            <ArrowLeft className="w-4 h-4 text-gray-600 dark:text-gray-400" />
+          <button className="p-2 rounded-xl border border-border hover:bg-muted/60 transition-colors">
+            <ArrowLeft className="w-4 h-4 text-muted-foreground" />
           </button>
         </Link>
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-50">{t.programs.newProgram}</h1>
+        <h1 className="text-2xl font-bold text-foreground">{t.programs.newProgram}</h1>
       </div>
 
       <form onSubmit={submit} className="space-y-6">
         {/* Program Meta */}
-        <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-700 p-6">
-          <h2 className="font-semibold text-sm text-gray-400 dark:text-gray-500 uppercase tracking-wide mb-4">{t.programs.programDetails}</h2>
+        <div className="section-card-padded">
+          <h2 className="font-semibold text-sm text-muted-foreground uppercase tracking-wide mb-4">{t.programs.programDetails}</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="sm:col-span-2">
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">{t.programs.programNameLabel}</label>
+              <label className="block text-sm font-medium text-foreground mb-1.5">{t.programs.programNameLabel}</label>
               <input value={name} onChange={(e) => setName(e.target.value)} required placeholder={t.programs.programNamePlaceholder} className={inputClass} />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">{t.programs.durationLabel}</label>
+              <label className="block text-sm font-medium text-foreground mb-1.5">{t.programs.durationLabel}</label>
               <input type="number" min={1} max={52} value={durationWeeks} onChange={(e) => setDurationWeeks(+e.target.value)} className={inputClass} />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">{t.programs.goalTagLabel}</label>
+              <label className="block text-sm font-medium text-foreground mb-1.5">{t.programs.goalTagLabel}</label>
               <select value={goalTag} onChange={(e) => setGoalTag(e.target.value)} className={inputClass}>
                 <option value="">{t.programs.selectGoal}</option>
                 <option value="strength">strength</option>
@@ -209,7 +209,7 @@ export default function NewProgramPage() {
               </select>
             </div>
             <div className="sm:col-span-2">
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">{t.programs.descriptionLabel}</label>
+              <label className="block text-sm font-medium text-foreground mb-1.5">{t.programs.descriptionLabel}</label>
               <textarea value={description} onChange={(e) => setDescription(e.target.value)} rows={2}
                 placeholder={t.programs.descriptionPlaceholder} className={`${inputClass} resize-none`} />
             </div>
@@ -217,21 +217,21 @@ export default function NewProgramPage() {
         </div>
 
         {/* Week/Day Builder */}
-        <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-700 overflow-hidden">
-          <div className="flex items-center gap-2 p-4 border-b border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-800">
+        <div className="section-card overflow-hidden">
+          <div className="flex items-center gap-2 p-4 border-b border-border bg-muted">
             <div className="flex gap-1.5 overflow-x-auto">
               {weeks.map((w, wi) => (
                 <button key={wi} type="button" onClick={() => { setActiveWeek(wi); setActiveDay(0); }}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-colors ${activeWeek === wi ? "bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900" : "bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 text-gray-600 dark:text-gray-300 hover:border-gray-300"}`}>
-                  {t.programs.weekLabel} {w.weekNumber} {w.isDeload ? "🔄" : ""}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-colors ${activeWeek === wi ? "bg-foreground text-card" : "bg-card border border-border text-muted-foreground hover:border-foreground/30"}`}>
+                  {t.programs.weekLabel} {w.weekNumber} {w.isDeload ? "(deload)" : ""}
                 </button>
               ))}
             </div>
             <button type="button" onClick={addWeek}
-              className="p-1.5 rounded-lg border border-dashed border-gray-300 dark:border-gray-600 hover:border-emerald-400 transition-colors ml-1">
-              <Plus className="w-3.5 h-3.5 text-gray-400" />
+              className="p-1.5 rounded-lg border border-dashed border-muted-foreground/40 hover:border-emerald-400 transition-colors ml-1">
+              <Plus className="w-3.5 h-3.5 text-muted-foreground" />
             </button>
-            <label className="flex items-center gap-2 ml-auto text-xs text-gray-500 dark:text-gray-400 cursor-pointer whitespace-nowrap">
+            <label className="flex items-center gap-2 ml-auto text-xs text-muted-foreground cursor-pointer whitespace-nowrap">
               <input type="checkbox" checked={weeks[activeWeek]?.isDeload || false}
                 onChange={(e) => {
                   const updated = [...weeks];
@@ -243,24 +243,24 @@ export default function NewProgramPage() {
           </div>
 
           {/* Day tabs */}
-          <div className="flex items-stretch border-b border-gray-100 dark:border-gray-800 overflow-x-auto">
+          <div className="flex items-stretch border-b border-border overflow-x-auto">
             {weeks[activeWeek]?.days.map((d, di) => (
               <div key={di} className="flex items-stretch flex-shrink-0">
                 <button type="button" onClick={() => setActiveDay(di)}
-                  className={`px-4 py-2.5 text-sm font-medium transition-colors whitespace-nowrap ${activeDay === di ? "text-emerald-700 dark:text-emerald-400 border-b-2 border-emerald-500" : "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"}`}>
+                  className={`px-4 py-2.5 text-sm font-medium transition-colors whitespace-nowrap ${activeDay === di ? "text-emerald-700 dark:text-emerald-400 border-b-2 border-emerald-500" : "text-muted-foreground hover:text-foreground"}`}>
                   {dayDisplayLabels[d.dayLabel] || d.dayLabel}
                 </button>
                 {weeks[activeWeek].days.length > 1 && (
                   <button type="button" onClick={() => removeDay(di)}
-                    className="px-1 text-gray-300 dark:text-gray-600 hover:text-red-500 dark:hover:text-red-400 transition-colors text-xs pb-0.5">
-                    ✕
+                    className="px-1 text-muted-foreground/50 hover:text-red-500 dark:hover:text-red-400 transition-colors text-xs pb-0.5">
+                    x
                   </button>
                 )}
               </div>
             ))}
             {weeks[activeWeek]?.days.length < 7 && (
               <button type="button" onClick={addDay}
-                className="px-3 py-2.5 text-xs text-gray-400 dark:text-gray-500 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors whitespace-nowrap flex items-center gap-1 border-l border-gray-100 dark:border-gray-800">
+                className="px-3 py-2.5 text-xs text-muted-foreground hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors whitespace-nowrap flex items-center gap-1 border-l border-border">
                 <Plus className="w-3 h-3" /> Day
               </button>
             )}
@@ -269,14 +269,14 @@ export default function NewProgramPage() {
           {/* Exercises */}
           <div className="p-5">
             {currentDay?.exercises.length === 0 && (
-              <p className="text-center text-sm text-gray-400 dark:text-gray-500 py-6">{t.programs.noExercises}</p>
+              <p className="text-center text-sm text-muted-foreground py-6">{t.programs.noExercises}</p>
             )}
             <div className="space-y-4">
               {currentDay?.exercises.map((ex, exIdx) => (
-                <div key={exIdx} className="p-4 bg-gray-50 dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700">
+                <div key={exIdx} className="p-4 bg-muted rounded-xl border border-border">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
                     <div className="sm:col-span-2">
-                      <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">{t.programs.exerciseLabel}</label>
+                      <label className="block text-xs font-medium text-muted-foreground mb-1">{t.programs.exerciseLabel}</label>
                       <ExerciseSelect
                         value={ex.exerciseId}
                         exercises={exercises}
@@ -289,22 +289,22 @@ export default function NewProgramPage() {
                     </div>
                     {exerciseFields.map((f) => (
                       <div key={f.field}>
-                        <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">{f.label}</label>
+                        <label className="block text-xs font-medium text-muted-foreground mb-1">{f.label}</label>
                         <input type={f.type} min={f.min} max={f.max} value={(ex as Record<string, unknown>)[f.field] as number}
                           onChange={(e) => updateExercise(exIdx, f.field, +e.target.value)}
-                          className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-50 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+                          className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500" />
                       </div>
                     ))}
                     <div>
-                      <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">{t.programs.tempoLabel}</label>
+                      <label className="block text-xs font-medium text-muted-foreground mb-1">{t.programs.tempoLabel}</label>
                       <input value={ex.tempo} onChange={(e) => updateExercise(exIdx, "tempo", e.target.value)}
-                        placeholder="3-1-1-0" className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-50 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+                        placeholder="3-1-1-0" className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500" />
                     </div>
                   </div>
                   <div>
-                    <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">{t.programs.coachingNoteLabel}</label>
+                    <label className="block text-xs font-medium text-muted-foreground mb-1">{t.programs.coachingNoteLabel}</label>
                     <input value={ex.coachingNote} onChange={(e) => updateExercise(exIdx, "coachingNote", e.target.value)}
-                      placeholder={t.programs.coachingNotePlaceholder} className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-50 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+                      placeholder={t.programs.coachingNotePlaceholder} className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500" />
                   </div>
                   <div className="flex justify-end mt-3">
                     <button type="button" onClick={() => removeExercise(exIdx)}
@@ -316,7 +316,7 @@ export default function NewProgramPage() {
               ))}
             </div>
             <button type="button" onClick={addExercise}
-              className="mt-4 w-full py-2.5 border border-dashed border-gray-300 dark:border-gray-600 rounded-xl text-sm text-gray-500 dark:text-gray-400 hover:border-emerald-400 hover:text-emerald-600 transition-colors flex items-center justify-center gap-2">
+              className="mt-4 w-full py-2.5 border border-dashed border-muted-foreground/40 rounded-xl text-sm text-muted-foreground hover:border-emerald-400 hover:text-emerald-600 transition-colors flex items-center justify-center gap-2">
               <Plus className="w-4 h-4" /> {t.programs.addExercise}
             </button>
           </div>
@@ -324,7 +324,7 @@ export default function NewProgramPage() {
 
         <div className="flex justify-end gap-3">
           <Link href="/programs">
-            <button type="button" className="px-5 py-2.5 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 rounded-xl text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">{t.common.cancel}</button>
+            <button type="button" className="px-5 py-2.5 border border-border text-foreground rounded-xl text-sm font-medium hover:bg-muted/60 transition-colors">{t.common.cancel}</button>
           </Link>
           <button type="submit" disabled={loading}
             className="px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-sm font-semibold transition-colors disabled:opacity-60">

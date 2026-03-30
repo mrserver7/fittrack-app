@@ -39,13 +39,12 @@ export default function CheckInPage({ params }: { params: Promise<{ id: string }
     }
   };
 
-  if (loading) return <div className="p-8 text-center text-gray-400 dark:text-gray-500">{t.checkins.loading}</div>;
+  if (loading) return <div className="p-8 text-center text-muted-foreground">{t.checkins.loading}</div>;
   if (!checkIn) return <div className="p-8 text-center text-red-500">{t.checkins.notFound}</div>;
   if (checkIn.status === "completed") {
     return (
-      <div className="p-6 md:p-8 max-w-2xl mx-auto text-center py-20">
-        <div className="text-4xl mb-3">✅</div>
-        <h2 className="text-xl font-bold text-gray-900 dark:text-gray-50">{t.checkins.alreadySubmitted}</h2>
+      <div className="page-container max-w-2xl text-center py-20">
+        <h2 className="text-xl font-bold text-foreground">{t.checkins.alreadySubmitted}</h2>
       </div>
     );
   }
@@ -53,16 +52,16 @@ export default function CheckInPage({ params }: { params: Promise<{ id: string }
   const questions: Question[] = JSON.parse(checkIn.checkInForm.questions || "[]");
 
   return (
-    <div className="p-6 md:p-8 max-w-2xl mx-auto">
+    <div className="page-container max-w-2xl">
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-50">{checkIn.checkInForm.name}</h1>
-        <p className="text-gray-500 dark:text-gray-400 text-sm mt-1">{t.checkins.completeWeekly}</p>
+        <h1 className="text-2xl font-bold text-foreground">{checkIn.checkInForm.name}</h1>
+        <p className="text-muted-foreground text-sm mt-1">{t.checkins.completeWeekly}</p>
       </div>
 
       <form onSubmit={submit} className="space-y-5">
         {questions.map((q) => (
-          <div key={q.id} className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-700 p-5">
-            <label className="block font-medium text-gray-900 dark:text-gray-50 mb-3">
+          <div key={q.id} className="section-card-padded">
+            <label className="block font-medium text-foreground mb-3">
               {q.label || q.text || ""}
               {q.required && <span className="text-red-500 ml-1">*</span>}
             </label>
@@ -70,7 +69,7 @@ export default function CheckInPage({ params }: { params: Promise<{ id: string }
               <div className="flex gap-2 flex-wrap">
                 {Array.from({ length: q.type === "scale_1_5" ? 5 : 10 }, (_, i) => i + 1).map((v) => (
                   <button key={v} type="button" onClick={() => setResponses((r) => ({ ...r, [q.id]: v.toString() }))}
-                    className={`w-12 h-12 rounded-xl font-bold text-sm transition-colors ${responses[q.id] === v.toString() ? "bg-emerald-600 text-white" : "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700"}`}>
+                    className={`w-12 h-12 rounded-xl font-bold text-sm transition-colors ${responses[q.id] === v.toString() ? "bg-emerald-600 text-white" : "bg-muted text-muted-foreground hover:bg-muted/60"}`}>
                     {v}
                   </button>
                 ))}
@@ -78,12 +77,12 @@ export default function CheckInPage({ params }: { params: Promise<{ id: string }
             )}
             {q.type === "number" && (
               <input type="number" value={responses[q.id] || ""} onChange={(e) => setResponses((r) => ({ ...r, [q.id]: e.target.value }))}
-                required={q.required} className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-50 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+                required={q.required} className="w-full px-3.5 py-2.5 rounded-xl border border-border bg-card text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500" />
             )}
             {(q.type === "short_text" || q.type === "long_text" || q.type === "text") && (
               <textarea rows={q.type === "long_text" ? 4 : 2} value={responses[q.id] || ""}
                 onChange={(e) => setResponses((r) => ({ ...r, [q.id]: e.target.value }))}
-                required={q.required} className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-50 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 resize-none" />
+                required={q.required} className="w-full px-3.5 py-2.5 rounded-xl border border-border bg-card text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 resize-none" />
             )}
           </div>
         ))}

@@ -42,17 +42,17 @@ export default function NewClientPage() {
 
   if (inviteLink) {
     return (
-      <div className="p-6 md:p-8 max-w-2xl mx-auto">
-        <div className="bg-white rounded-2xl border border-gray-200 p-8 text-center">
-          <div className="w-16 h-16 bg-emerald-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
-            <CheckCircle className="w-8 h-8 text-emerald-600" />
+      <div className="page-container max-w-2xl">
+        <div className="section-card-padded sm:p-8 text-center">
+          <div className="w-16 h-16 bg-emerald-100 dark:bg-emerald-900/40 rounded-2xl flex items-center justify-center mx-auto mb-4">
+            <CheckCircle className="w-8 h-8 text-emerald-600 dark:text-emerald-400" />
           </div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">Client Added!</h2>
-          <p className="text-gray-500 mb-6">
+          <h2 className="text-2xl font-bold text-foreground mb-2">Client Added!</h2>
+          <p className="text-muted-foreground mb-6">
             Share this invitation link with <strong>{form.name}</strong>. It expires in 72 hours.
           </p>
-          <div className="flex items-center gap-2 p-3.5 bg-gray-50 rounded-xl border border-gray-200 mb-6 text-left">
-            <code className="flex-1 text-sm text-gray-700 truncate">{inviteLink}</code>
+          <div className="flex items-center gap-2 p-3.5 bg-muted rounded-xl border border-border mb-6 text-left">
+            <code className="flex-1 text-sm text-foreground truncate">{inviteLink}</code>
             <button onClick={copyLink}
               className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-medium transition-colors flex-shrink-0">
               <Copy className="w-3 h-3" />
@@ -61,7 +61,7 @@ export default function NewClientPage() {
           </div>
           <div className="flex gap-3 justify-center">
             <button onClick={() => router.push("/clients")}
-              className="px-5 py-2.5 border border-gray-200 text-gray-700 rounded-xl text-sm font-medium hover:bg-gray-50 transition-colors">
+              className="px-5 py-2.5 border border-border text-foreground rounded-xl text-sm font-medium hover:bg-muted/60 transition-colors">
               Back to Clients
             </button>
             <button onClick={() => router.push("/clients")}
@@ -76,7 +76,7 @@ export default function NewClientPage() {
 
   const Field = ({ label, children, hint }: { label: string; children: React.ReactNode; hint?: string }) => (
     <div className="space-y-1.5">
-      <label className="block text-sm font-medium text-gray-700">
+      <label className="block text-sm font-medium text-foreground">
         {label}
         {hint && <span className="ml-1 text-xs text-red-500 font-normal">{hint}</span>}
       </label>
@@ -84,26 +84,26 @@ export default function NewClientPage() {
     </div>
   );
 
-  const inputClass = "w-full px-3.5 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent";
+  const inputClass = "w-full px-3.5 py-2.5 rounded-xl border border-border bg-card text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent placeholder:text-muted-foreground";
   const textareaClass = `${inputClass} resize-none`;
 
   return (
-    <div className="p-6 md:p-8 max-w-2xl mx-auto">
+    <div className="page-container max-w-2xl">
       <div className="flex items-center gap-3 mb-8">
         <Link href="/clients">
-          <button className="p-2 rounded-xl border border-gray-200 hover:bg-gray-50 transition-colors">
-            <ArrowLeft className="w-4 h-4 text-gray-600" />
+          <button className="p-2 rounded-xl border border-border hover:bg-muted/60 transition-colors">
+            <ArrowLeft className="w-4 h-4 text-muted-foreground" />
           </button>
         </Link>
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Add New Client</h1>
-          <p className="text-gray-500 text-sm">An invitation link will be generated after saving</p>
+          <h1 className="text-2xl font-bold text-foreground">Add New Client</h1>
+          <p className="text-muted-foreground text-sm">An invitation link will be generated after saving</p>
         </div>
       </div>
 
       <form onSubmit={submit} className="space-y-6">
-        <div className="bg-white rounded-2xl border border-gray-200 p-6 space-y-4">
-          <h2 className="font-semibold text-gray-900 text-sm uppercase tracking-wide text-gray-400">Basic Information</h2>
+        <div className="section-card-padded space-y-4">
+          <h2 className="font-semibold text-sm uppercase tracking-wide text-muted-foreground">Basic Information</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <Field label="Full Name *">
               <input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required
@@ -128,27 +128,27 @@ export default function NewClientPage() {
           </Field>
         </div>
 
-        <div className="bg-white rounded-2xl border border-gray-200 p-6 space-y-4">
-          <h2 className="font-semibold text-sm uppercase tracking-wide text-gray-400">Health & Goals</h2>
+        <div className="section-card-padded space-y-4">
+          <h2 className="font-semibold text-sm uppercase tracking-wide text-muted-foreground">Health & Goals</h2>
           <Field label="Goals">
             <textarea rows={3} value={form.goalsText} onChange={(e) => setForm({ ...form, goalsText: e.target.value })}
               placeholder="What does this client want to achieve?" className={textareaClass} />
           </Field>
-          <Field label="Injuries / Contraindications" hint="(sensitive — kept private)">
+          <Field label="Injuries / Contraindications" hint="(sensitive -- kept private)">
             <textarea rows={3} value={form.injuriesText} onChange={(e) => setForm({ ...form, injuriesText: e.target.value })}
-              placeholder="e.g. Left knee meniscus — no deep knee flexion" className={textareaClass} />
+              placeholder="e.g. Left knee meniscus -- no deep knee flexion" className={textareaClass} />
           </Field>
         </div>
 
-        <div className="bg-white rounded-2xl border border-gray-200 p-6">
-          <h2 className="font-semibold text-sm uppercase tracking-wide text-gray-400 mb-4">Private Trainer Notes</h2>
+        <div className="section-card-padded">
+          <h2 className="font-semibold text-sm uppercase tracking-wide text-muted-foreground mb-4">Private Trainer Notes</h2>
           <textarea rows={3} value={form.trainerNotes} onChange={(e) => setForm({ ...form, trainerNotes: e.target.value })}
-            placeholder="Private notes — only you can see these." className={textareaClass} />
+            placeholder="Private notes -- only you can see these." className={textareaClass} />
         </div>
 
         <div className="flex justify-end gap-3">
           <Link href="/clients">
-            <button type="button" className="px-5 py-2.5 border border-gray-200 text-gray-700 rounded-xl text-sm font-medium hover:bg-gray-50 transition-colors">
+            <button type="button" className="px-5 py-2.5 border border-border text-foreground rounded-xl text-sm font-medium hover:bg-muted/60 transition-colors">
               Cancel
             </button>
           </Link>

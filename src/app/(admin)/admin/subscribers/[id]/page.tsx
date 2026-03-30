@@ -48,7 +48,7 @@ export default async function AdminSubscriberDetailPage({ params }: Params) {
   const statusColors: Record<string, string> = {
     active: "bg-emerald-100 text-emerald-700",
     paused: "bg-yellow-100 text-yellow-700",
-    archived: "bg-gray-100 text-gray-500",
+    archived: "bg-muted text-muted-foreground",
     invited: "bg-blue-100 text-blue-700",
     pending: "bg-orange-100 text-orange-700",
   };
@@ -61,12 +61,12 @@ export default async function AdminSubscriberDetailPage({ params }: Params) {
   };
 
   return (
-    <div className="p-6 md:p-8 max-w-6xl mx-auto">
+    <div className="page-container !max-w-6xl">
       {/* Header */}
       <div className="flex items-center gap-3 mb-6">
         <Link href="/admin/subscribers">
-          <button className="p-2 rounded-xl border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
-            <ArrowLeft className="w-4 h-4 text-gray-600 dark:text-gray-400" />
+          <button className="p-2 rounded-xl border border-border hover:bg-muted/60 transition-colors">
+            <ArrowLeft className="w-4 h-4 text-muted-foreground" />
           </button>
         </Link>
         <div className="flex-1 flex items-center gap-4">
@@ -75,15 +75,15 @@ export default async function AdminSubscriberDetailPage({ params }: Params) {
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-50">{client.name}</h1>
-              <span className={`text-xs px-2.5 py-1 rounded-lg font-medium ${statusColors[client.status] || "bg-gray-100 text-gray-500"}`}>
+              <h1 className="text-2xl font-bold text-foreground">{client.name}</h1>
+              <span className={`text-xs px-2.5 py-1 rounded-lg font-medium ${statusColors[client.status] || "bg-muted text-muted-foreground"}`}>
                 {client.status}
               </span>
               <span className="text-xs px-2.5 py-1 rounded-lg bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-purple-300 font-medium flex items-center gap-1">
                 <Shield className="w-3 h-3" /> Admin View
               </span>
             </div>
-            <p className="text-gray-400 text-sm">{client.email}</p>
+            <p className="text-muted-foreground text-sm">{client.email}</p>
             <p className="text-xs text-purple-600 dark:text-purple-400 mt-0.5">
               Trainer: {client.trainer.name}
               {client.trainer.businessName ? ` · ${client.trainer.businessName}` : ""}
@@ -91,7 +91,7 @@ export default async function AdminSubscriberDetailPage({ params }: Params) {
           </div>
         </div>
         <Link href={`/admin/subscribers/${id}/messages`}>
-          <button className="flex items-center gap-2 px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-xl text-sm font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+          <button className="flex items-center gap-2 px-4 py-2 border border-border rounded-xl text-sm font-medium text-muted-foreground hover:bg-muted/60 transition-colors">
             <MessageSquare className="w-4 h-4" /> View Messages
           </button>
         </Link>
@@ -102,12 +102,12 @@ export default async function AdminSubscriberDetailPage({ params }: Params) {
         {[
           { label: "Sessions Done", value: client._count.sessionLogs },
           { label: "Adherence", value: `${adherence}%` },
-          { label: "Current Weight", value: lastMeasurement?.weightKg ? `${lastMeasurement.weightKg}kg` : "—" },
+          { label: "Current Weight", value: lastMeasurement?.weightKg ? `${lastMeasurement.weightKg}kg` : "--" },
           { label: "Messages", value: client._count.messages },
         ].map((s) => (
-          <div key={s.label} className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-700 p-4 text-center">
-            <p className="text-2xl font-bold text-gray-900 dark:text-gray-50">{s.value}</p>
-            <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">{s.label}</p>
+          <div key={s.label} className="section-card p-4 text-center">
+            <p className="text-2xl font-bold text-foreground">{s.value}</p>
+            <p className="text-xs text-muted-foreground mt-1">{s.label}</p>
           </div>
         ))}
       </div>
@@ -116,17 +116,17 @@ export default async function AdminSubscriberDetailPage({ params }: Params) {
         {/* Left column */}
         <div className="space-y-4">
           {/* Goals */}
-          <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-700 p-5">
+          <div className="section-card-padded">
             <div className="flex items-center gap-2 mb-3">
               <Target className="w-4 h-4 text-emerald-600" />
-              <h3 className="font-semibold text-gray-900 dark:text-gray-50 text-sm">Goals</h3>
+              <h3 className="font-semibold text-foreground text-sm">Goals</h3>
             </div>
-            <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">{client.goalsText || "No goals recorded."}</p>
+            <p className="text-sm text-muted-foreground leading-relaxed">{client.goalsText || "No goals recorded."}</p>
           </div>
 
           {/* Injuries */}
           {client.injuriesText && (
-            <div className="bg-white dark:bg-gray-900 rounded-2xl border border-red-200 dark:border-red-800 p-5">
+            <div className="bg-card rounded-2xl border border-red-200 dark:border-red-800 shadow-sm p-5 sm:p-6">
               <div className="flex items-center gap-2 mb-3">
                 <AlertTriangle className="w-4 h-4 text-red-500" />
                 <h3 className="font-semibold text-red-800 dark:text-red-300 text-sm">Injuries / Contraindications</h3>
@@ -136,18 +136,18 @@ export default async function AdminSubscriberDetailPage({ params }: Params) {
           )}
 
           {/* Active Programs */}
-          <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-700 p-5">
+          <div className="section-card-padded">
             <div className="flex items-center gap-2 mb-3">
               <ClipboardList className="w-4 h-4 text-blue-600" />
-              <h3 className="font-semibold text-gray-900 dark:text-gray-50 text-sm">Programs</h3>
+              <h3 className="font-semibold text-foreground text-sm">Programs</h3>
             </div>
             {client.clientPrograms.length > 0 ? (
               <div className="space-y-2">
                 {client.clientPrograms.map((cp) => (
-                  <div key={cp.id} className={`p-3 rounded-xl ${cp.status === "active" ? "bg-blue-50 dark:bg-blue-950/30" : "bg-gray-50 dark:bg-gray-800"}`}>
+                  <div key={cp.id} className={`p-3 rounded-xl ${cp.status === "active" ? "bg-blue-50 dark:bg-blue-950/30" : "bg-muted"}`}>
                     <div className="flex items-center justify-between">
                       <p className="text-sm font-semibold text-blue-900 dark:text-blue-300">{cp.program.name}</p>
-                      <span className={`text-xs px-2 py-0.5 rounded-full ${cp.status === "active" ? "bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-400" : "bg-gray-200 text-gray-500 dark:bg-gray-700 dark:text-gray-400"}`}>
+                      <span className={`text-xs px-2 py-0.5 rounded-full ${cp.status === "active" ? "bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-400" : "bg-muted text-muted-foreground"}`}>
                         {cp.status}
                       </span>
                     </div>
@@ -158,13 +158,13 @@ export default async function AdminSubscriberDetailPage({ params }: Params) {
                 ))}
               </div>
             ) : (
-              <p className="text-sm text-gray-400 dark:text-gray-500">No program assigned.</p>
+              <p className="text-sm text-muted-foreground">No program assigned.</p>
             )}
           </div>
 
           {/* Trainer Notes (admin can see) */}
           {client.trainerNotes && (
-            <div className="bg-white dark:bg-gray-900 rounded-2xl border border-yellow-200 dark:border-yellow-800 p-5">
+            <div className="bg-card rounded-2xl border border-yellow-200 dark:border-yellow-800 shadow-sm p-5 sm:p-6">
               <h3 className="font-semibold text-yellow-800 dark:text-yellow-300 text-sm mb-2">Trainer Private Notes</h3>
               <p className="text-sm text-yellow-700 dark:text-yellow-400 leading-relaxed">{client.trainerNotes}</p>
             </div>
@@ -175,8 +175,8 @@ export default async function AdminSubscriberDetailPage({ params }: Params) {
         <div className="lg:col-span-2 space-y-4">
           {/* Goal Milestones */}
           {client.goalMilestones.length > 0 && (
-            <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-700 p-5">
-              <h3 className="font-semibold text-gray-900 dark:text-gray-50 text-sm mb-4">Goal Milestones</h3>
+            <div className="section-card-padded">
+              <h3 className="font-semibold text-foreground text-sm mb-4">Goal Milestones</h3>
               <div className="space-y-3">
                 {client.goalMilestones.map((m) => {
                   const pct = m.targetValue && m.progressValue
@@ -185,12 +185,12 @@ export default async function AdminSubscriberDetailPage({ params }: Params) {
                   return (
                     <div key={m.id}>
                       <div className="flex items-center justify-between mb-1">
-                        <p className="text-sm font-medium text-gray-900 dark:text-gray-50">{m.title}</p>
-                        <span className={`text-xs ${m.achievedAt ? "text-emerald-600" : "text-gray-400"}`}>
-                          {m.achievedAt ? "✓ Achieved" : `${pct}%`}
+                        <p className="text-sm font-medium text-foreground">{m.title}</p>
+                        <span className={`text-xs ${m.achievedAt ? "text-emerald-600" : "text-muted-foreground"}`}>
+                          {m.achievedAt ? "Achieved" : `${pct}%`}
                         </span>
                       </div>
-                      <div className="h-2 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
+                      <div className="h-2 bg-muted rounded-full overflow-hidden">
                         <div className={`h-full rounded-full transition-all ${m.achievedAt ? "bg-emerald-500" : "bg-blue-400"}`}
                           style={{ width: `${pct}%` }} />
                       </div>
@@ -202,25 +202,25 @@ export default async function AdminSubscriberDetailPage({ params }: Params) {
           )}
 
           {/* Session History */}
-          <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-700 p-5">
+          <div className="section-card-padded">
             <div className="flex items-center gap-2 mb-4">
-              <Calendar className="w-4 h-4 text-gray-400" />
-              <h3 className="font-semibold text-gray-900 dark:text-gray-50 text-sm">Session History (last 20)</h3>
+              <Calendar className="w-4 h-4 text-muted-foreground" />
+              <h3 className="font-semibold text-foreground text-sm">Session History (last 20)</h3>
             </div>
             {client.sessionLogs.length === 0 ? (
-              <p className="text-sm text-gray-400 dark:text-gray-500 py-4 text-center">No sessions logged yet.</p>
+              <p className="text-sm text-muted-foreground py-4 text-center">No sessions logged yet.</p>
             ) : (
               <div className="space-y-2">
                 {client.sessionLogs.map((s) => (
-                  <div key={s.id} className="flex items-start gap-3 p-3 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+                  <div key={s.id} className="flex items-start gap-3 p-3 rounded-xl hover:bg-muted/60 transition-colors">
                     <div className={`w-2.5 h-2.5 rounded-full flex-shrink-0 mt-1.5 ${sessionStatusColors[s.status]}`} />
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 flex-wrap">
-                        <p className="text-sm font-medium text-gray-900 dark:text-gray-50">{formatDate(s.scheduledDate)}</p>
+                        <p className="text-sm font-medium text-foreground">{formatDate(s.scheduledDate)}</p>
                         <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
                           s.status === "completed" ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-400" :
                           s.status === "skipped" ? "bg-red-100 text-red-600 dark:bg-red-900/40 dark:text-red-400" :
-                          "bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400"
+                          "bg-muted text-muted-foreground"
                         }`}>{s.status}</span>
                         {s.overallFeedbackEmoji && <span>{s.overallFeedbackEmoji}</span>}
                         {s.painFlags.some((pf) => pf.severity >= 3) && (
@@ -228,11 +228,11 @@ export default async function AdminSubscriberDetailPage({ params }: Params) {
                         )}
                       </div>
                       {s.workoutDay && (
-                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                        <p className="text-xs text-muted-foreground mt-0.5">
                           {s.workoutDay.dayLabel} · {s.workoutDay.exercises.length} exercises
                         </p>
                       )}
-                      <p className="text-xs text-gray-400 dark:text-gray-500">
+                      <p className="text-xs text-muted-foreground">
                         {s.totalVolumeKg ? `${s.totalVolumeKg}kg volume` : ""}
                         {s.avgRpe ? ` · RPE ${s.avgRpe}` : ""}
                         {s.durationMinutes ? ` · ${s.durationMinutes} min` : ""}
@@ -241,13 +241,13 @@ export default async function AdminSubscriberDetailPage({ params }: Params) {
                         <div className="mt-1 flex flex-wrap gap-1">
                           {s.painFlags.map((pf) => (
                             <span key={pf.id} className={`text-xs px-2 py-0.5 rounded-full ${pf.severity >= 3 ? "bg-red-100 text-red-600 dark:bg-red-900/40 dark:text-red-400" : "bg-orange-100 text-orange-600 dark:bg-orange-900/40 dark:text-orange-400"}`}>
-                              ⚠ {pf.bodyRegion} {pf.severity}/5
+                              {pf.bodyRegion} {pf.severity}/5
                             </span>
                           ))}
                         </div>
                       )}
                     </div>
-                    <p className="text-xs text-gray-400 dark:text-gray-500 flex-shrink-0 whitespace-nowrap">{formatDateTime(s.updatedAt)}</p>
+                    <p className="text-xs text-muted-foreground flex-shrink-0 whitespace-nowrap">{formatDateTime(s.updatedAt)}</p>
                   </div>
                 ))}
               </div>
@@ -256,14 +256,14 @@ export default async function AdminSubscriberDetailPage({ params }: Params) {
 
           {/* PRs */}
           {client.personalRecords.length > 0 && (
-            <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-700 p-5">
-              <h3 className="font-semibold text-gray-900 dark:text-gray-50 text-sm mb-4">Personal Records 🏆</h3>
+            <div className="section-card-padded">
+              <h3 className="font-semibold text-foreground text-sm mb-4">Personal Records</h3>
               <div className="grid grid-cols-2 gap-3">
                 {client.personalRecords.map((pr) => (
                   <div key={pr.id} className="p-3 bg-amber-50 dark:bg-amber-950/30 rounded-xl">
                     <p className="text-xs text-amber-600 dark:text-amber-400 font-medium">{pr.exercise.name}</p>
                     <p className="text-lg font-bold text-amber-800 dark:text-amber-300">{pr.valueKg}kg</p>
-                    {pr.repsAtPr && <p className="text-xs text-amber-600 dark:text-amber-400">× {pr.repsAtPr} reps</p>}
+                    {pr.repsAtPr && <p className="text-xs text-amber-600 dark:text-amber-400">x {pr.repsAtPr} reps</p>}
                     <p className="text-xs text-amber-400 mt-1">{formatDate(pr.recordedAt)}</p>
                   </div>
                 ))}

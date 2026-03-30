@@ -48,58 +48,58 @@ export default async function AdminMessagesPage({
   }
 
   return (
-    <div className="p-6 md:p-8 max-w-7xl mx-auto">
+    <div className="page-container">
       <div className="flex items-center gap-3 mb-6">
-        <Link href="/admin" className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-xl transition-colors">
-          <ArrowLeft className="w-4 h-4 text-gray-500 dark:text-gray-400" />
+        <Link href="/admin" className="p-2 hover:bg-muted/60 rounded-xl transition-colors">
+          <ArrowLeft className="w-4 h-4 text-muted-foreground" />
         </Link>
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-50">Message Browser</h1>
-          <p className="text-sm text-gray-500 dark:text-gray-400">Read-only view of all trainer/client conversations</p>
+          <h1 className="text-2xl font-bold text-foreground">Message Browser</h1>
+          <p className="text-sm text-muted-foreground">Read-only view of all trainer/client conversations</p>
         </div>
       </div>
 
       {trainers.length === 0 ? (
-        <div className="text-center py-20 bg-white dark:bg-gray-900 rounded-2xl border border-dashed border-gray-300 dark:border-gray-700">
-          <MessageSquare className="w-10 h-10 text-gray-300 dark:text-gray-600 mx-auto mb-3" />
-          <p className="text-gray-400 dark:text-gray-500 text-sm">No trainers or messages yet.</p>
+        <div className="text-center py-20 section-card border-dashed">
+          <MessageSquare className="w-10 h-10 text-muted-foreground mx-auto mb-3" />
+          <p className="text-muted-foreground text-sm">No trainers or messages yet.</p>
         </div>
       ) : (
         <div className="flex gap-4 h-[calc(100vh-200px)]">
           {/* Trainer list */}
-          <div className="w-48 flex-shrink-0 bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-700 overflow-y-auto">
-            <div className="px-4 py-3 border-b border-gray-100 dark:border-gray-800">
-              <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Trainers</p>
+          <div className="w-48 flex-shrink-0 section-card overflow-y-auto">
+            <div className="px-4 py-3 border-b border-border">
+              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Trainers</p>
             </div>
             {trainers.map((trainer) => (
               <Link key={trainer.id}
                 href={`/admin/messages?trainer=${trainer.id}`}
-                className={`block px-4 py-3 text-sm border-b border-gray-50 dark:border-gray-800 transition-colors ${
+                className={`block px-4 py-3 text-sm border-b border-border/50 transition-colors ${
                   trainer.id === activeTrainerId
                     ? "bg-purple-50 dark:bg-purple-900/20 text-purple-700 dark:text-purple-400 font-medium"
-                    : "text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800"
+                    : "text-foreground hover:bg-muted/60"
                 }`}>
                 {trainer.name}
-                <span className="block text-xs text-gray-400 dark:text-gray-500">{trainer.clients.length} clients</span>
+                <span className="block text-xs text-muted-foreground">{trainer.clients.length} clients</span>
               </Link>
             ))}
           </div>
 
           {/* Client list */}
-          <div className="w-44 flex-shrink-0 bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-700 overflow-y-auto">
-            <div className="px-4 py-3 border-b border-gray-100 dark:border-gray-800">
-              <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Clients</p>
+          <div className="w-44 flex-shrink-0 section-card overflow-y-auto">
+            <div className="px-4 py-3 border-b border-border">
+              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Clients</p>
             </div>
             {clients.length === 0 ? (
-              <p className="px-4 py-3 text-xs text-gray-400 dark:text-gray-500">No clients</p>
+              <p className="px-4 py-3 text-xs text-muted-foreground">No clients</p>
             ) : (
               clients.map((client) => (
                 <Link key={client.id}
                   href={`/admin/messages?trainer=${activeTrainerId}&client=${client.id}`}
-                  className={`block px-4 py-3 text-sm border-b border-gray-50 dark:border-gray-800 transition-colors ${
+                  className={`block px-4 py-3 text-sm border-b border-border/50 transition-colors ${
                     client.id === activeClientId
                       ? "bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400 font-medium"
-                      : "text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800"
+                      : "text-foreground hover:bg-muted/60"
                   }`}>
                   {client.name}
                 </Link>
@@ -108,18 +108,18 @@ export default async function AdminMessagesPage({
           </div>
 
           {/* Message thread (read-only) */}
-          <div className="flex-1 bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-700 flex flex-col overflow-hidden">
+          <div className="flex-1 section-card flex flex-col overflow-hidden">
             {activeClientId && activeTrainerId ? (
               <>
-                <div className="px-5 py-4 border-b border-gray-100 dark:border-gray-800 flex-shrink-0">
-                  <p className="font-semibold text-gray-900 dark:text-gray-50 text-sm">
+                <div className="px-5 py-4 border-b border-border flex-shrink-0">
+                  <p className="font-semibold text-foreground text-sm">
                     {activeTrainer?.name} ↔ {clients.find((c) => c.id === activeClientId)?.name}
                   </p>
-                  <p className="text-xs text-gray-400 dark:text-gray-500">{messages.length} message{messages.length !== 1 ? "s" : ""} · read-only</p>
+                  <p className="text-xs text-muted-foreground">{messages.length} message{messages.length !== 1 ? "s" : ""} -- read-only</p>
                 </div>
                 <div className="flex-1 overflow-y-auto p-5 space-y-3">
                   {messages.length === 0 ? (
-                    <div className="text-center py-12 text-gray-400 dark:text-gray-500 text-sm">No messages in this conversation.</div>
+                    <div className="text-center py-12 text-muted-foreground text-sm">No messages in this conversation.</div>
                   ) : (
                     messages.map((msg) => {
                       const isTrainer = msg.senderRole === "trainer";
@@ -128,11 +128,11 @@ export default async function AdminMessagesPage({
                           <div className={`max-w-[70%] rounded-2xl px-4 py-2.5 ${
                             isTrainer
                               ? "bg-purple-600 text-white rounded-br-sm"
-                              : "bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-50 rounded-bl-sm"
+                              : "bg-muted text-foreground rounded-bl-sm"
                           }`}>
                             <p className="text-xs font-medium mb-1 opacity-70">{isTrainer ? activeTrainer?.name : clients.find((c) => c.id === activeClientId)?.name}</p>
                             <p className="text-sm leading-relaxed">{msg.body}</p>
-                            <p className={`text-xs mt-1 ${isTrainer ? "text-purple-200" : "text-gray-400 dark:text-gray-500"}`}>
+                            <p className={`text-xs mt-1 ${isTrainer ? "text-purple-200" : "text-muted-foreground"}`}>
                               {formatDateTime(msg.createdAt)}
                             </p>
                           </div>
@@ -145,8 +145,8 @@ export default async function AdminMessagesPage({
             ) : (
               <div className="flex-1 flex items-center justify-center text-center p-8">
                 <div>
-                  <MessageSquare className="w-10 h-10 text-gray-300 dark:text-gray-600 mx-auto mb-3" />
-                  <p className="text-gray-500 dark:text-gray-400 text-sm">Select a trainer and client to view their conversation.</p>
+                  <MessageSquare className="w-10 h-10 text-muted-foreground mx-auto mb-3" />
+                  <p className="text-muted-foreground text-sm">Select a trainer and client to view their conversation.</p>
                 </div>
               </div>
             )}

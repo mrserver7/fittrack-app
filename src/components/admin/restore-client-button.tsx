@@ -29,7 +29,7 @@ export default function RestoreClientButton({ clientId }: { clientId: string }) 
       className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg border border-emerald-300 dark:border-emerald-700 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 transition-colors disabled:opacity-50"
     >
       <RotateCcw className="w-3.5 h-3.5" />
-      {loading ? "Restoring…" : "Restore"}
+      {loading ? "Restoring..." : "Restore"}
     </button>
   );
 }

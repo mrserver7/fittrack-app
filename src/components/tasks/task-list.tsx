@@ -88,12 +88,12 @@ export default function TaskList({
 
   if (visible.length === 0) {
     return (
-      <div className="text-center py-20 bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-700">
+      <div className="text-center py-20 bg-card rounded-2xl border border-border">
         <div className="w-14 h-14 bg-emerald-100 dark:bg-emerald-900/30 rounded-2xl flex items-center justify-center mx-auto mb-4">
           <CheckSquare className="w-7 h-7 text-emerald-600 dark:text-emerald-400" />
         </div>
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-50 mb-2">{allClearTitle}</h3>
-        <p className="text-gray-400 dark:text-gray-500 text-sm">{allClearSub}</p>
+        <h3 className="text-lg font-semibold text-foreground mb-2">{allClearTitle}</h3>
+        <p className="text-muted-foreground text-sm">{allClearSub}</p>
       </div>
     );
   }
@@ -106,24 +106,24 @@ export default function TaskList({
         return (
           <div key={task.id} className={`relative flex items-center gap-4 p-4 rounded-2xl border ${config.border} ${config.bg}`}>
             <Link href={task.href} className="flex items-center gap-4 flex-1 min-w-0 hover:opacity-80 transition-opacity">
-              <div className="w-10 h-10 bg-white dark:bg-gray-900 rounded-xl flex items-center justify-center flex-shrink-0 shadow-sm">
+              <div className="w-10 h-10 bg-card rounded-xl flex items-center justify-center flex-shrink-0 shadow-sm">
                 <Icon className={`w-5 h-5 ${config.iconColor}`} />
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 mb-0.5">
-                  <p className="font-semibold text-gray-900 dark:text-gray-50 text-sm">{task.client.name}</p>
+                  <p className="font-semibold text-foreground text-sm">{task.client.name}</p>
                   <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${config.badge}`}>
                     {priorityLabel[task.priority]}
                   </span>
                 </div>
-                <p className="text-sm text-gray-700 dark:text-gray-300">{task.label}</p>
-                <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">{task.detail}</p>
+                <p className="text-sm text-foreground">{task.label}</p>
+                <p className="text-xs text-muted-foreground mt-0.5">{task.detail}</p>
               </div>
-              <span className="text-gray-300 dark:text-gray-600 flex-shrink-0">→</span>
+              <span className="text-muted-foreground flex-shrink-0">&#8594;</span>
             </Link>
             <button
               onClick={(e) => handleDismiss(task.id, e)}
-              className="ml-1 flex-shrink-0 p-1.5 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-white/60 dark:hover:bg-gray-900/60 transition-colors"
+              className="ml-1 flex-shrink-0 p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-colors"
               title="Dismiss"
             >
               <X className="w-4 h-4" />

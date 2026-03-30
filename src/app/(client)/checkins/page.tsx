@@ -23,24 +23,24 @@ export default async function CheckInsPage() {
   };
 
   return (
-    <div className="p-6 md:p-8 max-w-3xl mx-auto">
+    <div className="page-container max-w-3xl">
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-50">{t.checkins.title}</h1>
-        <p className="text-gray-500 dark:text-gray-400 text-sm mt-1">{t.checkins.subtitle}</p>
+        <h1 className="text-2xl font-bold text-foreground">{t.checkins.title}</h1>
+        <p className="text-muted-foreground text-sm mt-1">{t.checkins.subtitle}</p>
       </div>
 
       {checkIns.length === 0 ? (
-        <div className="text-center py-20 bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-700">
-          <CheckSquare className="w-10 h-10 text-gray-300 dark:text-gray-600 mx-auto mb-3" />
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-50 mb-2">{t.checkins.noCheckInsYet}</h3>
-          <p className="text-gray-400 dark:text-gray-500 text-sm">{t.checkins.noCheckInsSub}</p>
+        <div className="text-center py-20 section-card-padded">
+          <CheckSquare className="w-10 h-10 text-muted-foreground mx-auto mb-3" />
+          <h3 className="text-lg font-semibold text-foreground mb-2">{t.checkins.noCheckInsYet}</h3>
+          <p className="text-muted-foreground text-sm">{t.checkins.noCheckInsSub}</p>
         </div>
       ) : (
         <div className="space-y-3">
           {checkIns.map((ci) => (
-            <div key={ci.id} className={`bg-white dark:bg-gray-900 rounded-2xl border ${ci.status === "pending" ? "border-orange-200 dark:border-orange-800" : "border-gray-200 dark:border-gray-700"} p-5`}>
+            <div key={ci.id} className={`section-card p-5 ${ci.status === "pending" ? "border-orange-200 dark:border-orange-800" : ""}`}>
               <div className="flex items-start gap-4">
-                <div className={`p-2.5 rounded-xl ${ci.status === "pending" ? "bg-orange-100 dark:bg-orange-900/30" : "bg-gray-100 dark:bg-gray-800"}`}>
+                <div className={`p-2.5 rounded-xl ${ci.status === "pending" ? "bg-orange-100 dark:bg-orange-900/30" : "bg-muted"}`}>
                   {ci.status === "pending" ? (
                     <Clock className="w-5 h-5 text-orange-600 dark:text-orange-400" />
                   ) : (
@@ -49,12 +49,12 @@ export default async function CheckInsPage() {
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 flex-wrap mb-1">
-                    <h3 className="font-semibold text-gray-900 dark:text-gray-50">{ci.checkInForm.name}</h3>
+                    <h3 className="font-semibold text-foreground">{ci.checkInForm.name}</h3>
                     <span className={`text-xs px-2.5 py-1 rounded-full font-medium ${statusStyles[ci.status]}`}>
                       {ci.status}
                     </span>
                   </div>
-                  <p className="text-sm text-gray-400 dark:text-gray-500">
+                  <p className="text-sm text-muted-foreground">
                     {formatDate(ci.periodStart)} – {formatDate(ci.periodEnd)}
                   </p>
                   {ci.trainerComment && (

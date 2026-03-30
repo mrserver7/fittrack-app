@@ -56,7 +56,7 @@ export default function DashboardAlerts({
       <div className="text-center py-8">
         <TrendingUp className="w-8 h-8 text-emerald-300 mx-auto mb-2" />
         <p className="text-emerald-600 text-sm font-medium">{allClearLabel}</p>
-        <p className="text-gray-400 dark:text-gray-500 text-xs mt-1">{allClearSub}</p>
+        <p className="text-muted-foreground text-xs mt-1">{allClearSub}</p>
       </div>
     );
   }

@@ -54,7 +54,34 @@ export async function DELETE(req: NextRequest, { params }: Params) {
   const existing = await prisma.program.findUnique({ where: { id, trainerId: session.user.id!, deletedAt: null } });
   if (!existing) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
-  await prisma.program.update({ where: { id }, data: { deletedAt: new Date() } });
+  // Soft-delete the program AND deactivate all active client assignments
+  const [, deactivated] = await prisma.$transaction([
+    prisma.program.update({ where: { id }, data: { deletedAt: new Date() } }),
+    prisma.clientProgram.updateMany({
+      where: { programId: id, status: "active" },
+      data: { status: "archived", endDate: new Date().toISOString().split("T")[0] },
+    }),
+  ]);
+
+  // Notify affected clients
+  if (deactivated.count > 0) {
+    const affectedClients = await prisma.clientProgram.findMany({
+      where: { programId: id, status: "archived", endDate: new Date().toISOString().split("T")[0] },
+      select: { clientId: true },
+    });
+    await prisma.notification.createMany({
+      data: affectedClients.map((cp) => ({
+        recipientId: cp.clientId,
+        recipientRole: "client",
+        type: "program_removed",
+        referenceId: id,
+        referenceType: "Program",
+        title: "Program removed",
+        body: `Your trainer has removed the program "${existing.name}". Please contact your trainer for a new assignment.`,
+      })),
+    });
+  }
+
   return NextResponse.json({ success: true });
 }
 

@@ -9,7 +9,7 @@ export default async function TrainerLayout({ children }: { children: React.Reac
   }
   const isAdmin = (session.user as Record<string, unknown>)?.isAdmin as boolean;
   return (
-    <div className="flex h-screen overflow-hidden bg-gray-50 dark:bg-gray-950">
+    <div className="flex h-screen overflow-hidden bg-background">
       <Sidebar role="trainer" isAdmin={isAdmin} />
       <main className="flex-1 overflow-y-auto pt-14 md:pt-0">
         {children}

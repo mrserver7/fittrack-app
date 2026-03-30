@@ -32,13 +32,13 @@ export default function CanApproveToggle({ trainerId, initialValue }: { trainerI
         onClick={toggle}
         disabled={loading}
         className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors focus:outline-none disabled:opacity-50 ${
-          enabled ? "bg-emerald-500" : "bg-gray-300 dark:bg-gray-600"
+          enabled ? "bg-emerald-500" : "bg-muted-foreground/30"
         }`}>
         <span className={`inline-block h-3.5 w-3.5 transform rounded-full bg-white transition-transform ${
           enabled ? "translate-x-[18px]" : "translate-x-0.5"
         }`} />
       </button>
-      <span className="text-xs text-gray-500 dark:text-gray-400">Can approve</span>
+      <span className="text-xs text-muted-foreground">Can approve</span>
     </div>
   );
 }
