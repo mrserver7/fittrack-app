@@ -42,7 +42,10 @@ export async function GET(req: NextRequest, { params }: Params) {
 
 export async function DELETE(req: NextRequest, { params }: Params) {
   const session = await auth();
-  if (!session || (session.user! as Record<string, unknown>).role !== "trainer")
+  if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const role = (session.user! as Record<string, unknown>).role as string;
+  const isAdmin = (session.user! as Record<string, unknown>).isAdmin as boolean;
+  if (role !== "trainer" && !isAdmin)
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   const { id } = await params;
   const trainerId = session.user!.id!;
@@ -50,7 +53,6 @@ export async function DELETE(req: NextRequest, { params }: Params) {
   const client = await prisma.client.findUnique({ where: { id } });
   if (!client) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
-  const isAdmin = (session.user! as Record<string, unknown>).isAdmin as boolean;
   if (!isAdmin && client.trainerId !== trainerId)
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 

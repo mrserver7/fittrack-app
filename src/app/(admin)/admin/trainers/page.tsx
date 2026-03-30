@@ -6,6 +6,7 @@ import { formatDate } from "@/lib/utils";
 import { getT } from "@/lib/i18n/server";
 import ApproveTrainerButton from "@/components/admin/approve-trainer-button";
 import CanApproveToggle from "@/components/admin/can-approve-toggle";
+import DeleteTrainerButton from "@/components/admin/delete-trainer-button";
 
 export default async function AdminTrainersPage() {
   const [, t] = await Promise.all([auth(), getT()]);
@@ -86,7 +87,14 @@ export default async function AdminTrainersPage() {
                     </div>
                     <div className="mt-4 pt-3 border-t border-amber-200 dark:border-amber-500/20 flex items-center justify-between">
                       <p className="text-xs text-muted-foreground">{t.admin.joined} {formatDate(trainer.createdAt)}</p>
-                      <ApproveTrainerButton trainerId={trainer.id} />
+                      <div className="flex items-center gap-2">
+                        <ApproveTrainerButton trainerId={trainer.id} />
+                        <DeleteTrainerButton
+                          trainerId={trainer.id}
+                          trainerName={trainer.name}
+                          clientCount={trainer._count.clients}
+                        />
+                      </div>
                     </div>
                   </div>
                 ))}
@@ -134,7 +142,14 @@ export default async function AdminTrainersPage() {
                       </div>
                       <div className="mt-3 flex items-center justify-between">
                         <p className="text-xs text-muted-foreground">{t.admin.joined} {formatDate(trainer.createdAt)}</p>
-                        <CanApproveToggle trainerId={trainer.id} initialValue={trainer.canApproveClients} />
+                        <div className="flex items-center gap-2">
+                          <CanApproveToggle trainerId={trainer.id} initialValue={trainer.canApproveClients} />
+                          <DeleteTrainerButton
+                            trainerId={trainer.id}
+                            trainerName={trainer.name}
+                            clientCount={trainer._count.clients}
+                          />
+                        </div>
                       </div>
                     </div>
                   );
