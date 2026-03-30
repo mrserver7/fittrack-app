@@ -4,6 +4,8 @@ import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { computeReadinessScore } from "@/lib/utils";
 import { CheckCircle, AlertTriangle, Timer, Zap } from "lucide-react";
+import RestTimer from "@/components/workout/rest-timer";
+import PRCelebration from "@/components/workout/pr-celebration";
 
 type Exercise = {
   id: string; name: string; category: string; bodyRegions?: string | null;
@@ -13,6 +15,8 @@ type WorkoutExercise = {
   repsMin?: number | null; repsMax?: number | null; tempo?: string | null;
   restSeconds: number; rpeMin?: number | null; rpeMax?: number | null;
   coachingNote?: string | null; substitutionExercise?: Exercise | null;
+  exerciseGroupId?: string | null;
+  exerciseGroup?: { id: string; groupType: string; restSeconds?: number | null } | null;
 };
 type WorkoutDay = {
   id: string; dayLabel: string; weekNumber: number;
@@ -55,6 +59,22 @@ export default function WorkoutLogger({
   const [feedback, setFeedback] = useState({ emoji: "", text: "" });
   const [completing, setCompleting] = useState(false);
   const [startedAt] = useState(Date.now());
+  const [showRestTimer, setShowRestTimer] = useState(false);
+  const [restDuration, setRestDuration] = useState(0);
+  const [prCelebration, setPrCelebration] = useState<{
+    exerciseName: string; newWeight: number; previousWeight?: number; reps?: number;
+  } | null>(null);
+  const [lastPerformance, setLastPerformance] = useState<Record<string, { weightKg: number; repsActual: number }[]>>({});
+
+  // Fetch last performance for auto-fill
+  useEffect(() => {
+    fetch(`/api/last-performance/${workoutDay.id}`)
+      .then((r) => r.json())
+      .then((data) => {
+        if (data.exercises) setLastPerformance(data.exercises);
+      })
+      .catch(() => {});
+  }, [workoutDay.id]);
 
   useEffect(() => {
     let interval: NodeJS.Timeout;
@@ -110,7 +130,25 @@ export default function WorkoutLogger({
         ...prev,
         [exId]: prev[exId].map((s, i) => i === setIdx ? { ...s, saved: true } : s),
       }));
+      // Show rest timer component
+      setRestDuration(ex.restSeconds);
+      setShowRestTimer(true);
       setRestTimer(ex.restSeconds);
+
+      // Check for PR (compare to last performance)
+      const weight = parseFloat(entry.weightKg);
+      if (weight > 0 && lastPerformance[ex.exerciseId]) {
+        const prevMax = Math.max(...lastPerformance[ex.exerciseId].map((s) => s.weightKg || 0));
+        if (weight > prevMax && prevMax > 0) {
+          setPrCelebration({
+            exerciseName: ex.exercise.name,
+            newWeight: weight,
+            previousWeight: prevMax,
+            reps: parseInt(entry.repsActual) || undefined,
+          });
+        }
+      }
+
       toast.success(`Set ${setIdx + 1} saved!`);
     } else {
       toast.error("Failed to save set.");
@@ -228,23 +266,45 @@ export default function WorkoutLogger({
       <div className="flex gap-2 mb-4 overflow-x-auto pb-1">
         {workoutDay.exercises.map((ex, idx) => {
           const savedSets = sets[ex.id]?.filter((s) => s.saved).length || 0;
+          const isGrouped = !!ex.exerciseGroupId;
+          const isFirstInGroup = isGrouped && (idx === 0 || workoutDay.exercises[idx - 1]?.exerciseGroupId !== ex.exerciseGroupId);
           return (
-            <button key={ex.id} onClick={() => setActiveExercise(idx)}
-              className={`px-3 py-2 rounded-xl text-xs font-medium whitespace-nowrap flex items-center gap-1.5 transition-colors ${activeExercise === idx ? "bg-emerald-600 text-white" : "bg-white border border-gray-200 text-gray-600 hover:border-emerald-300"}`}>
-              {savedSets === ex.sets ? <CheckCircle className="w-3 h-3" /> : null}
-              {ex.exercise.name}
-              <span className={`text-xs ${activeExercise === idx ? "text-emerald-200" : "text-gray-400"}`}>
-                {savedSets}/{ex.sets}
-              </span>
-            </button>
+            <div key={ex.id} className="flex items-center">
+              {isFirstInGroup && (
+                <span className="text-[10px] font-bold text-purple-500 mr-1 uppercase">
+                  {ex.exerciseGroup?.groupType === "circuit" ? "CIR" : "SS"}
+                </span>
+              )}
+              <button onClick={() => setActiveExercise(idx)}
+                className={`px-3 py-2 rounded-xl text-xs font-medium whitespace-nowrap flex items-center gap-1.5 transition-colors ${
+                  activeExercise === idx
+                    ? isGrouped ? "bg-purple-600 text-white" : "bg-emerald-600 text-white"
+                    : isGrouped
+                      ? "bg-white border border-purple-200 text-purple-600 hover:border-purple-400"
+                      : "bg-white border border-gray-200 text-gray-600 hover:border-emerald-300"
+                }`}>
+                {savedSets === ex.sets ? <CheckCircle className="w-3 h-3" /> : null}
+                {ex.exercise.name}
+                <span className={`text-xs ${activeExercise === idx ? (isGrouped ? "text-purple-200" : "text-emerald-200") : "text-gray-400"}`}>
+                  {savedSets}/{ex.sets}
+                </span>
+              </button>
+            </div>
           );
         })}
       </div>
 
       {/* Current Exercise */}
       {currentEx && (
-        <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden mb-4">
-          <div className="p-5 border-b border-gray-100 bg-gray-50">
+        <div className={`bg-white rounded-2xl border overflow-hidden mb-4 ${
+          currentEx.exerciseGroupId ? "border-purple-200" : "border-gray-200"
+        }`}>
+          <div className={`p-5 border-b ${currentEx.exerciseGroupId ? "border-purple-100 bg-purple-50" : "border-gray-100 bg-gray-50"}`}>
+            {currentEx.exerciseGroupId && (
+              <span className="text-xs font-bold text-purple-600 uppercase tracking-wide mb-1 block">
+                {currentEx.exerciseGroup?.groupType === "circuit" ? "Circuit" : "Superset"}
+              </span>
+            )}
             <h2 className="font-bold text-gray-900">{currentEx.exercise.name}</h2>
             <p className="text-sm text-gray-400 mt-0.5">
               {currentEx.sets} sets · {currentEx.repsMin}
@@ -267,6 +327,22 @@ export default function WorkoutLogger({
                     {setIdx + 1}
                   </span>
                   <p className="text-xs text-gray-500">Target: {currentEx.repsMin}–{currentEx.repsMax} reps</p>
+                  {!set.saved && lastPerformance[currentEx.exerciseId]?.[setIdx] && (
+                    <button
+                      onClick={() => {
+                        const prev = lastPerformance[currentEx.exerciseId][setIdx];
+                        setSets((p) => ({
+                          ...p,
+                          [currentEx.id]: p[currentEx.id].map((s, i) =>
+                            i === setIdx ? { ...s, weightKg: String(prev.weightKg || ""), repsActual: String(prev.repsActual || "") } : s
+                          ),
+                        }));
+                      }}
+                      className="ml-auto text-xs text-blue-600 dark:text-blue-400 hover:underline"
+                    >
+                      Auto-fill ({lastPerformance[currentEx.exerciseId][setIdx].weightKg}kg)
+                    </button>
+                  )}
                 </div>
                 <div className="grid grid-cols-3 gap-2">
                   <div>
@@ -298,6 +374,26 @@ export default function WorkoutLogger({
             ))}
           </div>
         </div>
+      )}
+
+      {/* Rest Timer */}
+      {showRestTimer && restDuration > 0 && (
+        <RestTimer
+          duration={restDuration}
+          onComplete={() => setShowRestTimer(false)}
+          onSkip={() => setShowRestTimer(false)}
+        />
+      )}
+
+      {/* PR Celebration */}
+      {prCelebration && (
+        <PRCelebration
+          exerciseName={prCelebration.exerciseName}
+          newWeight={prCelebration.newWeight}
+          previousWeight={prCelebration.previousWeight}
+          reps={prCelebration.reps}
+          onDismiss={() => setPrCelebration(null)}
+        />
       )}
 
       {/* Pain Flag Modal */}

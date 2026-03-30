@@ -14,7 +14,11 @@
     },
     "ios": {
       "supportsTablet": false,
-      "bundleIdentifier": "com.fittrack.app"
+      "bundleIdentifier": "com.fittrack.app",
+      "deploymentTarget": "16.0",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "package": "com.fittrack.app",
@@ -22,7 +26,10 @@
         "foregroundImage": "./assets/android-icon-foreground.png",
         "backgroundImage": "./assets/android-icon-background.png",
         "backgroundColor": "#059669"
-      }
+      },
+      "permissions": [
+        "android.permission.RECORD_AUDIO"
+      ]
     },
     "web": {
       "favicon": "./assets/favicon.png",
@@ -50,10 +57,12 @@
     "experiments": {
       "typedRoutes": true
     },
+    "owner": "mrserver7",
     "extra": {
       "eas": {
-        "projectId": "YOUR_EAS_PROJECT_ID"
-      }
+        "projectId": "f0bea90c-2366-4104-9bf0-de52abe427bd"
+      },
+      "router": {}
     }
   }
 }

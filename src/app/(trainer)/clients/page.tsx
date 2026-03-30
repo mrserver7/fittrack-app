@@ -4,6 +4,7 @@ import Link from "next/link";
 import { formatDate } from "@/lib/utils";
 import { UserPlus, Search, Clock } from "lucide-react";
 import ApproveRejectButtons from "@/components/clients/approve-reject-buttons";
+import EngagementBadge from "@/components/clients/engagement-badge";
 import { getT } from "@/lib/i18n/server";
 
 const statusColors: Record<string, string> = {
@@ -205,7 +206,10 @@ export default async function ClientsPage({
                     </div>
                   </div>
                   <div className="mt-4 pt-3 border-t border-gray-100 dark:border-gray-800 flex items-center justify-between text-xs text-gray-400 dark:text-gray-500">
-                    <span>{t.clients.sessions}: {client._count.sessionLogs}</span>
+                    <div className="flex items-center gap-2">
+                      <span>{t.clients.sessions}: {client._count.sessionLogs}</span>
+                      <EngagementBadge clientId={client.id} />
+                    </div>
                     <span>
                       {client.sessionLogs[0]
                         ? `${t.clients.last}: ${formatDate(client.sessionLogs[0].completedAt)}`

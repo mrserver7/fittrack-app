@@ -2,9 +2,12 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 import { formatDate } from "@/lib/utils";
-import { Dumbbell, TrendingUp, CheckSquare, Award, Flame, CheckCircle } from "lucide-react";
+import { Dumbbell, TrendingUp, CheckSquare, Award, Flame, CheckCircle, Apple, Target, Heart } from "lucide-react";
 import { getT } from "@/lib/i18n/server";
 import ClientNotifications from "@/components/client/client-notifications";
+import AiCoachChat from "@/components/workout/ai-coach-chat";
+import StreakBadge from "@/components/workout/streak-badge";
+import HabitTracker from "@/components/habits/habit-tracker";
 
 export default async function ClientHomePage() {
   const [session, t] = await Promise.all([auth(), getT()]);
@@ -179,6 +182,42 @@ export default async function ClientHomePage() {
           )}
         </div>
       </div>
+
+      {/* Habits quick view */}
+      <div className="mt-6">
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-2">
+            <Target className="w-4 h-4 text-blue-600" />
+            <h2 className="font-semibold text-gray-900 dark:text-gray-50">Daily Habits</h2>
+          </div>
+          <Link href="/habits" className="text-xs text-emerald-600 hover:underline">View all</Link>
+        </div>
+        <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-700 p-4">
+          <HabitTracker />
+        </div>
+      </div>
+
+      {/* Quick links to new features */}
+      <div className="mt-6 grid grid-cols-3 gap-3">
+        <Link href="/nutrition"
+          className="flex flex-col items-center gap-2 p-4 bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-700 hover:border-emerald-300 dark:hover:border-emerald-700 transition-colors">
+          <Apple className="w-5 h-5 text-emerald-600" />
+          <span className="text-xs font-medium text-gray-700 dark:text-gray-300">{t.nav.nutrition}</span>
+        </Link>
+        <Link href="/explore"
+          className="flex flex-col items-center gap-2 p-4 bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-700 hover:border-purple-300 dark:hover:border-purple-700 transition-colors">
+          <Dumbbell className="w-5 h-5 text-purple-600" />
+          <span className="text-xs font-medium text-gray-700 dark:text-gray-300">{t.nav.explore}</span>
+        </Link>
+        <Link href="/community"
+          className="flex flex-col items-center gap-2 p-4 bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-700 hover:border-pink-300 dark:hover:border-pink-700 transition-colors">
+          <Heart className="w-5 h-5 text-pink-600" />
+          <span className="text-xs font-medium text-gray-700 dark:text-gray-300">{t.nav.community}</span>
+        </Link>
+      </div>
+
+      {/* AI Coach Chat FAB */}
+      <AiCoachChat />
     </div>
   );
 }

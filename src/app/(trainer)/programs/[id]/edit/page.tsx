@@ -22,7 +22,10 @@ export default async function EditProgramPage({ params }: Params) {
               include: {
                 exercises: {
                   orderBy: { sortOrder: "asc" },
-                  include: { exercise: true },
+                  include: { exercise: true, exerciseGroup: true },
+                },
+                exerciseGroups: {
+                  orderBy: { sortOrder: "asc" },
                 },
               },
             },

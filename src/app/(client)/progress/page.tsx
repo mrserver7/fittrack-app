@@ -2,7 +2,8 @@
 import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { formatDate } from "@/lib/utils";
-import { TrendingUp, Award, Activity, Plus } from "lucide-react";
+import { TrendingUp, Award, Activity, Plus, Camera } from "lucide-react";
+import ProgressPhotos from "@/components/progress/progress-photos";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import { useLanguage } from "@/contexts/language-context";
 
@@ -16,7 +17,7 @@ export default function ProgressPage() {
   const { data: session } = useSession();
   const { t } = useLanguage();
   const clientId = (session?.user as Record<string, unknown>)?.id as string;
-  const [tab, setTab] = useState<"measurements" | "prs">("measurements");
+  const [tab, setTab] = useState<"measurements" | "prs" | "photos">("measurements");
   const [measurements, setMeasurements] = useState<Measurement[]>([]);
   const [prs, setPrs] = useState<PR[]>([]);
   const [loading, setLoading] = useState(true);
@@ -69,10 +70,10 @@ export default function ProgressPage() {
       </div>
 
       <div className="flex gap-2 mb-6">
-        {(["measurements", "prs"] as const).map((tabKey) => (
+        {(["measurements", "prs", "photos"] as const).map((tabKey) => (
           <button key={tabKey} onClick={() => setTab(tabKey)}
             className={`px-4 py-2 rounded-xl text-sm font-medium transition-colors ${tab === tabKey ? "bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900" : "bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600"}`}>
-            {tabKey === "measurements" ? t.progress.measurements : t.progress.personalRecords}
+            {tabKey === "measurements" ? t.progress.measurements : tabKey === "prs" ? t.progress.personalRecords : "Photos"}
           </button>
         ))}
       </div>
@@ -170,6 +171,15 @@ export default function ProgressPage() {
               ))}
             </div>
           )}
+        </div>
+      )}
+
+      {tab === "photos" && (
+        <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-700 p-5">
+          <h2 className="font-semibold text-gray-900 dark:text-gray-50 flex items-center gap-2 mb-4">
+            <Camera className="w-4 h-4 text-emerald-600" /> Progress Photos
+          </h2>
+          <ProgressPhotos />
         </div>
       )}
 

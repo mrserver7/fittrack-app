@@ -7,6 +7,8 @@ import { ArrowLeft, Target, AlertTriangle, Calendar, MessageSquare, ClipboardLis
 import AssignProgramButton from "@/components/clients/assign-program-button";
 import SendCheckinButton from "@/components/clients/send-checkin-button";
 import DeleteClientButton from "@/components/clients/delete-client-button";
+import EngagementBadge from "@/components/clients/engagement-badge";
+import ProgressPhotos from "@/components/progress/progress-photos";
 
 type Params = { params: Promise<{ id: string }> };
 
@@ -369,20 +371,29 @@ export default async function ClientProfilePage({ params }: Params) {
 
           {/* PRs */}
           {client.personalRecords.length > 0 && (
-            <div className="bg-white rounded-2xl border border-gray-200 p-5">
-              <h3 className="font-semibold text-gray-900 text-sm mb-4">Personal Records 🏆</h3>
+            <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-700 p-5">
+              <h3 className="font-semibold text-gray-900 dark:text-gray-50 text-sm mb-4">Personal Records 🏆</h3>
               <div className="grid grid-cols-2 gap-3">
                 {client.personalRecords.map((pr) => (
-                  <div key={pr.id} className="p-3 bg-amber-50 rounded-xl">
-                    <p className="text-xs text-amber-600 font-medium">{pr.exercise.name}</p>
-                    <p className="text-lg font-bold text-amber-800">{pr.valueKg}kg</p>
-                    {pr.repsAtPr && <p className="text-xs text-amber-600">× {pr.repsAtPr} reps</p>}
-                    <p className="text-xs text-amber-400 mt-1">{formatDate(pr.recordedAt)}</p>
+                  <div key={pr.id} className="p-3 bg-amber-50 dark:bg-amber-900/20 rounded-xl">
+                    <p className="text-xs text-amber-600 dark:text-amber-400 font-medium">{pr.exercise.name}</p>
+                    <p className="text-lg font-bold text-amber-800 dark:text-amber-300">{pr.valueKg}kg</p>
+                    {pr.repsAtPr && <p className="text-xs text-amber-600 dark:text-amber-400">× {pr.repsAtPr} reps</p>}
+                    <p className="text-xs text-amber-400 dark:text-amber-500 mt-1">{formatDate(pr.recordedAt)}</p>
                   </div>
                 ))}
               </div>
             </div>
           )}
+
+          {/* Engagement Score */}
+          <EngagementBadge clientId={id} showDetail />
+
+          {/* Progress Photos */}
+          <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-700 p-5">
+            <h3 className="font-semibold text-gray-900 dark:text-gray-50 text-sm mb-4">Progress Photos</h3>
+            <ProgressPhotos clientId={id} />
+          </div>
         </div>
       </div>
     </div>

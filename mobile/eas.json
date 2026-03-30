@@ -23,7 +23,8 @@
         "resourceClass": "m-medium"
       },
       "android": {
-        "buildType": "apk"
+        "buildType": "apk",
+        "credentialsSource": "local"
       }
     },
     "production": {
@@ -40,8 +41,7 @@
     "production": {
       "ios": {
         "appleId": "mrserver.ksa@gmail.com",
-        "ascAppId": "",
-        "appleTeamId": ""
+        "appleTeamId": "5KVQN5UT25"
       }
     }
   }

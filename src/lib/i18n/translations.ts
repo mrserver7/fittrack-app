@@ -23,6 +23,10 @@ export const translations = {
       bannedUsers: "Banned Users",
       loginLog: "Sign-in Log",
       admin: "Admin",
+      nutrition: "Nutrition",
+      habits: "Habits",
+      community: "Community",
+      explore: "Explore",
     },
     auth: {
       welcomeBack: "Welcome back",
@@ -438,6 +442,10 @@ export const translations = {
       bannedUsers: "المحظورون",
       loginLog: "سجل الدخول",
       admin: "الإدارة",
+      nutrition: "التغذية",
+      habits: "العادات",
+      community: "المجتمع",
+      explore: "استكشاف",
     },
     auth: {
       welcomeBack: "مرحباً بعودتك",

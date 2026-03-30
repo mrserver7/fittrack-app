@@ -15,6 +15,13 @@ type ExerciseInput = {
   rpeMax?: number | null;
   tempo?: string | null;
   coachingNote?: string | null;
+  groupId?: string | null;
+};
+
+type GroupInput = {
+  id: string;
+  groupType: string;
+  restSeconds?: number;
 };
 
 type DayInput = {
@@ -22,6 +29,7 @@ type DayInput = {
   weekId?: string;   // required when dayId is undefined
   dayLabel?: string; // required when dayId is undefined
   exercises: ExerciseInput[];
+  groups?: GroupInput[];
 };
 
 export async function PUT(req: NextRequest, { params }: Params) {
@@ -70,7 +78,26 @@ export async function PUT(req: NextRequest, { params }: Params) {
       await prisma.workoutDay.update({ where: { id: resolvedDayId }, data: { dayLabel: day.dayLabel } });
     }
 
-    const { exercises } = day;
+    const { exercises, groups } = day;
+
+    // Handle exercise groups (supersets/circuits)
+    // Delete old groups for this day, then recreate
+    await prisma.exerciseGroup.deleteMany({ where: { workoutDayId: resolvedDayId } });
+    const groupIdMap: Record<string, string> = {}; // client group id -> DB group id
+    if (groups && groups.length > 0) {
+      for (let gi = 0; gi < groups.length; gi++) {
+        const g = groups[gi];
+        const created = await prisma.exerciseGroup.create({
+          data: {
+            workoutDayId: resolvedDayId,
+            groupType: g.groupType,
+            restSeconds: g.restSeconds || 60,
+            sortOrder: gi,
+          },
+        });
+        groupIdMap[g.id] = created.id;
+      }
+    }
 
     const existing = await prisma.workoutExercise.findMany({ where: { workoutDayId: resolvedDayId } });
     const existingIds = new Set(existing.map((e) => e.id));
@@ -96,6 +123,7 @@ export async function PUT(req: NextRequest, { params }: Params) {
         tempo: ex.tempo || null,
         coachingNote: ex.coachingNote || null,
         sortOrder: i,
+        exerciseGroupId: ex.groupId ? (groupIdMap[ex.groupId] || null) : null,
       };
       if (ex.id) {
         await prisma.workoutExercise.update({ where: { id: ex.id }, data });

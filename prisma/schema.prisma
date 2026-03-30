@@ -30,6 +30,7 @@ model Trainer {
   checkInForms CheckInForm[]
   messages     Message[]
   auditEvents  AuditEvent[]
+  habits       Habit[]
 }
 
 model Client {
@@ -67,6 +68,14 @@ model Client {
   goalMilestones    GoalMilestone[]
   painFlags         PainFlag[]
   scheduleOverrides WorkoutScheduleOverride[]
+  progressPhotos    ProgressPhoto[]
+  habits            Habit[]
+  habitLogs         HabitLog[]
+  nutritionLogs     NutritionLog[]
+  workoutStreak     WorkoutStreak?
+  socialPosts       SocialPost[]
+  socialReactions   SocialReaction[]
+  challengeEntries  ChallengeEntry[]
 }
 
 model Program {
@@ -108,6 +117,7 @@ model WorkoutDay {
 
   programWeek       ProgramWeek               @relation(fields: [programWeekId], references: [id], onDelete: Cascade)
   exercises         WorkoutExercise[]
+  exerciseGroups    ExerciseGroup[]
   sessionLogs       SessionLog[]
   scheduleOverrides WorkoutScheduleOverride[]
 }
@@ -116,6 +126,7 @@ model WorkoutExercise {
   id                     String  @id @default(cuid())
   workoutDayId           String
   exerciseId             String
+  exerciseGroupId        String?
   sortOrder              Int     @default(0)
   sets                   Int     @default(3)
   repsMin                Int?
@@ -125,15 +136,17 @@ model WorkoutExercise {
   restSeconds            Int     @default(60)
   rpeMin                 Float?
   rpeMax                 Float?
+  percentOf1RM           Float?
   coachingNote           String?
   substitutionExerciseId String?
   substitutionCondition  String?
   attachmentUrl          String?
   attachmentType         String?
 
-  workoutDay           WorkoutDay @relation(fields: [workoutDayId], references: [id], onDelete: Cascade)
-  exercise             Exercise   @relation("PrimaryExercise", fields: [exerciseId], references: [id])
-  substitutionExercise Exercise?  @relation("SubstitutionExercise", fields: [substitutionExerciseId], references: [id])
+  workoutDay           WorkoutDay     @relation(fields: [workoutDayId], references: [id], onDelete: Cascade)
+  exercise             Exercise       @relation("PrimaryExercise", fields: [exerciseId], references: [id])
+  substitutionExercise Exercise?      @relation("SubstitutionExercise", fields: [substitutionExerciseId], references: [id])
+  exerciseGroup        ExerciseGroup? @relation(fields: [exerciseGroupId], references: [id], onDelete: SetNull)
   setLogs              SetLog[]
 }
 
@@ -391,4 +404,155 @@ model WorkoutScheduleOverride {
 
   client     Client     @relation(fields: [clientId], references: [id])
   workoutDay WorkoutDay @relation(fields: [workoutDayId], references: [id])
+}
+
+// ─── Exercise Groups (Supersets / Circuits) ─────────────────────
+
+model ExerciseGroup {
+  id           String @id @default(cuid())
+  workoutDayId String
+  groupType    String // "superset", "circuit", "emom", "amrap"
+  sortOrder    Int    @default(0)
+  restSeconds  Int?
+  timeCap      Int?
+
+  workoutDay WorkoutDay        @relation(fields: [workoutDayId], references: [id], onDelete: Cascade)
+  exercises  WorkoutExercise[]
+}
+
+// ─── Progress Photos ────────────────────────────────────────────
+
+model ProgressPhoto {
+  id        String   @id @default(cuid())
+  clientId  String
+  photoUrl  String
+  pose      String   @default("front") // "front", "side", "back"
+  takenAt   String
+  notes     String?
+  createdAt DateTime @default(now())
+
+  client Client @relation(fields: [clientId], references: [id])
+}
+
+// ─── Habit Tracking ─────────────────────────────────────────────
+
+model Habit {
+  id          String   @id @default(cuid())
+  trainerId   String
+  clientId    String
+  name        String
+  icon        String?  // emoji or icon name
+  targetValue Float?
+  unit        String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  trainer Trainer    @relation(fields: [trainerId], references: [id])
+  client  Client     @relation(fields: [clientId], references: [id])
+  logs    HabitLog[]
+}
+
+model HabitLog {
+  id       String   @id @default(cuid())
+  habitId  String
+  clientId String
+  date     String
+  value    Float    @default(1)
+  loggedAt DateTime @default(now())
+
+  habit  Habit  @relation(fields: [habitId], references: [id], onDelete: Cascade)
+  client Client @relation(fields: [clientId], references: [id])
+
+  @@unique([habitId, date])
+}
+
+// ─── Nutrition Tracking ─────────────────────────────────────────
+
+model NutritionLog {
+  id       String   @id @default(cuid())
+  clientId String
+  date     String
+  meal     String   // "breakfast", "lunch", "dinner", "snack"
+  name     String?
+  calories Int?
+  protein  Float?
+  carbs    Float?
+  fat      Float?
+  photoUrl String?
+  loggedAt DateTime @default(now())
+
+  client Client @relation(fields: [clientId], references: [id])
+}
+
+// ─── Workout Streaks ────────────────────────────────────────────
+
+model WorkoutStreak {
+  id              String   @id @default(cuid())
+  clientId        String   @unique
+  currentStreak   Int      @default(0)
+  longestStreak   Int      @default(0)
+  lastWorkoutDate String?
+  freezesUsed     Int      @default(0)
+  freezesAllowed  Int      @default(1)
+  updatedAt       DateTime @updatedAt
+
+  client Client @relation(fields: [clientId], references: [id])
+}
+
+// ─── Social / Community ─────────────────────────────────────────
+
+model SocialPost {
+  id           String   @id @default(cuid())
+  clientId     String
+  sessionLogId String?
+  postType     String   @default("workout") // "workout", "pr", "milestone", "streak"
+  caption      String?
+  isPublic     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+
+  client    Client           @relation(fields: [clientId], references: [id])
+  reactions SocialReaction[]
+}
+
+model SocialReaction {
+  id        String   @id @default(cuid())
+  postId    String
+  clientId  String
+  emoji     String   @default("💪") // "💪", "🔥", "👏", "🎉"
+  createdAt DateTime @default(now())
+
+  post   SocialPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+  client Client     @relation(fields: [clientId], references: [id])
+
+  @@unique([postId, clientId])
+}
+
+model Challenge {
+  id          String    @id @default(cuid())
+  trainerId   String
+  title       String
+  description String?
+  type        String    @default("volume") // "volume", "consistency", "custom"
+  targetValue Float?
+  unit        String?
+  startDate   String
+  endDate     String
+  isActive    Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+
+  entries ChallengeEntry[]
+}
+
+model ChallengeEntry {
+  id           String   @id @default(cuid())
+  challengeId  String
+  clientId     String
+  currentValue Float    @default(0)
+  updatedAt    DateTime @updatedAt
+
+  challenge Challenge @relation(fields: [challengeId], references: [id], onDelete: Cascade)
+  client    Client    @relation(fields: [clientId], references: [id])
+
+  @@unique([challengeId, clientId])
 }

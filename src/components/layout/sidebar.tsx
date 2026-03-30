@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils";
 import {
   LayoutDashboard, Users, Dumbbell, ClipboardList, BarChart3,
   CheckSquare, LogOut, Menu, X, MessageSquare, Shield, Settings, CalendarDays,
-  ShieldX, Activity,
+  ShieldX, Activity, Apple, Target, Heart, Compass,
 } from "lucide-react";
 import { useState } from "react";
 import { useLanguage } from "@/contexts/language-context";
@@ -39,7 +39,11 @@ export default function Sidebar({ role, isAdmin }: { role: "trainer" | "client";
     { href: "/home", label: t.nav.dashboard, icon: LayoutDashboard },
     { href: "/schedule", label: t.nav.schedule, icon: CalendarDays },
     { href: "/workouts", label: t.nav.workouts, icon: Dumbbell },
+    { href: "/explore", label: t.nav.explore, icon: Compass },
+    { href: "/nutrition", label: t.nav.nutrition, icon: Apple },
+    { href: "/habits", label: t.nav.habits, icon: Target },
     { href: "/progress", label: t.nav.progress, icon: BarChart3 },
+    { href: "/community", label: t.nav.community, icon: Heart },
     { href: "/messages", label: t.nav.messages, icon: MessageSquare },
     { href: "/checkins", label: t.nav.checkins, icon: CheckSquare },
     { href: "/account", label: t.nav.settings, icon: Settings },

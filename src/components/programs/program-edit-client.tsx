@@ -3,7 +3,7 @@ import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { toast } from "sonner";
-import { ArrowLeft, Plus, Trash2, Save, X, ChevronDown } from "lucide-react";
+import { ArrowLeft, Plus, Trash2, Save, X, ChevronDown, Link2, Unlink } from "lucide-react";
 import ExerciseSelect from "@/components/programs/exercise-select";
 
 type ExerciseOption = { id: string; name: string };
@@ -20,6 +20,13 @@ type ExerciseState = {
   rpeMax: number;
   tempo: string;
   coachingNote: string;
+  groupId?: string; // links exercises in the same superset/circuit
+};
+
+type ExerciseGroupState = {
+  id: string;
+  groupType: "superset" | "circuit" | "emom" | "amrap";
+  restSeconds: number;
 };
 
 type DayState = {
@@ -27,6 +34,7 @@ type DayState = {
   weekId: string;   // parent week ID — needed when creating new days
   dayLabel: string;
   exercises: ExerciseState[];
+  groups: ExerciseGroupState[];
 };
 
 type WeekState = {
@@ -47,9 +55,16 @@ type ProgramData = {
       id: string;
       dayLabel: string;
       dayOrder: number;
+      exerciseGroups?: Array<{
+        id: string;
+        groupType: string;
+        restSeconds: number | null;
+        sortOrder: number;
+      }>;
       exercises: Array<{
         id: string;
         exerciseId: string;
+        exerciseGroupId?: string | null;
         sets: number;
         repsMin: number | null;
         repsMax: number | null;
@@ -59,6 +74,7 @@ type ProgramData = {
         tempo: string | null;
         coachingNote: string | null;
         exercise: { id: string; name: string };
+        exerciseGroup?: { id: string; groupType: string; restSeconds: number | null } | null;
       }>;
     }>;
   }>;
@@ -108,6 +124,11 @@ export default function ProgramEditClient({
         id: d.id,
         weekId: w.id,
         dayLabel: d.dayLabel,
+        groups: (d.exerciseGroups || []).map((g) => ({
+          id: g.id,
+          groupType: g.groupType as "superset" | "circuit" | "emom" | "amrap",
+          restSeconds: g.restSeconds ?? 60,
+        })),
         exercises: d.exercises.map((ex) => ({
           id: ex.id,
           exerciseId: ex.exerciseId,
@@ -120,6 +141,7 @@ export default function ProgramEditClient({
           rpeMax: ex.rpeMax ?? 8,
           tempo: ex.tempo ?? "",
           coachingNote: ex.coachingNote ?? "",
+          groupId: ex.exerciseGroupId ?? undefined,
         })),
       })),
     }))
@@ -135,7 +157,7 @@ export default function ProgramEditClient({
         const nextLabel = DAY_LABELS.find((l) => !usedLabels.has(l)) ?? "Sunday";
         return {
           ...w,
-          days: [...w.days, { id: "", weekId: w.id, dayLabel: nextLabel, exercises: [] }],
+          days: [...w.days, { id: "", weekId: w.id, dayLabel: nextLabel, exercises: [], groups: [] }],
         };
       })
     );
@@ -217,6 +239,76 @@ export default function ProgramEditClient({
     );
   };
 
+  // Group selected exercises into a superset/circuit
+  const createGroup = (exerciseIndices: number[], groupType: "superset" | "circuit") => {
+    const groupId = `group_${Date.now()}`;
+    setWeeks((prev) =>
+      prev.map((w, wi) =>
+        wi !== activeWeek ? w : {
+          ...w,
+          days: w.days.map((d, di) =>
+            di !== activeDay ? d : {
+              ...d,
+              groups: [...d.groups, { id: groupId, groupType, restSeconds: 60 }],
+              exercises: d.exercises.map((ex, ei) =>
+                exerciseIndices.includes(ei) ? { ...ex, groupId } : ex
+              ),
+            }
+          ),
+        }
+      )
+    );
+  };
+
+  const ungroupExercise = (exIdx: number) => {
+    setWeeks((prev) =>
+      prev.map((w, wi) =>
+        wi !== activeWeek ? w : {
+          ...w,
+          days: w.days.map((d, di) => {
+            if (di !== activeDay) return d;
+            const ex = d.exercises[exIdx];
+            const newExercises = d.exercises.map((e, ei) =>
+              ei !== exIdx ? e : { ...e, groupId: undefined }
+            );
+            // Remove group if no exercises left in it
+            const remainingInGroup = newExercises.filter((e) => e.groupId === ex.groupId).length;
+            const newGroups = remainingInGroup > 0 ? d.groups : d.groups.filter((g) => g.id !== ex.groupId);
+            return { ...d, exercises: newExercises, groups: newGroups };
+          }),
+        }
+      )
+    );
+  };
+
+  const makeSuperset = (exIdx: number) => {
+    // Group this exercise with the next one
+    if (!currentDay || exIdx >= currentDay.exercises.length - 1) return;
+    const nextEx = currentDay.exercises[exIdx + 1];
+    const thisEx = currentDay.exercises[exIdx];
+
+    if (thisEx.groupId) {
+      // Add next exercise to existing group
+      setWeeks((prev) =>
+        prev.map((w, wi) =>
+          wi !== activeWeek ? w : {
+            ...w,
+            days: w.days.map((d, di) =>
+              di !== activeDay ? d : {
+                ...d,
+                exercises: d.exercises.map((e, ei) =>
+                  ei === exIdx + 1 ? { ...e, groupId: thisEx.groupId } : e
+                ),
+              }
+            ),
+          }
+        )
+      );
+    } else {
+      createGroup([exIdx, exIdx + 1], "superset");
+    }
+  };
+
   const save = async () => {
     for (const w of weeks) {
       for (const d of w.days) {
@@ -237,6 +329,11 @@ export default function ProgramEditClient({
         dayId: d.id || undefined,        // undefined = new day
         weekId: d.weekId,               // needed for new days
         dayLabel: d.dayLabel,           // needed for new days
+        groups: d.groups.map((g) => ({
+          id: g.id,
+          groupType: g.groupType,
+          restSeconds: g.restSeconds,
+        })),
         exercises: d.exercises.map((ex) => ({
           id: ex.id,
           exerciseId: ex.exerciseId,
@@ -248,6 +345,7 @@ export default function ProgramEditClient({
           rpeMax: ex.rpeMax,
           tempo: ex.tempo || null,
           coachingNote: ex.coachingNote || null,
+          groupId: ex.groupId || null,
         })),
       }))
     );
@@ -398,8 +496,27 @@ export default function ProgramEditClient({
             </p>
           )}
           <div className="space-y-4">
-            {currentDay?.exercises.map((ex, exIdx) => (
-              <div key={exIdx} className="p-4 bg-gray-50 dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700">
+            {currentDay?.exercises.map((ex, exIdx) => {
+              const group = ex.groupId ? currentDay.groups.find((g) => g.id === ex.groupId) : null;
+              const isFirstInGroup = ex.groupId && (exIdx === 0 || currentDay.exercises[exIdx - 1]?.groupId !== ex.groupId);
+              const isLastInGroup = ex.groupId && (exIdx === currentDay.exercises.length - 1 || currentDay.exercises[exIdx + 1]?.groupId !== ex.groupId);
+
+              return (
+              <div key={exIdx}>
+                {/* Group header */}
+                {isFirstInGroup && group && (
+                  <div className="flex items-center gap-2 mb-1 ml-2">
+                    <Link2 className="w-3.5 h-3.5 text-purple-500" />
+                    <span className="text-xs font-semibold text-purple-600 dark:text-purple-400 uppercase tracking-wide">
+                      {group.groupType}
+                    </span>
+                  </div>
+                )}
+              <div className={`p-4 bg-gray-50 dark:bg-gray-800 rounded-xl border transition-colors ${
+                ex.groupId
+                  ? "border-purple-300 dark:border-purple-700 border-l-4"
+                  : "border-gray-200 dark:border-gray-700"
+              }`}>
                 <div className="flex items-center gap-2 mb-3">
                   <span className="text-xs font-bold text-gray-400 w-5">{exIdx + 1}</span>
                   <div className="flex-1">
@@ -412,6 +529,27 @@ export default function ProgramEditClient({
                       }}
                     />
                   </div>
+                  {/* Superset button */}
+                  {!ex.groupId && exIdx < (currentDay?.exercises.length ?? 0) - 1 && (
+                    <button
+                      type="button"
+                      onClick={() => makeSuperset(exIdx)}
+                      title="Create superset with next exercise"
+                      className="p-1.5 text-purple-400 hover:text-purple-600 hover:bg-purple-50 dark:hover:bg-purple-900/20 rounded-lg transition-colors flex-shrink-0"
+                    >
+                      <Link2 className="w-4 h-4" />
+                    </button>
+                  )}
+                  {ex.groupId && (
+                    <button
+                      type="button"
+                      onClick={() => ungroupExercise(exIdx)}
+                      title="Remove from group"
+                      className="p-1.5 text-purple-400 hover:text-purple-600 hover:bg-purple-50 dark:hover:bg-purple-900/20 rounded-lg transition-colors flex-shrink-0"
+                    >
+                      <Unlink className="w-4 h-4" />
+                    </button>
+                  )}
                   <button
                     type="button"
                     onClick={() => removeExercise(exIdx)}
@@ -454,7 +592,19 @@ export default function ProgramEditClient({
                   />
                 </div>
               </div>
-            ))}
+              {/* Add to group button for last in group */}
+              {isLastInGroup && ex.groupId && exIdx < (currentDay?.exercises.length ?? 0) - 1 && !currentDay?.exercises[exIdx + 1]?.groupId && (
+                <button
+                  type="button"
+                  onClick={() => makeSuperset(exIdx)}
+                  className="mt-1 text-xs text-purple-500 hover:text-purple-700 flex items-center gap-1"
+                >
+                  <Plus className="w-3 h-3" /> Add to {group?.groupType || "superset"}
+                </button>
+              )}
+              </div>
+            );
+            })}
           </div>
           <button
             type="button"

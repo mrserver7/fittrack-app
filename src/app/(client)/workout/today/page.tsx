@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 import WorkoutLogger from "@/components/workout/workout-logger";
 import WorkoutDayOptions from "@/components/workout/workout-day-options";
+import AiCoachChat from "@/components/workout/ai-coach-chat";
 import { Dumbbell, CheckCircle, Moon } from "lucide-react";
 import { WEEKDAYS, getWeekStart } from "@/lib/utils";
 import { getT } from "@/lib/i18n/server";
@@ -33,7 +34,7 @@ export default async function TodayWorkoutPage({ searchParams }: { searchParams:
                     include: {
                       exercises: {
                         orderBy: { sortOrder: "asc" },
-                        include: { exercise: true, substitutionExercise: true },
+                        include: { exercise: true, substitutionExercise: true, exerciseGroup: true },
                       },
                     },
                   },
@@ -202,6 +203,7 @@ export default async function TodayWorkoutPage({ searchParams }: { searchParams:
         existingSession={existingSession ? JSON.parse(JSON.stringify(existingSession)) : null}
         clientProgramId={activeProgram.id}
       />
+      <AiCoachChat />
     </div>
   );
 }
