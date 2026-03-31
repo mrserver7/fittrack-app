@@ -7,7 +7,8 @@ export async function POST(req: NextRequest) {
   const user = await getAuthUser(req);
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  if (!process.env.GEMINI_API_KEY) {
+  if (!process.env.GEMINI_API_KEY || process.env.GEMINI_API_KEY.trim() === "") {
+    console.error("[coach-chat] GEMINI_API_KEY is", process.env.GEMINI_API_KEY === undefined ? "undefined" : "empty string");
     return NextResponse.json({ reply: "AI coach is not configured yet. Please contact your trainer." });
   }
 
@@ -54,7 +55,8 @@ export async function POST(req: NextRequest) {
 
     const reply = await chatWithCoach(message, context);
     return NextResponse.json({ reply });
-  } catch {
-    return NextResponse.json({ reply: "I'm having trouble right now. Try again in a moment!" });
+  } catch (err) {
+    console.error("[coach-chat] Gemini error:", err);
+    return NextResponse.json({ reply: "I'm having trouble connecting to the AI service. Please try again later." });
   }
 }

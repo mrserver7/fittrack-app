@@ -367,7 +367,7 @@ export function useSubmitCheckIn() {
 
 export function useUpdateProfile() {
   return useMutation({
-    mutationFn: (body: { name?: string; email?: string }) =>
+    mutationFn: (body: { name?: string; email?: string; photoUrl?: string | null }) =>
       api.patch("/api/settings/profile", body),
   });
 }

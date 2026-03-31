@@ -4,7 +4,7 @@ import { Platform } from "react-native";
 import * as Notifications from "expo-notifications";
 import * as Device from "expo-device";
 import Constants from "expo-constants";
-import { LayoutDashboard, Users, ClipboardList, MessageSquare, Settings, Sparkles } from "lucide-react-native";
+import { LayoutDashboard, Users, ClipboardList, MessageSquare, Settings, Sparkles, Compass } from "lucide-react-native";
 import { useAuthStore } from "@/src/store/auth-store";
 import { api } from "@/src/api/client";
 
@@ -67,6 +67,7 @@ export default function TrainerLayout() {
       <Tabs.Screen name="dashboard" options={{ title: "Dashboard", tabBarIcon: ({ color, size }) => <LayoutDashboard color={color} size={size} /> }} />
       <Tabs.Screen name="clients" options={{ title: "Clients", tabBarIcon: ({ color, size }) => <Users color={color} size={size} /> }} />
       <Tabs.Screen name="programs" options={{ title: "Programs", tabBarIcon: ({ color, size }) => <ClipboardList color={color} size={size} /> }} />
+      <Tabs.Screen name="explore" options={{ title: "Explore", tabBarIcon: ({ color, size }) => <Compass color={color} size={size} /> }} />
       <Tabs.Screen name="messages" options={{ title: "Messages", tabBarIcon: ({ color, size }) => <MessageSquare color={color} size={size} /> }} />
       <Tabs.Screen name="settings" options={{ title: "Settings", tabBarIcon: ({ color, size }) => <Settings color={color} size={size} /> }} />
       <Tabs.Screen name="ai-chat" options={{ title: "AI Coach", tabBarIcon: ({ color, size }) => <Sparkles color={color} size={size} /> }} />

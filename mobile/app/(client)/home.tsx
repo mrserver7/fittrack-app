@@ -1,12 +1,19 @@
+import React, { useState, useEffect, useCallback } from "react";
 import {
   View, Text, StyleSheet, ScrollView, TouchableOpacity,
   RefreshControl, ActivityIndicator,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
-import { Flame, Dumbbell, CheckCircle, Trophy, Calendar } from "lucide-react-native";
+import { Flame, Dumbbell, CheckCircle, Trophy, Calendar, Apple } from "lucide-react-native";
 import { useAuthStore } from "@/src/store/auth-store";
 import { useClientHome } from "@/src/api/queries";
+import { api } from "@/src/api/client";
+
+type NutritionTotals = { calories: number; protein: number; carbs: number; fat: number };
+type NutritionResponse = { meals: unknown[]; totals: NutritionTotals };
+
+const NUTRITION_TARGETS = { calories: 2000, protein: 150, carbs: 250, fat: 65 };
 
 function Avatar({ name, size = 40 }: { name: string; size?: number }) {
   const initials = name.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2);
@@ -22,6 +29,31 @@ export default function ClientHome() {
   const router = useRouter();
   const { data, isLoading, refetch, isRefetching } = useClientHome();
 
+  const [nutritionTotals, setNutritionTotals] = useState<NutritionTotals | null>(null);
+  const [nutritionMealCount, setNutritionMealCount] = useState(0);
+  const [nutritionLoading, setNutritionLoading] = useState(true);
+
+  const fetchNutrition = useCallback(async () => {
+    try {
+      setNutritionLoading(true);
+      const todayISO = new Date().toISOString().split("T")[0];
+      const res = await api.get<NutritionResponse>(`/api/nutrition/daily?date=${todayISO}`);
+      setNutritionTotals(res.totals || { calories: 0, protein: 0, carbs: 0, fat: 0 });
+      setNutritionMealCount(res.meals?.length ?? 0);
+    } catch {
+      setNutritionTotals(null);
+      setNutritionMealCount(0);
+    } finally {
+      setNutritionLoading(false);
+    }
+  }, []);
+
+  useEffect(() => { fetchNutrition(); }, [fetchNutrition]);
+
+  const handleRefresh = useCallback(async () => {
+    await Promise.all([refetch(), fetchNutrition()]);
+  }, [refetch, fetchNutrition]);
+
   const firstName = user?.name?.split(" ")[0] ?? "";
   const today = new Date().toLocaleDateString("en-US", {
     weekday: "long", month: "long", day: "numeric",
@@ -31,7 +63,7 @@ export default function ClientHome() {
     <SafeAreaView style={s.container}>
       <ScrollView
         contentContainerStyle={s.content}
-        refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} tintColor="#059669" />}
+        refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={handleRefresh} tintColor="#059669" />}
       >
         <View style={s.header}>
           <View style={{ flex: 1 }}>
@@ -91,6 +123,55 @@ export default function ClientHome() {
                     : "No program assigned yet"}
                 </Text>
               </View>
+            </TouchableOpacity>
+
+            {/* Today's Nutrition card */}
+            <TouchableOpacity
+              style={s.nutritionCard}
+              onPress={() => router.push("/(client)/nutrition" as never)}
+              activeOpacity={0.85}
+            >
+              <View style={s.nutritionHeader}>
+                <View style={s.nutritionIconWrap}>
+                  <Apple size={18} color="#059669" />
+                </View>
+                <Text style={s.nutritionTitle}>Today's Nutrition</Text>
+              </View>
+              {nutritionLoading ? (
+                <View style={s.nutritionLoadingWrap}>
+                  <ActivityIndicator size="small" color="#059669" />
+                </View>
+              ) : nutritionMealCount === 0 ? (
+                <Text style={s.nutritionEmpty}>No meals logged today — tap to start</Text>
+              ) : nutritionTotals ? (
+                <View>
+                  {/* Calories main number */}
+                  <View style={s.nutritionCalRow}>
+                    <Text style={s.nutritionCalNum}>{Math.round(nutritionTotals.calories)}</Text>
+                    <Text style={s.nutritionCalUnit}>kcal</Text>
+                  </View>
+
+                  {/* Macro bars */}
+                  {([
+                    { label: "Protein", current: nutritionTotals.protein, target: NUTRITION_TARGETS.protein, color: "#3b82f6" },
+                    { label: "Carbs", current: nutritionTotals.carbs, target: NUTRITION_TARGETS.carbs, color: "#f59e0b" },
+                    { label: "Fat", current: nutritionTotals.fat, target: NUTRITION_TARGETS.fat, color: "#ef4444" },
+                  ] as const).map((macro) => {
+                    const pct = Math.min(macro.current / macro.target, 1);
+                    return (
+                      <View key={macro.label} style={s.macroRow}>
+                        <View style={s.macroLabelRow}>
+                          <Text style={s.macroLabel}>{macro.label}</Text>
+                          <Text style={s.macroGrams}>{Math.round(macro.current)}g</Text>
+                        </View>
+                        <View style={[s.macroBarBg, { backgroundColor: macro.color + "1A" }]}>
+                          <View style={[s.macroBarFill, { backgroundColor: macro.color, width: `${pct * 100}%` }]} />
+                        </View>
+                      </View>
+                    );
+                  })}
+                </View>
+              ) : null}
             </TouchableOpacity>
 
             {/* Pending checkins */}
@@ -194,6 +275,28 @@ const s = StyleSheet.create({
   },
   todayTitle: { color: "#fff", fontWeight: "700", fontSize: 16 },
   todaySub: { color: "rgba(255,255,255,0.8)", fontSize: 13, marginTop: 2 },
+
+  nutritionCard: {
+    backgroundColor: "#fff", borderRadius: 14, borderWidth: 1, borderColor: "#e5e7eb",
+    padding: 16, marginBottom: 12,
+  },
+  nutritionHeader: { flexDirection: "row", alignItems: "center", gap: 10, marginBottom: 12 },
+  nutritionIconWrap: {
+    width: 32, height: 32, borderRadius: 8, backgroundColor: "#d1fae5",
+    alignItems: "center", justifyContent: "center",
+  },
+  nutritionTitle: { fontSize: 15, fontWeight: "600", color: "#111827" },
+  nutritionLoadingWrap: { paddingVertical: 12, alignItems: "center" },
+  nutritionEmpty: { fontSize: 13, color: "#9ca3af", textAlign: "center", paddingVertical: 8 },
+  nutritionCalRow: { flexDirection: "row", alignItems: "baseline", gap: 4, marginBottom: 12 },
+  nutritionCalNum: { fontSize: 28, fontWeight: "700", color: "#111827" },
+  nutritionCalUnit: { fontSize: 14, color: "#6b7280", fontWeight: "500" },
+  macroRow: { marginBottom: 8 },
+  macroLabelRow: { flexDirection: "row", justifyContent: "space-between", marginBottom: 4 },
+  macroLabel: { fontSize: 12, color: "#6b7280", fontWeight: "500" },
+  macroGrams: { fontSize: 12, color: "#374151", fontWeight: "600" },
+  macroBarBg: { height: 4, borderRadius: 2, overflow: "hidden" },
+  macroBarFill: { height: 4, borderRadius: 2 },
 
   checkinBanner: {
     backgroundColor: "#eff6ff", borderRadius: 12, padding: 12,

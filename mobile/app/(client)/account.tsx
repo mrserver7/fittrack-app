@@ -1,12 +1,14 @@
 import {
   View, Text, StyleSheet, ScrollView, TouchableOpacity,
-  TextInput, ActivityIndicator, Alert,
+  TextInput, ActivityIndicator, Alert, Image,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { useState } from "react";
+import * as ImagePicker from "expo-image-picker";
 import { useAuthStore } from "@/src/store/auth-store";
 import { useUpdateProfile, useChangePassword } from "@/src/api/queries";
+import { API_BASE } from "@/src/api/client";
 
 export default function ClientAccount() {
   const { clearAuth, user, setAuth, token } = useAuthStore();
@@ -16,9 +18,14 @@ export default function ClientAccount() {
   const [currentPw, setCurrentPw] = useState("");
   const [newPw, setNewPw] = useState("");
   const [confirmPw, setConfirmPw] = useState("");
+  const [uploading, setUploading] = useState(false);
 
   const updateProfile = useUpdateProfile();
   const changePassword = useChangePassword();
+
+  const initials = user
+    ? user.name.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2)
+    : "";
 
   const handleSignOut = async () => {
     await clearAuth();
@@ -67,25 +74,131 @@ export default function ClientAccount() {
     );
   };
 
+  const handlePickPhoto = async () => {
+    try {
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        aspect: [1, 1],
+        quality: 0.7,
+      });
+
+      if (result.canceled || !result.assets?.[0]) return;
+
+      const asset = result.assets[0];
+      setUploading(true);
+
+      // Upload to backend via multipart FormData
+      const formData = new FormData();
+      formData.append("file", {
+        uri: asset.uri,
+        type: "image/jpeg",
+        name: "avatar.jpg",
+      } as any);
+
+      const uploadRes = await fetch(`${API_BASE}/api/settings/upload-avatar`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+        body: formData,
+      });
+
+      if (!uploadRes.ok) {
+        throw new Error("Upload failed");
+      }
+
+      const { url } = await uploadRes.json();
+
+      // Update profile with new photo URL
+      updateProfile.mutate(
+        { photoUrl: url },
+        {
+          onSuccess: () => {
+            if (user && token) {
+              setAuth(token, { ...user, photoUrl: url });
+            }
+          },
+          onError: () => Alert.alert("Error", "Photo uploaded but failed to save to profile."),
+        }
+      );
+    } catch {
+      Alert.alert("Error", "Failed to upload photo.");
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleRemovePhoto = () => {
+    Alert.alert("Remove Photo", "Are you sure you want to remove your profile photo?", [
+      { text: "Cancel", style: "cancel" },
+      {
+        text: "Remove",
+        style: "destructive",
+        onPress: () => {
+          updateProfile.mutate(
+            { photoUrl: null },
+            {
+              onSuccess: () => {
+                if (user && token) {
+                  setAuth(token, { ...user, photoUrl: null });
+                }
+              },
+              onError: () => Alert.alert("Error", "Failed to remove photo."),
+            }
+          );
+        },
+      },
+    ]);
+  };
+
   return (
     <SafeAreaView style={s.container}>
       <ScrollView contentContainerStyle={s.content}>
         <Text style={s.title}>Account</Text>
 
+        {/* Profile card with photo upload */}
         {user && (
           <View style={s.profileCard}>
-            <View style={s.avatarBox}>
-              <Text style={s.avatarText}>
-                {user.name.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2)}
-              </Text>
+            <View style={s.avatarSection}>
+              <TouchableOpacity
+                onPress={handlePickPhoto}
+                disabled={uploading}
+                activeOpacity={0.7}
+              >
+                <View style={s.avatarWrapper}>
+                  {user.photoUrl ? (
+                    <Image
+                      source={{ uri: user.photoUrl }}
+                      style={s.avatarImage}
+                    />
+                  ) : (
+                    <View style={s.avatarBox}>
+                      <Text style={s.avatarText}>{initials}</Text>
+                    </View>
+                  )}
+                  {/* Camera badge */}
+                  <View style={s.cameraBadge}>
+                    {uploading ? (
+                      <ActivityIndicator color="#fff" size={12} />
+                    ) : (
+                      <Text style={s.cameraIcon}>📷</Text>
+                    )}
+                  </View>
+                </View>
+              </TouchableOpacity>
+              {user.photoUrl && (
+                <TouchableOpacity onPress={handleRemovePhoto} style={s.removePhotoBtn}>
+                  <Text style={s.removePhotoText}>Remove photo</Text>
+                </TouchableOpacity>
+              )}
             </View>
-            <View>
+            <View style={s.profileInfo}>
               <Text style={s.userName}>{user.name}</Text>
               <Text style={s.userEmail}>{user.email}</Text>
             </View>
           </View>
         )}
 
+        {/* Edit name */}
         <View style={s.section}>
           <Text style={s.sectionTitle}>Display Name</Text>
           <View style={s.card}>
@@ -109,6 +222,7 @@ export default function ClientAccount() {
           </View>
         </View>
 
+        {/* Change password */}
         <View style={s.section}>
           <Text style={s.sectionTitle}>Change Password</Text>
           <View style={s.card}>
@@ -148,6 +262,7 @@ export default function ClientAccount() {
           </View>
         </View>
 
+        {/* Sign out */}
         <TouchableOpacity style={s.signOutBtn} onPress={handleSignOut}>
           <Text style={s.signOutText}>Sign Out</Text>
         </TouchableOpacity>
@@ -166,11 +281,37 @@ const s = StyleSheet.create({
     backgroundColor: "#fff", borderRadius: 16, padding: 16,
     borderWidth: 1, borderColor: "#e5e7eb", marginBottom: 20,
   },
+  avatarSection: {
+    alignItems: "center",
+  },
+  avatarWrapper: {
+    width: 72, height: 72, position: "relative",
+  },
+  avatarImage: {
+    width: 72, height: 72, borderRadius: 36,
+  },
   avatarBox: {
-    width: 52, height: 52, borderRadius: 26,
+    width: 72, height: 72, borderRadius: 36,
     backgroundColor: "#d1fae5", alignItems: "center", justifyContent: "center",
   },
-  avatarText: { color: "#059669", fontWeight: "700", fontSize: 18 },
+  avatarText: { color: "#059669", fontWeight: "700", fontSize: 24 },
+  cameraBadge: {
+    position: "absolute", bottom: 0, right: 0,
+    width: 26, height: 26, borderRadius: 13,
+    backgroundColor: "#059669",
+    alignItems: "center", justifyContent: "center",
+    borderWidth: 2, borderColor: "#fff",
+  },
+  cameraIcon: { fontSize: 12 },
+  removePhotoBtn: {
+    marginTop: 6,
+  },
+  removePhotoText: {
+    fontSize: 12, color: "#dc2626", fontWeight: "500",
+  },
+  profileInfo: {
+    flex: 1,
+  },
   userName: { fontSize: 16, fontWeight: "600", color: "#111827" },
   userEmail: { fontSize: 13, color: "#6b7280", marginTop: 2 },
 
