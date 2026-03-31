@@ -1,20 +1,22 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
+import { getAuthUser } from "@/lib/get-auth-user";
 import { prisma } from "@/lib/prisma";
 
 export async function GET(req: NextRequest) {
-  const session = await auth();
-  if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const user = await getAuthUser(req);
+  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const trainerId = session.user!.id!;
   const { searchParams } = new URL(req.url);
   const search = searchParams.get("search") || "";
   const category = searchParams.get("category") || "";
 
+  // Trainers see global + their own; clients see global only
   const exercises = await prisma.exercise.findMany({
     where: {
       deletedAt: null,
-      OR: [{ isGlobal: true }, { trainerId }],
+      OR: user.role === "trainer"
+        ? [{ isGlobal: true }, { trainerId: user.id }]
+        : [{ isGlobal: true }],
       ...(search ? { name: { contains: search } } : {}),
       ...(category ? { category } : {}),
     },

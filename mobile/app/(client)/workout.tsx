@@ -1,15 +1,92 @@
 import {
   View, Text, StyleSheet, ScrollView, TouchableOpacity,
-  TextInput, ActivityIndicator, Alert, RefreshControl,
+  TextInput, ActivityIndicator, Alert, RefreshControl, FlatList,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useState, useCallback } from "react";
-import { Moon, Dumbbell, CheckCircle, SkipForward, MoveRight, ChevronDown, ChevronUp } from "lucide-react-native";
+import { useState, useCallback, useEffect } from "react";
+import { Moon, Dumbbell, CheckCircle, SkipForward, MoveRight, ChevronDown, ChevronUp, Search } from "lucide-react-native";
 import { useAuthStore } from "@/src/store/auth-store";
 import {
   useToday, useStartSession, useLogSet, useCompleteSession, useCreateOverride,
   type WorkoutExercise,
 } from "@/src/api/queries";
+import { api } from "@/src/api/client";
+
+type Exercise = { id: string; name: string; category: string; primaryMuscles: string | null };
+
+function ExerciseBrowser() {
+  const [exercises, setExercises] = useState<Exercise[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState("");
+
+  useEffect(() => {
+    api.get<{ exercises: Exercise[] }>("/api/exercises")
+      .then((d) => { setExercises(d.exercises || []); setLoading(false); })
+      .catch(() => setLoading(false));
+  }, []);
+
+  const displayed = search
+    ? exercises.filter((e) => e.name.toLowerCase().includes(search.toLowerCase()))
+    : exercises;
+
+  return (
+    <View style={{ flex: 1 }}>
+      {/* Header */}
+      <View style={{ paddingHorizontal: 20, paddingTop: 20, paddingBottom: 14, backgroundColor: "#fff", borderBottomWidth: 1, borderBottomColor: "#e5e7eb" }}>
+        <Text style={{ fontSize: 22, fontWeight: "700", color: "#111827" }}>Browse Exercises</Text>
+        <Text style={{ fontSize: 13, color: "#6b7280", marginTop: 2 }}>No program assigned — explore all exercises</Text>
+        <View style={{ flexDirection: "row", alignItems: "center", backgroundColor: "#f9fafb", borderWidth: 1, borderColor: "#e5e7eb", borderRadius: 12, paddingHorizontal: 12, marginTop: 12 }}>
+          <Search color="#9ca3af" size={16} />
+          <TextInput
+            value={search}
+            onChangeText={setSearch}
+            placeholder="Search exercises..."
+            placeholderTextColor="#9ca3af"
+            style={{ flex: 1, paddingVertical: 10, paddingLeft: 8, fontSize: 14, color: "#111827" }}
+          />
+        </View>
+      </View>
+
+      {loading ? (
+        <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
+          <ActivityIndicator size="large" color="#059669" />
+        </View>
+      ) : (
+        <FlatList
+          data={displayed}
+          keyExtractor={(item) => item.id}
+          contentContainerStyle={{ padding: 16, gap: 8 }}
+          ListEmptyComponent={
+            <View style={{ alignItems: "center", paddingVertical: 40 }}>
+              <Dumbbell color="#d1d5db" size={32} />
+              <Text style={{ fontSize: 14, color: "#9ca3af", marginTop: 8 }}>No exercises found</Text>
+            </View>
+          }
+          renderItem={({ item }) => (
+            <View style={{ backgroundColor: "#fff", borderRadius: 12, borderWidth: 1, borderColor: "#e5e7eb", padding: 14, flexDirection: "row", alignItems: "center", gap: 12 }}>
+              <View style={{ width: 38, height: 38, backgroundColor: "#f0fdf4", borderRadius: 10, justifyContent: "center", alignItems: "center" }}>
+                <Dumbbell color="#059669" size={18} />
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text style={{ fontSize: 14, fontWeight: "600", color: "#111827" }}>{item.name}</Text>
+                <View style={{ flexDirection: "row", gap: 4, marginTop: 4, flexWrap: "wrap" }}>
+                  <View style={{ backgroundColor: "#f3f4f6", paddingHorizontal: 8, paddingVertical: 2, borderRadius: 10 }}>
+                    <Text style={{ fontSize: 11, color: "#6b7280", textTransform: "capitalize" }}>{item.category}</Text>
+                  </View>
+                  {item.primaryMuscles?.split(",").slice(0, 2).map((m) => (
+                    <View key={m.trim()} style={{ backgroundColor: "#d1fae5", paddingHorizontal: 8, paddingVertical: 2, borderRadius: 10 }}>
+                      <Text style={{ fontSize: 11, color: "#047857", textTransform: "capitalize" }}>{m.trim()}</Text>
+                    </View>
+                  ))}
+                </View>
+              </View>
+            </View>
+          )}
+        />
+      )}
+    </View>
+  );
+}
 
 interface SetEntry { weight: string; reps: string; logged: boolean }
 
@@ -265,11 +342,7 @@ export default function WorkoutScreen() {
   if (data?.status === "no_program" || data?.status === "empty_program") {
     return (
       <SafeAreaView style={s.container}>
-        <View style={s.centered}>
-          <Dumbbell size={48} color="#d1d5db" />
-          <Text style={s.emptyTitle}>No program assigned</Text>
-          <Text style={s.emptySub}>Your trainer hasn't assigned a program yet.</Text>
-        </View>
+        <ExerciseBrowser />
       </SafeAreaView>
     );
   }

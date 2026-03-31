@@ -4,7 +4,7 @@ import {
   ActivityIndicator, FlatList,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import Svg, { Circle, Rect, Ellipse, G } from "react-native-svg";
+import Svg, { Circle, Path, Ellipse, G } from "react-native-svg";
 import { Compass, Dumbbell, Search } from "lucide-react-native";
 import { api } from "@/src/api/client";
 
@@ -32,37 +32,41 @@ const MUSCLE_GROUPS: Record<string, { label: string; color: string }> = {
 
 type MuscleKey = keyof typeof MUSCLE_GROUPS;
 
-// [x, y, width, height, muscle]
+// Front muscle regions [cx, cy, rx, ry, muscle]
 const FRONT_REGIONS: [number, number, number, number, MuscleKey][] = [
-  [68, 82, 64, 46, "chest"],
-  [74, 130, 52, 64, "abs"],
-  [46, 67, 22, 20, "shoulders"],
-  [132, 67, 22, 20, "shoulders"],
-  [44, 96, 16, 36, "biceps"],
-  [140, 96, 16, 36, "biceps"],
-  [38, 133, 14, 30, "forearms"],
-  [148, 133, 14, 30, "forearms"],
-  [65, 215, 30, 64, "quads"],
-  [105, 215, 30, 64, "quads"],
-  [68, 285, 22, 48, "calves"],
-  [110, 285, 22, 48, "calves"],
+  [82,  98,  20, 26, "chest"],
+  [118, 98,  20, 26, "chest"],
+  [100, 145, 18, 28, "abs"],
+  [52,  76,  14, 12, "shoulders"],
+  [148, 76,  14, 12, "shoulders"],
+  [52,  98,  10, 22, "biceps"],
+  [148, 98,  10, 22, "biceps"],
+  [47,  148,  8, 18, "forearms"],
+  [153, 148,  8, 18, "forearms"],
+  [77,  228, 16, 34, "quads"],
+  [123, 228, 16, 34, "quads"],
+  [76,  305, 11, 24, "calves"],
+  [124, 305, 11, 24, "calves"],
 ];
 
+// Back muscle regions [cx, cy, rx, ry, muscle]
 const BACK_REGIONS: [number, number, number, number, MuscleKey][] = [
-  [70, 68, 60, 24, "traps"],
-  [46, 67, 22, 20, "shoulders"],
-  [132, 67, 22, 20, "shoulders"],
-  [67, 94, 24, 48, "lats"],
-  [109, 94, 24, 48, "lats"],
-  [44, 96, 16, 36, "triceps"],
-  [140, 96, 16, 36, "triceps"],
-  [74, 143, 52, 33, "lower_back"],
-  [66, 196, 30, 33, "glutes"],
-  [104, 196, 30, 33, "glutes"],
-  [66, 232, 28, 50, "hamstrings"],
-  [106, 232, 28, 50, "hamstrings"],
-  [68, 285, 22, 48, "calves"],
-  [110, 285, 22, 48, "calves"],
+  [100, 76,  30, 16, "traps"],
+  [52,  76,  14, 12, "shoulders"],
+  [148, 76,  14, 12, "shoulders"],
+  [76,  116, 18, 30, "lats"],
+  [124, 116, 18, 30, "lats"],
+  [52,  98,  10, 22, "triceps"],
+  [148, 98,  10, 22, "triceps"],
+  [47,  148,  8, 18, "forearms"],
+  [153, 148,  8, 18, "forearms"],
+  [100, 148, 22, 20, "lower_back"],
+  [78,  186, 18, 22, "glutes"],
+  [122, 186, 18, 22, "glutes"],
+  [77,  228, 14, 30, "hamstrings"],
+  [123, 228, 14, 30, "hamstrings"],
+  [76,  305, 11, 24, "calves"],
+  [124, 305, 11, 24, "calves"],
 ];
 
 function BodyMapSvg({ view, selected, onPress }: {
@@ -74,35 +78,58 @@ function BodyMapSvg({ view, selected, onPress }: {
   const fill = "#d1d5db";
 
   return (
-    <Svg width="100%" height={280} viewBox="0 0 200 370" preserveAspectRatio="xMidYMid meet">
+    <Svg width="100%" height={290} viewBox="0 0 200 370" preserveAspectRatio="xMidYMid meet">
       <G>
-        <Circle cx={100} cy={30} r={22} fill={fill} />
-        <Rect x={91} y={51} width={18} height={13} rx={4} fill={fill} />
-        <Rect x={56} y={63} width={88} height={16} rx={8} fill={fill} />
-        <Rect x={43} y={70} width={18} height={52} rx={8} fill={fill} />
-        <Rect x={139} y={70} width={18} height={52} rx={8} fill={fill} />
-        <Rect x={37} y={122} width={16} height={44} rx={7} fill={fill} />
-        <Rect x={147} y={122} width={16} height={44} rx={7} fill={fill} />
-        <Ellipse cx={45} cy={173} rx={12} ry={9} fill={fill} />
-        <Ellipse cx={155} cy={173} rx={12} ry={9} fill={fill} />
-        <Rect x={67} y={79} width={66} height={125} rx={10} fill={fill} />
-        <Rect x={61} y={199} width={78} height={20} rx={8} fill={fill} />
-        <Rect x={63} y={215} width={33} height={68} rx={10} fill={fill} />
-        <Rect x={104} y={215} width={33} height={68} rx={10} fill={fill} />
-        <Rect x={66} y={283} width={27} height={56} rx={8} fill={fill} />
-        <Rect x={107} y={283} width={27} height={56} rx={8} fill={fill} />
-        <Ellipse cx={78} cy={344} rx={20} ry={9} fill={fill} />
-        <Ellipse cx={122} cy={344} rx={20} ry={9} fill={fill} />
+        {/* Head */}
+        <Circle cx={100} cy={24} r={20} fill={fill} />
+        {/* Neck */}
+        <Path d="M 91 42 L 109 42 L 109 56 L 91 56 Z" fill={fill} />
+        {/* Shoulder bar */}
+        <Path d="M 48 58 Q 74 52 100 54 Q 126 52 152 58 L 148 74 Q 124 78 100 78 Q 76 78 52 74 Z" fill={fill} />
+        {/* Left upper arm */}
+        <Path d="M 46 63 Q 38 72 36 100 Q 36 118 42 124 Q 48 128 58 126 Q 66 120 68 106 Q 70 82 62 66 Z" fill={fill} />
+        {/* Right upper arm */}
+        <Path d="M 154 63 Q 138 66 132 106 Q 130 120 134 126 Q 142 130 152 126 Q 162 120 164 100 Q 164 72 154 63 Z" fill={fill} />
+        {/* Left forearm */}
+        <Path d="M 38 126 Q 34 138 34 156 Q 34 168 38 172 L 58 172 Q 62 168 64 154 Q 66 138 60 128 Z" fill={fill} />
+        {/* Right forearm */}
+        <Path d="M 162 126 Q 140 128 136 154 Q 134 168 138 172 L 162 172 Q 166 168 166 156 Q 166 138 162 126 Z" fill={fill} />
+        {/* Left hand */}
+        <Ellipse cx={47} cy={179} rx={12} ry={9} fill={fill} />
+        {/* Right hand */}
+        <Ellipse cx={153} cy={179} rx={12} ry={9} fill={fill} />
+        {/* Main torso */}
+        <Path d="M 52 74 Q 54 112 56 142 Q 58 158 62 166 Q 80 172 100 172 Q 120 172 138 166 Q 142 158 144 142 Q 146 112 148 74 Q 124 78 100 78 Q 76 78 52 74 Z" fill={fill} />
+        {/* Hip area */}
+        <Path d="M 62 166 Q 60 178 60 192 L 140 192 Q 140 178 138 166 Q 120 172 100 172 Q 80 172 62 166 Z" fill={fill} />
+        {/* Left thigh */}
+        <Path d="M 60 192 Q 56 226 58 260 Q 62 268 76 270 Q 90 270 94 262 Q 98 248 96 210 L 96 192 Z" fill={fill} />
+        {/* Right thigh */}
+        <Path d="M 104 192 L 104 210 Q 102 248 106 262 Q 110 270 124 270 Q 138 268 142 260 Q 144 226 140 192 Z" fill={fill} />
+        {/* Left knee */}
+        <Ellipse cx={76} cy={274} rx={15} ry={8} fill={fill} />
+        {/* Right knee */}
+        <Ellipse cx={124} cy={274} rx={15} ry={8} fill={fill} />
+        {/* Left calf */}
+        <Path d="M 62 280 Q 58 306 60 332 Q 64 338 76 340 Q 90 338 94 332 Q 96 308 92 280 Z" fill={fill} />
+        {/* Right calf */}
+        <Path d="M 108 280 L 108 332 Q 110 338 124 340 Q 136 338 140 332 Q 142 308 138 280 Z" fill={fill} />
+        {/* Left foot */}
+        <Ellipse cx={76} cy={346} rx={20} ry={9} fill={fill} />
+        {/* Right foot */}
+        <Ellipse cx={124} cy={346} rx={20} ry={9} fill={fill} />
       </G>
-      {regions.map(([x, y, w, h, muscle], i) => {
+
+      {/* Muscle region overlays */}
+      {regions.map(([cx, cy, rx, ry, muscle], i) => {
         const isSelected = selected === muscle;
         const color = MUSCLE_GROUPS[muscle].color;
         return (
-          <Rect
+          <Ellipse
             key={`${muscle}-${i}`}
-            x={x} y={y} width={w} height={h} rx={6}
+            cx={cx} cy={cy} rx={rx} ry={ry}
             fill={color}
-            fillOpacity={isSelected ? 0.85 : 0.25}
+            fillOpacity={isSelected ? 0.85 : 0.28}
             stroke={color}
             strokeWidth={isSelected ? 1.5 : 0}
             onPress={() => onPress(muscle)}
@@ -178,13 +205,20 @@ export default function ExploreScreen() {
 
             {/* Body Map Card */}
             <View style={{ backgroundColor: "#fff", marginHorizontal: 16, borderRadius: 16, padding: 14, borderWidth: 1, borderColor: "#e5e7eb", marginBottom: 14 }}>
+              {/* Front / Back toggle */}
               <View style={{ flexDirection: "row", backgroundColor: "#f3f4f6", borderRadius: 10, padding: 3, marginBottom: 10 }}>
                 {(["front", "back"] as const).map((v) => (
                   <TouchableOpacity
                     key={v}
                     onPress={() => setBodyView(v)}
-                    style={{ flex: 1, paddingVertical: 7, borderRadius: 8, backgroundColor: bodyView === v ? "#fff" : "transparent", alignItems: "center",
-                      shadowColor: bodyView === v ? "#000" : "transparent", shadowOpacity: 0.06, shadowRadius: 4, elevation: bodyView === v ? 2 : 0 }}
+                    style={{
+                      flex: 1, paddingVertical: 7, borderRadius: 8,
+                      backgroundColor: bodyView === v ? "#fff" : "transparent",
+                      alignItems: "center",
+                      shadowColor: bodyView === v ? "#000" : "transparent",
+                      shadowOpacity: 0.06, shadowRadius: 4,
+                      elevation: bodyView === v ? 2 : 0,
+                    }}
                   >
                     <Text style={{ fontSize: 13, fontWeight: "600", color: bodyView === v ? "#111827" : "#9ca3af" }}>
                       {v === "front" ? "Front View" : "Back View"}
@@ -209,13 +243,18 @@ export default function ExploreScreen() {
             {/* Muscle chips */}
             <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 12 }}>
               <View style={{ flexDirection: "row", gap: 6, paddingHorizontal: 16 }}>
-                <TouchableOpacity onPress={() => setSelectedMuscle(null)}
-                  style={{ paddingHorizontal: 12, paddingVertical: 6, borderRadius: 20, backgroundColor: !selectedMuscle ? "#111827" : "#f3f4f6" }}>
+                <TouchableOpacity
+                  onPress={() => setSelectedMuscle(null)}
+                  style={{ paddingHorizontal: 12, paddingVertical: 6, borderRadius: 20, backgroundColor: !selectedMuscle ? "#111827" : "#f3f4f6" }}
+                >
                   <Text style={{ fontSize: 12, fontWeight: "500", color: !selectedMuscle ? "#fff" : "#6b7280" }}>All</Text>
                 </TouchableOpacity>
                 {(Object.keys(MUSCLE_GROUPS) as MuscleKey[]).map((mg) => (
-                  <TouchableOpacity key={mg} onPress={() => handleMusclePress(mg)}
-                    style={{ paddingHorizontal: 12, paddingVertical: 6, borderRadius: 20, backgroundColor: selectedMuscle === mg ? MUSCLE_GROUPS[mg].color : "#f3f4f6" }}>
+                  <TouchableOpacity
+                    key={mg}
+                    onPress={() => handleMusclePress(mg)}
+                    style={{ paddingHorizontal: 12, paddingVertical: 6, borderRadius: 20, backgroundColor: selectedMuscle === mg ? MUSCLE_GROUPS[mg].color : "#f3f4f6" }}
+                  >
                     <Text style={{ fontSize: 12, fontWeight: "500", color: selectedMuscle === mg ? "#fff" : "#6b7280" }}>
                       {MUSCLE_GROUPS[mg].label}
                     </Text>
