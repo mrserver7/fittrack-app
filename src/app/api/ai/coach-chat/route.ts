@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
+import { getAuthUser } from "@/lib/get-auth-user";
 import { prisma } from "@/lib/prisma";
 import { chatWithCoach } from "@/lib/gemini";
 
 export async function POST(req: NextRequest) {
-  const session = await auth();
-  if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const user = await getAuthUser(req);
+  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   if (!process.env.GEMINI_API_KEY) {
     return NextResponse.json({ reply: "AI coach is not configured yet. Please contact your trainer." });
@@ -17,16 +17,13 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Message is required" }, { status: 400 });
     }
 
-    const role = (session.user as Record<string, unknown>).role as string;
-    const userId = session.user.id!;
-
     let context: { clientName: string; currentProgram?: string; recentWorkouts?: string; goals?: string } = {
-      clientName: session.user.name || "Athlete",
+      clientName: user.name || "Athlete",
     };
 
-    if (role === "client") {
+    if (user.role === "client") {
       const client = await prisma.client.findUnique({
-        where: { id: userId },
+        where: { id: user.id },
         include: {
           clientPrograms: {
             where: { status: "active" },

@@ -28,12 +28,14 @@ export async function POST(req: NextRequest) {
 
   if (!name?.trim()) return NextResponse.json({ error: "Program name is required." }, { status: 400 });
 
-  // Validate at least one exercise
-  const hasExercise = Array.isArray(weeks) && weeks.some((w: Record<string, unknown>) => {
-    const days = w.days as { exercises?: { exerciseId?: string }[] }[] | undefined;
-    return days?.some((d) => d.exercises?.some((ex) => ex.exerciseId));
-  });
-  if (!hasExercise) return NextResponse.json({ error: "Program must have at least one exercise." }, { status: 400 });
+  // Validate at least one exercise only when weeks are explicitly provided (web app)
+  if (Array.isArray(weeks) && weeks.length > 0) {
+    const hasExercise = weeks.some((w: Record<string, unknown>) => {
+      const days = w.days as { exercises?: { exerciseId?: string }[] }[] | undefined;
+      return days?.some((d) => d.exercises?.some((ex) => ex.exerciseId));
+    });
+    if (!hasExercise) return NextResponse.json({ error: "Program must have at least one exercise." }, { status: 400 });
+  }
 
   const program = await prisma.program.create({
     data: {

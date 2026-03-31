@@ -6,7 +6,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
-import { Users, BarChart3, CheckCircle, Clock, Shield } from "lucide-react-native";
+import { Users, BarChart3, CheckCircle, Clock, Shield, Sparkles } from "lucide-react-native";
 import { useAuthStore } from "@/src/store/auth-store";
 import { api } from "@/src/api/client";
 
@@ -89,9 +89,14 @@ export default function AdminScreen() {
           </View>
           <Text style={s.headerTitle}>Admin Panel</Text>
         </View>
-        <TouchableOpacity onPress={handleSignOut} style={s.signOutBtn}>
-          <Text style={s.signOutText}>Sign out</Text>
-        </TouchableOpacity>
+        <View style={{ flexDirection: "row", gap: 8 }}>
+          <TouchableOpacity style={s.aiBtn} onPress={() => router.push("/(admin)/ai-chat" as never)}>
+            <Sparkles size={15} color="#059669" />
+          </TouchableOpacity>
+          <TouchableOpacity onPress={handleSignOut} style={s.signOutBtn}>
+            <Text style={s.signOutText}>Sign out</Text>
+          </TouchableOpacity>
+        </View>
       </View>
 
       {/* Tab switcher */}
@@ -263,6 +268,7 @@ const s = StyleSheet.create({
     backgroundColor: "#d1fae5", alignItems: "center", justifyContent: "center",
   },
   headerTitle: { fontSize: 18, fontWeight: "700", color: "#111827" },
+  aiBtn: { width: 32, height: 32, borderRadius: 8, backgroundColor: "#d1fae5", alignItems: "center", justifyContent: "center" },
   signOutBtn: { paddingHorizontal: 12, paddingVertical: 6, backgroundColor: "#fee2e2", borderRadius: 8 },
   signOutText: { fontSize: 13, fontWeight: "600", color: "#dc2626" },
 

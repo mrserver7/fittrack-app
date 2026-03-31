@@ -4,7 +4,7 @@ import { Platform } from "react-native";
 import * as Notifications from "expo-notifications";
 import * as Device from "expo-device";
 import Constants from "expo-constants";
-import { LayoutDashboard, Dumbbell, BarChart3, Apple, Compass, Trophy } from "lucide-react-native";
+import { LayoutDashboard, Dumbbell, BarChart3, Apple, Compass, Trophy, Sparkles } from "lucide-react-native";
 import { useAuthStore } from "@/src/store/auth-store";
 import { api } from "@/src/api/client";
 
@@ -70,6 +70,7 @@ export default function ClientLayout() {
       <Tabs.Screen name="nutrition" options={{ title: "Nutrition", tabBarIcon: ({ color, size }) => <Apple color={color} size={size} /> }} />
       <Tabs.Screen name="progress" options={{ title: "Progress", tabBarIcon: ({ color, size }) => <BarChart3 color={color} size={size} /> }} />
       <Tabs.Screen name="challenges" options={{ title: "Challenges", tabBarIcon: ({ color, size }) => <Trophy color={color} size={size} /> }} />
+      <Tabs.Screen name="ai-chat" options={{ title: "AI Coach", tabBarIcon: ({ color, size }) => <Sparkles color={color} size={size} /> }} />
       {/* Hidden screens */}
       <Tabs.Screen name="messages" options={{ href: null }} />
       <Tabs.Screen name="account" options={{ href: null }} />

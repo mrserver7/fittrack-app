@@ -146,6 +146,13 @@ export default function LoginScreen() {
               <Text style={styles.buttonText}>Sign In</Text>
             )}
           </TouchableOpacity>
+
+          <View style={styles.registerRow}>
+            <Text style={styles.registerHint}>New to FitTrack?</Text>
+            <TouchableOpacity onPress={() => router.push("/(auth)/register" as never)}>
+              <Text style={styles.registerLink}> Create account</Text>
+            </TouchableOpacity>
+          </View>
         </View>
       </ScrollView>
     </KeyboardAvoidingView>
@@ -252,4 +259,15 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     fontSize: 15,
   },
+  registerRow: {
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    marginTop: 20,
+    paddingTop: 16,
+    borderTopWidth: 1,
+    borderTopColor: "#f3f4f6",
+  },
+  registerHint: { fontSize: 13, color: "#6b7280" },
+  registerLink: { fontSize: 13, color: "#059669", fontWeight: "700" },
 });
