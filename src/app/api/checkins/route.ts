@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAuthUser } from "@/lib/get-auth-user";
 import { prisma } from "@/lib/prisma";
+import { sendPush } from "@/lib/push";
 
 export async function GET(req: NextRequest) {
   const user = await getAuthUser(req);
@@ -31,17 +32,27 @@ export async function POST(req: NextRequest) {
     },
   });
 
-  await prisma.notification.create({
-    data: {
-      recipientId: body.clientId,
-      recipientRole: "client",
-      type: "check_in_due",
-      referenceId: checkIn.id,
-      referenceType: "CheckIn",
-      title: "Time for your weekly check-in!",
-      body: "Your trainer is waiting for your update.",
-    },
+  const client = await prisma.client.findUnique({
+    where: { id: body.clientId },
+    select: { pushToken: true },
   });
+
+  await Promise.all([
+    prisma.notification.create({
+      data: {
+        recipientId: body.clientId,
+        recipientRole: "client",
+        type: "check_in_due",
+        referenceId: checkIn.id,
+        referenceType: "CheckIn",
+        title: "Time for your weekly check-in!",
+        body: "Your trainer is waiting for your update.",
+      },
+    }),
+    client?.pushToken
+      ? sendPush(client.pushToken, "📋 Check-in time!", "Your trainer is waiting for your weekly update.", { screen: "checkins" })
+      : Promise.resolve(),
+  ]);
 
   return NextResponse.json({ checkIn }, { status: 201 });
 }

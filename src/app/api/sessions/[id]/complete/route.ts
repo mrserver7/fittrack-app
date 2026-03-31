@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getAuthUser } from "@/lib/get-auth-user";
 import { prisma } from "@/lib/prisma";
 import { computeReadinessScore } from "@/lib/utils";
+import { sendPush } from "@/lib/push";
 
 type Params = { params: Promise<{ id: string }> };
 
@@ -55,20 +56,32 @@ export async function POST(req: NextRequest, { params }: Params) {
     },
   });
 
-  // Notify trainer
-  await prisma.notification.create({
-    data: {
-      recipientId: existing.client.trainerId,
-      recipientRole: "trainer",
-      type: "session_completed",
-      referenceId: id,
-      referenceType: "SessionLog",
-      title: `${existing.client.name} completed a workout`,
-      body: body.overallFeedbackEmoji
-        ? `Feedback: ${body.overallFeedbackEmoji} ${body.overallFeedbackText || ""}`
-        : "Session complete.",
-    },
-  });
+  // Notify + push trainer
+  if (existing.client.trainerId) {
+    const trainer = await prisma.trainer.findUnique({
+      where: { id: existing.client.trainerId },
+      select: { pushToken: true },
+    });
+    const notifBody = body.overallFeedbackEmoji
+      ? `Feedback: ${body.overallFeedbackEmoji} ${body.overallFeedbackText || ""}`
+      : "Session complete.";
+    await Promise.all([
+      prisma.notification.create({
+        data: {
+          recipientId: existing.client.trainerId,
+          recipientRole: "trainer",
+          type: "session_completed",
+          referenceId: id,
+          referenceType: "SessionLog",
+          title: `${existing.client.name} completed a workout`,
+          body: notifBody,
+        },
+      }),
+      trainer?.pushToken
+        ? sendPush(trainer.pushToken, `💪 ${existing.client.name} completed a workout`, notifBody, { screen: "clients" })
+        : Promise.resolve(),
+    ]);
+  }
 
   return NextResponse.json({ session: updated });
 }

@@ -27,6 +27,7 @@ export const translations = {
       habits: "Habits",
       community: "Community",
       explore: "Explore",
+      challenges: "Challenges",
     },
     auth: {
       welcomeBack: "Welcome back",
@@ -446,6 +447,7 @@ export const translations = {
       habits: "العادات",
       community: "المجتمع",
       explore: "استكشاف",
+      challenges: "التحديات",
     },
     auth: {
       welcomeBack: "مرحباً بعودتك",
